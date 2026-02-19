@@ -2,7 +2,7 @@
 
 <p align="center">
   <strong>Pre-Built CPM Solution for Global Multi-Plant Manufacturing</strong><br>
-  194 Artifacts &nbsp;|&nbsp; 74 Business Rules &nbsp;|&nbsp; 53,000+ Lines of Code &nbsp;|&nbsp; 6 Modules &nbsp;|&nbsp; 14 Dimensions
+  214 Artifacts &nbsp;|&nbsp; 74 Business Rules &nbsp;|&nbsp; 53,000+ Lines of Code &nbsp;|&nbsp; 7 Modules &nbsp;|&nbsp; 14 Dimensions
 </p>
 
 ---
@@ -218,6 +218,26 @@ Global Consolidated
 
 ---
 
+## Journal Entry Templates (20 Artifacts)
+
+Pre-built journal entry templates for monthly, quarterly, and annual close activities. Standardizes JE creation across all 13 plants, reduces errors, and enforces consistent GL account usage.
+
+| Category | Count | Templates |
+|----------|-------|-----------|
+| **Monthly Accruals** | 5 | Payroll, Utilities, Interest, Warranty Reserve, Bonus |
+| **Manufacturing Adjustments** | 4 | Inventory Reserve, Standard Cost Reval, WIP True-Up, Overhead Absorption |
+| **Reclassifications** | 3 | AR/AP Netting, LT Debt to Current, Prepaid Amortization |
+| **IC Eliminations** | 3 | Revenue/COGS, Dividends, Loan Interest |
+| **Configuration** | 2 | Template Config (XML), Approval Matrix (XML) |
+| **Sample Data** | 1 | Complete monthly close batch for Detroit plant |
+| **Documentation** | 1 | [Template User Guide](JournalEntries/Documentation/JE_TemplateGuide.md) |
+
+**Approval Thresholds:** < $50K (Plant Controller) → $50-250K (+ Accounting Manager) → $250K-1M (+ Regional Controller) → > $1M (+ CFO)
+
+**Integration:** All templates process through `FR_JournalEntries.vb` with balance validation, auto-reversal for RECLASS entries, and full audit trail.
+
+---
+
 ## Business Rules (74 Total)
 
 | Category | Count | Key Capabilities |
@@ -316,6 +336,11 @@ OneStream/
 │   ├── MemberFilter/      5 security & access rules
 │   ├── EventHandler/      6 workflow automation rules
 │   └── Extender/          6 batch processing rules
+├── JournalEntries/
+│   ├── Templates/         15 CSV JE templates (accruals, mfg, reclass, elim)
+│   ├── Config/            Template config + approval matrix (XML)
+│   ├── SampleData/        Sample monthly close JE batch
+│   └── Documentation/     Template user guide
 ├── DataManagement/        27 XMLs (connections, stage, transform, load)
 ├── Workflows/             5 workflow definitions
 ├── Dashboards/            16 dashboard XMLs + mockup illustrations

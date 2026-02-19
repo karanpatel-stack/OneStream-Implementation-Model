@@ -1,0 +1,5 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ELIM_Elim_Americas_{Period}_003,ELIM,IC Dividend Elimination - Americas,Elim_Americas,OIE_InvestmentIncome,RE_CurrentYear,0,N,Quarterly,Eliminate intercompany dividend income against subsidiary retained earnings
+JE_ELIM_Elim_EMEA_{Period}_003,ELIM,IC Dividend Elimination - EMEA,Elim_EMEA,OIE_InvestmentIncome,RE_CurrentYear,0,N,Quarterly,Eliminate intercompany dividend income against subsidiary retained earnings
+JE_ELIM_Elim_APAC_{Period}_003,ELIM,IC Dividend Elimination - APAC,Elim_APAC,OIE_InvestmentIncome,RE_CurrentYear,0,N,Quarterly,Eliminate intercompany dividend income against subsidiary retained earnings
+JE_ELIM_Elim_CrossRegion_{Period}_004,ELIM,IC Dividend Elimination - Cross Region,Elim_CrossRegion,OIE_InvestmentIncome,RE_CurrentYear,0,N,Quarterly,Eliminate cross-region intercompany dividend income against subsidiary retained earnings

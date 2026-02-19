@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  JE Template Configuration
+  Defines all journal entry templates with metadata, account mappings, and applicable entities.
+  Used by FR_JournalEntries.vb to validate and process template-based journal entries.
+-->
+<JETemplateConfig>
+
+  <!-- ============================================================ -->
+  <!-- MONTHLY ACCRUAL TEMPLATES (ADJUST type)                      -->
+  <!-- ============================================================ -->
+
+  <Template id="JET_Accrued_Payroll" name="Monthly Payroll Accrual" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>true</Reversing>
+    <Description>Accrue estimated payroll costs for the period. Reverses on first day of next month when actual payroll posts.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="SGA_Salaries" description="SGA Salaries and Wages" />
+      <CreditAccount code="ACCR_Payroll" description="Accrued Payroll" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Accrued_Payroll.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Accrued_Utilities" name="Monthly Utility Accrual" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>true</Reversing>
+    <Description>Accrue estimated factory utility costs (electricity, gas, water) pending invoice receipt.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="MOH_Utilities" description="Factory Utilities" />
+      <CreditAccount code="ACCR_Utilities" description="Accrued Utilities" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Accrued_Utilities.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Accrued_Interest" name="Monthly Interest Accrual" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>true</Reversing>
+    <Description>Accrue interest expense on long-term debt facilities based on outstanding principal and rate.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="INT_LongTermDebt" description="Interest on Long-Term Debt" />
+      <CreditAccount code="ACCR_Interest" description="Accrued Interest" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Accrued_Interest.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Warranty_Reserve" name="Monthly Warranty Provision" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Provision for estimated warranty claims based on historical claim rates applied to current period sales volume.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="MOH_Other" description="Other Manufacturing Overhead" />
+      <CreditAccount code="ACCR_Warranty" description="Warranty Reserve" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Warranty_Reserve.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Bonus_Accrual" name="Monthly Management Bonus Accrual" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Accrue 1/12 of estimated annual management bonus pool. Adjusted quarterly based on performance targets.</Description>
+    <RequiredApproval>AccountingManager</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="SGA_Benefits" description="SGA Employee Benefits" />
+      <CreditAccount code="ACCR_Other" description="Other Accrued Liabilities" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Bonus_Accrual.csv</TemplateFile>
+  </Template>
+
+  <!-- ============================================================ -->
+  <!-- MANUFACTURING ADJUSTMENT TEMPLATES (ADJUST type)             -->
+  <!-- ============================================================ -->
+
+  <Template id="JET_Inventory_Reserve" name="Inventory Obsolescence Reserve" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Adjust inventory obsolescence reserve based on aging analysis. Charges material usage variance for write-downs.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="UsageVariance" description="Material Usage Variance" />
+      <CreditAccount code="INV_Reserve" description="Inventory Obsolescence Reserve" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Inventory_Reserve.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Standard_Cost_Reval" name="Standard Cost Revaluation" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Revalue inventory from standard cost to actual cost. Records price variance for raw materials and finished goods.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="PriceVariance" description="Material Price Variance" />
+      <CreditAccount code="INV_RawMaterials" description="Raw Materials Inventory" />
+      <AlternateCredit code="INV_FinishedGoods" description="Finished Goods Inventory" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Standard_Cost_Reval.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_WIP_Adjustment" name="WIP True-Up Adjustment" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>True-up WIP inventory balance based on actual production stage completion. Charges efficiency variance for labor and overhead differences.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="EfficiencyVariance" description="Labor Efficiency Variance" />
+      <CreditAccount code="INV_WIP" description="Work in Process Inventory" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_WIP_Adjustment.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Overhead_Absorption" name="Over/Under Absorbed Overhead" active="true">
+    <JEType>ADJUST</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Adjust for over/under absorbed manufacturing overhead. Spending variance vs volume variance based on actual vs standard production rates.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="SpendingVariance" description="Overhead Spending Variance" />
+      <CreditAccount code="VolumeVariance" description="Production Volume Variance" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Overhead_Absorption.csv</TemplateFile>
+  </Template>
+
+  <!-- ============================================================ -->
+  <!-- RECLASSIFICATION TEMPLATES (RECLASS type, auto-reversing)    -->
+  <!-- ============================================================ -->
+
+  <Template id="JET_Reclass_AR_Netting" name="AR/AP Netting Reclassification" active="true">
+    <JEType>RECLASS</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>true</Reversing>
+    <Description>Net accounts receivable against accounts payable for the same counterparty. Required for proper balance sheet presentation.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="AP_Trade" description="Trade Payables" />
+      <CreditAccount code="AR_Trade" description="Trade Receivables" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Reclass_AR_Netting.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Reclass_Debt" name="LT Debt Current Portion Reclassification" active="true">
+    <JEType>RECLASS</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>true</Reversing>
+    <Description>Reclassify portion of long-term debt maturing within 12 months from long-term to current liabilities.</Description>
+    <RequiredApproval>AccountingManager</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="LTD_TermLoan" description="Term Loan Facility" />
+      <CreditAccount code="CurrentPortionLTD" description="Current Portion of Long-Term Debt" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Reclass_Debt.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_Reclass_Prepaid" name="Prepaid Expense Amortization" active="true">
+    <JEType>RECLASS</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>true</Reversing>
+    <Description>Amortize prepaid expenses (insurance, rent, maintenance contracts) to appropriate expense accounts on a straight-line basis.</Description>
+    <RequiredApproval>PlantController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="MOH_Insurance" description="Factory Insurance" />
+      <CreditAccount code="Prepaid_Insurance" description="Prepaid Insurance" />
+      <AlternateDebit code="SGA_Rent" description="Office Rent and Leases" />
+      <AlternateCredit code="Prepaid_Rent" description="Prepaid Rent" />
+      <AlternateDebit2 code="MOH_PreventiveMaint" description="Preventive Maintenance" />
+      <AlternateCredit2 code="Prepaid_Maintenance" description="Prepaid Maintenance Contracts" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Plant_US01_Detroit" />
+      <Entity code="Plant_US02_Houston" />
+      <Entity code="Plant_US03_Charlotte" />
+      <Entity code="Plant_CA01_Toronto" />
+      <Entity code="Plant_MX01_Monterrey" />
+      <Entity code="Plant_DE01_Munich" />
+      <Entity code="Plant_DE02_Stuttgart" />
+      <Entity code="Plant_UK01_Birmingham" />
+      <Entity code="Plant_FR01_Lyon" />
+      <Entity code="Plant_CN01_Shanghai" />
+      <Entity code="Plant_CN02_Shenzhen" />
+      <Entity code="Plant_JP01_Osaka" />
+      <Entity code="Plant_IN01_Pune" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_Reclass_Prepaid.csv</TemplateFile>
+  </Template>
+
+  <!-- ============================================================ -->
+  <!-- INTERCOMPANY ELIMINATION TEMPLATES (ELIM type)               -->
+  <!-- ============================================================ -->
+
+  <Template id="JET_IC_Revenue_COGS" name="IC Revenue/COGS Elimination" active="true">
+    <JEType>ELIM</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Eliminate intercompany transfer sales revenue against purchasing entity cost of goods sold. Includes service revenue and royalty eliminations.</Description>
+    <RequiredApproval>RegionalController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="REV_IC_TransferSales" description="IC Transfer Sales" />
+      <CreditAccount code="RawMaterials" description="Raw Materials Consumed" />
+      <AlternateDebit code="REV_IC_ServiceRevenue" description="IC Service Revenue" />
+      <AlternateCredit code="SGA_Professional" description="Professional Services" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Elim_Americas" />
+      <Entity code="Elim_EMEA" />
+      <Entity code="Elim_APAC" />
+      <Entity code="Elim_CrossRegion" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_IC_Revenue_COGS.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_IC_Dividend" name="IC Dividend Elimination" active="true">
+    <JEType>ELIM</JEType>
+    <Frequency>Quarterly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Eliminate intercompany dividend income recorded by parent against subsidiary retained earnings distribution.</Description>
+    <RequiredApproval>RegionalController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="OIE_InvestmentIncome" description="Investment Income" />
+      <CreditAccount code="RE_CurrentYear" description="Current Year Net Income" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Elim_Americas" />
+      <Entity code="Elim_EMEA" />
+      <Entity code="Elim_APAC" />
+      <Entity code="Elim_CrossRegion" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_IC_Dividend.csv</TemplateFile>
+  </Template>
+
+  <Template id="JET_IC_Loan_Interest" name="IC Loan Interest Elimination" active="true">
+    <JEType>ELIM</JEType>
+    <Frequency>Monthly</Frequency>
+    <Reversing>false</Reversing>
+    <Description>Eliminate intercompany loan interest income against borrowing entity interest expense. Includes IC receivable/payable balance elimination.</Description>
+    <RequiredApproval>RegionalController</RequiredApproval>
+    <AccountMapping>
+      <DebitAccount code="OIE_InvestmentIncome" description="Investment Income" />
+      <CreditAccount code="INT_LongTermDebt" description="Interest on Long-Term Debt" />
+      <AlternateDebit code="AP_Intercompany" description="Intercompany Payables" />
+      <AlternateCredit code="AR_Intercompany" description="Intercompany Receivables" />
+    </AccountMapping>
+    <DefaultAmount>0</DefaultAmount>
+    <ApplicableEntities>
+      <Entity code="Elim_Americas" />
+      <Entity code="Elim_EMEA" />
+      <Entity code="Elim_APAC" />
+      <Entity code="Elim_CrossRegion" />
+    </ApplicableEntities>
+    <TemplateFile>Templates/JET_IC_Loan_Interest.csv</TemplateFile>
+  </Template>
+
+</JETemplateConfig>

@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_US01_Detroit,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_US02_Houston_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_US02_Houston,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_US03_Charlotte_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_US03_Charlotte,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_CA01_Toronto_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_CA01_Toronto,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_MX01_Monterrey,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_DE01_Munich_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_DE01_Munich,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_DE02_Stuttgart,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_UK01_Birmingham,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_FR01_Lyon_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_FR01_Lyon,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_CN01_Shanghai,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_CN02_Shenzhen,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_JP01_Osaka_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_JP01_Osaka,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion
+JE_ADJUST_Plant_IN01_Pune_{Period}_008,ADJUST,WIP True-Up Adjustment,Plant_IN01_Pune,EfficiencyVariance,INV_WIP,0,N,Monthly,Adjust WIP balance to reflect actual production stage completion

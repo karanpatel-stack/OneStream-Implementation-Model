@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  JE Approval Matrix Configuration
+  Defines approval routing thresholds by JE type and dollar amount.
+  Integrated with OneStream workflow for electronic approval routing.
+-->
+<JEApprovalMatrix>
+
+  <!-- ============================================================ -->
+  <!-- APPROVAL ROLES                                                -->
+  <!-- ============================================================ -->
+  <Roles>
+    <Role id="PlantController" name="Plant Controller" description="Local plant financial controller responsible for entity-level JEs" />
+    <Role id="AccountingManager" name="Accounting Manager" description="Senior accounting manager overseeing multiple entities" />
+    <Role id="RegionalController" name="Regional Controller" description="Regional controller for Americas, EMEA, or APAC" />
+    <Role id="CFO" name="Chief Financial Officer" description="CFO approval required for material adjustments" />
+  </Roles>
+
+  <!-- ============================================================ -->
+  <!-- APPROVAL THRESHOLDS BY JE TYPE                                -->
+  <!-- ============================================================ -->
+
+  <!-- ADJUST Type - Adjustments and Accruals -->
+  <ApprovalRule jeType="ADJUST">
+    <Threshold minAmount="0" maxAmount="49999.99" currency="USD">
+      <Approver role="PlantController" required="true" />
+    </Threshold>
+    <Threshold minAmount="50000" maxAmount="249999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+    </Threshold>
+    <Threshold minAmount="250000" maxAmount="999999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+    </Threshold>
+    <Threshold minAmount="1000000" maxAmount="999999999" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+      <Approver role="CFO" required="true" sequence="4" />
+    </Threshold>
+  </ApprovalRule>
+
+  <!-- RECLASS Type - Reclassifications -->
+  <ApprovalRule jeType="RECLASS">
+    <Threshold minAmount="0" maxAmount="49999.99" currency="USD">
+      <Approver role="PlantController" required="true" />
+    </Threshold>
+    <Threshold minAmount="50000" maxAmount="249999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+    </Threshold>
+    <Threshold minAmount="250000" maxAmount="999999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+    </Threshold>
+    <Threshold minAmount="1000000" maxAmount="999999999" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+      <Approver role="CFO" required="true" sequence="4" />
+    </Threshold>
+  </ApprovalRule>
+
+  <!-- ELIM Type - Intercompany Eliminations -->
+  <ApprovalRule jeType="ELIM">
+    <Threshold minAmount="0" maxAmount="49999.99" currency="USD">
+      <Approver role="PlantController" required="true" />
+    </Threshold>
+    <Threshold minAmount="50000" maxAmount="249999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+    </Threshold>
+    <Threshold minAmount="250000" maxAmount="999999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+    </Threshold>
+    <Threshold minAmount="1000000" maxAmount="999999999" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+      <Approver role="CFO" required="true" sequence="4" />
+    </Threshold>
+  </ApprovalRule>
+
+  <!-- CORRECT Type - Error Corrections -->
+  <ApprovalRule jeType="CORRECT">
+    <Threshold minAmount="0" maxAmount="49999.99" currency="USD">
+      <Approver role="PlantController" required="true" />
+    </Threshold>
+    <Threshold minAmount="50000" maxAmount="249999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+    </Threshold>
+    <Threshold minAmount="250000" maxAmount="999999.99" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+    </Threshold>
+    <Threshold minAmount="1000000" maxAmount="999999999" currency="USD">
+      <Approver role="PlantController" required="true" sequence="1" />
+      <Approver role="AccountingManager" required="true" sequence="2" />
+      <Approver role="RegionalController" required="true" sequence="3" />
+      <Approver role="CFO" required="true" sequence="4" />
+    </Threshold>
+  </ApprovalRule>
+
+  <!-- ============================================================ -->
+  <!-- APPROVAL SUMMARY                                              -->
+  <!-- ============================================================ -->
+  <!--
+    Amount Range         | Required Approvals
+    =====================|==========================================
+    < $50,000            | Plant Controller
+    $50,000 - $249,999   | Plant Controller + Accounting Manager
+    $250,000 - $999,999  | + Regional Controller
+    >= $1,000,000        | + CFO
+
+    Notes:
+    - Amounts are in USD; foreign currency JEs converted at period-end rate
+    - Approval sequence is mandatory (lower sequence must approve first)
+    - All JE types follow the same threshold structure
+    - CORRECT type entries require additional documentation attachment
+    - Escalation: if approver does not respond within 48 hours, auto-escalate
+  -->
+
+  <!-- ============================================================ -->
+  <!-- ESCALATION SETTINGS                                           -->
+  <!-- ============================================================ -->
+  <EscalationPolicy>
+    <TimeoutHours>48</TimeoutHours>
+    <EscalationAction>NotifyNextApprover</EscalationAction>
+    <MaxEscalations>2</MaxEscalations>
+    <FinalEscalationRole>CFO</FinalEscalationRole>
+  </EscalationPolicy>
+
+  <!-- ============================================================ -->
+  <!-- SPECIAL RULES                                                 -->
+  <!-- ============================================================ -->
+  <SpecialRules>
+    <Rule id="CORRECT_DOCUMENTATION" jeType="CORRECT">
+      <Description>All CORRECT type entries require supporting documentation attachment explaining the original error and correction methodology.</Description>
+      <RequireAttachment>true</RequireAttachment>
+    </Rule>
+    <Rule id="ELIM_DUAL_SIGN_OFF" jeType="ELIM">
+      <Description>Cross-region eliminations (Elim_CrossRegion) require sign-off from both sending and receiving regional controllers.</Description>
+      <ApplicableEntity>Elim_CrossRegion</ApplicableEntity>
+      <AdditionalApprover role="RegionalController" note="Both sending and receiving region controllers" />
+    </Rule>
+    <Rule id="YEAR_END_ENHANCED" jeType="ALL">
+      <Description>During year-end close (Period 12), all JEs above $100K require Regional Controller approval regardless of type.</Description>
+      <ApplicablePeriod>12</ApplicablePeriod>
+      <OverrideMinAmount>100000</OverrideMinAmount>
+      <MinimumApprovalRole>RegionalController</MinimumApprovalRole>
+    </Rule>
+  </SpecialRules>
+
+</JEApprovalMatrix>

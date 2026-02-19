@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_US01_Detroit,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_US02_Houston_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_US02_Houston,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_US03_Charlotte_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_US03_Charlotte,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_CA01_Toronto_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_CA01_Toronto,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_MX01_Monterrey,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_DE01_Munich_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_DE01_Munich,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_DE02_Stuttgart,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_UK01_Birmingham,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_FR01_Lyon_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_FR01_Lyon,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_CN01_Shanghai,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_CN02_Shenzhen,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_JP01_Osaka_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_JP01_Osaka,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis
+JE_ADJUST_Plant_IN01_Pune_{Period}_006,ADJUST,Inventory Obsolescence Reserve,Plant_IN01_Pune,UsageVariance,INV_Reserve,0,N,Monthly,Adjust inventory obsolescence reserve based on aging analysis

@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_US01_Detroit,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_US02_Houston_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_US02_Houston,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_US03_Charlotte_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_US03_Charlotte,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_CA01_Toronto_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_CA01_Toronto,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_MX01_Monterrey,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_DE01_Munich_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_DE01_Munich,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_DE02_Stuttgart,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_UK01_Birmingham,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_FR01_Lyon_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_FR01_Lyon,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_CN01_Shanghai,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_CN02_Shenzhen,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_JP01_Osaka_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_JP01_Osaka,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management
+JE_ADJUST_Plant_IN01_Pune_{Period}_005,ADJUST,Monthly Management Bonus Accrual,Plant_IN01_Pune,SGA_Benefits,ACCR_Other,0,N,Monthly,Accrue 1/12 of estimated annual bonus pool for management

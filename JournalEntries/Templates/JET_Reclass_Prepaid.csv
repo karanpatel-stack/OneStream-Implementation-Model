@@ -1,0 +1,18 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_RECLASS_Plant_US01_Detroit_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_US01_Detroit,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_US01_Detroit_{Period}_003b,RECLASS,Prepaid Rent Amortization,Plant_US01_Detroit,SGA_Rent,Prepaid_Rent,0,Y,Monthly,Amortize prepaid rent to SGA expense - auto-reverses
+JE_RECLASS_Plant_US01_Detroit_{Period}_003c,RECLASS,Prepaid Maintenance Amortization,Plant_US01_Detroit,MOH_PreventiveMaint,Prepaid_Maintenance,0,Y,Monthly,Amortize prepaid maintenance contracts to factory overhead - auto-reverses
+JE_RECLASS_Plant_US02_Houston_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_US02_Houston,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_US02_Houston_{Period}_003b,RECLASS,Prepaid Rent Amortization,Plant_US02_Houston,SGA_Rent,Prepaid_Rent,0,Y,Monthly,Amortize prepaid rent to SGA expense - auto-reverses
+JE_RECLASS_Plant_US03_Charlotte_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_US03_Charlotte,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_US03_Charlotte_{Period}_003b,RECLASS,Prepaid Rent Amortization,Plant_US03_Charlotte,SGA_Rent,Prepaid_Rent,0,Y,Monthly,Amortize prepaid rent to SGA expense - auto-reverses
+JE_RECLASS_Plant_CA01_Toronto_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_CA01_Toronto,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_MX01_Monterrey_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_MX01_Monterrey,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_DE01_Munich_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_DE01_Munich,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_DE02_Stuttgart_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_DE02_Stuttgart,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_UK01_Birmingham_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_UK01_Birmingham,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_FR01_Lyon_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_FR01_Lyon,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_CN01_Shanghai_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_CN01_Shanghai,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_CN02_Shenzhen_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_CN02_Shenzhen,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_JP01_Osaka_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_JP01_Osaka,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses
+JE_RECLASS_Plant_IN01_Pune_{Period}_003a,RECLASS,Prepaid Insurance Amortization,Plant_IN01_Pune,MOH_Insurance,Prepaid_Insurance,0,Y,Monthly,Amortize prepaid insurance to factory overhead expense - auto-reverses

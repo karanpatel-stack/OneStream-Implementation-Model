@@ -1,0 +1,27 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_US01_Detroit,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_US01_Detroit_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_US01_Detroit,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_US02_Houston_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_US02_Houston,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_US02_Houston_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_US02_Houston,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_US03_Charlotte_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_US03_Charlotte,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_US03_Charlotte_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_US03_Charlotte,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_CA01_Toronto_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_CA01_Toronto,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_CA01_Toronto_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_CA01_Toronto,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_MX01_Monterrey,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_MX01_Monterrey,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_DE01_Munich_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_DE01_Munich,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_DE01_Munich_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_DE01_Munich,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_DE02_Stuttgart,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_DE02_Stuttgart,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_UK01_Birmingham,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_UK01_Birmingham,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_FR01_Lyon_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_FR01_Lyon,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_FR01_Lyon_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_FR01_Lyon,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_CN01_Shanghai,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_CN01_Shanghai,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_CN02_Shenzhen,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_CN02_Shenzhen,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_JP01_Osaka_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_JP01_Osaka,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_JP01_Osaka_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_JP01_Osaka,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment
+JE_ADJUST_Plant_IN01_Pune_{Period}_007a,ADJUST,Standard Cost Reval - Material Price Variance,Plant_IN01_Pune,PriceVariance,INV_RawMaterials,0,N,Monthly,Material price variance - std vs actual purchase cost
+JE_ADJUST_Plant_IN01_Pune_{Period}_007b,ADJUST,Standard Cost Reval - Finished Goods,Plant_IN01_Pune,PriceVariance,INV_FinishedGoods,0,N,Monthly,Finished goods std cost revaluation adjustment

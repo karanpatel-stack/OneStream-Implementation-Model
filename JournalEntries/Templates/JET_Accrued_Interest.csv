@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_US01_Detroit,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_US02_Houston_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_US02_Houston,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_US03_Charlotte_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_US03_Charlotte,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_CA01_Toronto_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_CA01_Toronto,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_MX01_Monterrey,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_DE01_Munich_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_DE01_Munich,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_DE02_Stuttgart,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_UK01_Birmingham,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_FR01_Lyon_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_FR01_Lyon,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_CN01_Shanghai,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_CN02_Shenzhen,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_JP01_Osaka_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_JP01_Osaka,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities
+JE_ADJUST_Plant_IN01_Pune_{Period}_003,ADJUST,Monthly Interest Accrual,Plant_IN01_Pune,INT_LongTermDebt,ACCR_Interest,0,Y,Monthly,Accrue interest on long-term debt facilities

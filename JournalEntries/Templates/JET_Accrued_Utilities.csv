@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_US01_Detroit,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_US02_Houston_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_US02_Houston,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_US03_Charlotte_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_US03_Charlotte,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_CA01_Toronto_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_CA01_Toronto,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_MX01_Monterrey,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_DE01_Munich_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_DE01_Munich,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_DE02_Stuttgart,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_UK01_Birmingham,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_FR01_Lyon_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_FR01_Lyon,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_CN01_Shanghai,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_CN02_Shenzhen,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_JP01_Osaka_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_JP01_Osaka,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water
+JE_ADJUST_Plant_IN01_Pune_{Period}_002,ADJUST,Monthly Utility Accrual,Plant_IN01_Pune,MOH_Utilities,ACCR_Utilities,0,Y,Monthly,Accrue estimated factory utilities - electricity gas and water

@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_US01_Detroit,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_US02_Houston_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_US02_Houston,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_US03_Charlotte_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_US03_Charlotte,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_CA01_Toronto_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_CA01_Toronto,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_MX01_Monterrey,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_DE01_Munich_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_DE01_Munich,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_DE02_Stuttgart,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_UK01_Birmingham,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_FR01_Lyon_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_FR01_Lyon,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_CN01_Shanghai,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_CN02_Shenzhen,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_JP01_Osaka_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_JP01_Osaka,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume
+JE_ADJUST_Plant_IN01_Pune_{Period}_004,ADJUST,Monthly Warranty Provision,Plant_IN01_Pune,MOH_Other,ACCR_Warranty,0,N,Monthly,Provision for estimated warranty claims based on sales volume

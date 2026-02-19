@@ -1,0 +1,10 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ELIM_Elim_Americas_{Period}_001,ELIM,IC Revenue/COGS Elimination - Americas,Elim_Americas,REV_IC_TransferSales,RawMaterials,0,N,Monthly,Eliminate intercompany transfer sales revenue against purchasing entity COGS
+JE_ELIM_Elim_Americas_{Period}_002,ELIM,IC Service Revenue Elimination - Americas,Elim_Americas,REV_IC_ServiceRevenue,SGA_Professional,0,N,Monthly,Eliminate intercompany service revenue against purchasing entity SGA
+JE_ELIM_Elim_EMEA_{Period}_001,ELIM,IC Revenue/COGS Elimination - EMEA,Elim_EMEA,REV_IC_TransferSales,RawMaterials,0,N,Monthly,Eliminate intercompany transfer sales revenue against purchasing entity COGS
+JE_ELIM_Elim_EMEA_{Period}_002,ELIM,IC Service Revenue Elimination - EMEA,Elim_EMEA,REV_IC_ServiceRevenue,SGA_Professional,0,N,Monthly,Eliminate intercompany service revenue against purchasing entity SGA
+JE_ELIM_Elim_APAC_{Period}_001,ELIM,IC Revenue/COGS Elimination - APAC,Elim_APAC,REV_IC_TransferSales,RawMaterials,0,N,Monthly,Eliminate intercompany transfer sales revenue against purchasing entity COGS
+JE_ELIM_Elim_APAC_{Period}_002,ELIM,IC Service Revenue Elimination - APAC,Elim_APAC,REV_IC_ServiceRevenue,SGA_Professional,0,N,Monthly,Eliminate intercompany service revenue against purchasing entity SGA
+JE_ELIM_Elim_CrossRegion_{Period}_001,ELIM,IC Revenue/COGS Elimination - Cross Region,Elim_CrossRegion,REV_IC_TransferSales,RawMaterials,0,N,Monthly,Eliminate cross-region intercompany transfer sales revenue against COGS
+JE_ELIM_Elim_CrossRegion_{Period}_002,ELIM,IC Service Revenue Elimination - Cross Region,Elim_CrossRegion,REV_IC_ServiceRevenue,SGA_Professional,0,N,Monthly,Eliminate cross-region intercompany service revenue against SGA
+JE_ELIM_Elim_CrossRegion_{Period}_003,ELIM,IC Royalty Elimination - Cross Region,Elim_CrossRegion,REV_IC_RoyaltyIncome,SGA_Professional,0,N,Monthly,Eliminate cross-region intercompany royalty income against royalty expense

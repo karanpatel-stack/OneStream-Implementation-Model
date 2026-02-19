@@ -1,0 +1,9 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ELIM_Elim_Americas_{Period}_004,ELIM,IC Loan Interest Elimination - Americas,Elim_Americas,OIE_InvestmentIncome,INT_LongTermDebt,0,N,Monthly,Eliminate intercompany loan interest income against borrowing entity interest expense
+JE_ELIM_Elim_EMEA_{Period}_004,ELIM,IC Loan Interest Elimination - EMEA,Elim_EMEA,OIE_InvestmentIncome,INT_LongTermDebt,0,N,Monthly,Eliminate intercompany loan interest income against borrowing entity interest expense
+JE_ELIM_Elim_APAC_{Period}_004,ELIM,IC Loan Interest Elimination - APAC,Elim_APAC,OIE_InvestmentIncome,INT_LongTermDebt,0,N,Monthly,Eliminate intercompany loan interest income against borrowing entity interest expense
+JE_ELIM_Elim_CrossRegion_{Period}_005,ELIM,IC Loan Interest Elimination - Cross Region,Elim_CrossRegion,OIE_InvestmentIncome,INT_LongTermDebt,0,N,Monthly,Eliminate cross-region intercompany loan interest income against interest expense
+JE_ELIM_Elim_Americas_{Period}_005,ELIM,IC Receivable/Payable Elimination - Americas,Elim_Americas,AP_Intercompany,AR_Intercompany,0,N,Monthly,Eliminate intercompany receivable against intercompany payable balances
+JE_ELIM_Elim_EMEA_{Period}_005,ELIM,IC Receivable/Payable Elimination - EMEA,Elim_EMEA,AP_Intercompany,AR_Intercompany,0,N,Monthly,Eliminate intercompany receivable against intercompany payable balances
+JE_ELIM_Elim_APAC_{Period}_005,ELIM,IC Receivable/Payable Elimination - APAC,Elim_APAC,AP_Intercompany,AR_Intercompany,0,N,Monthly,Eliminate intercompany receivable against intercompany payable balances
+JE_ELIM_Elim_CrossRegion_{Period}_006,ELIM,IC Receivable/Payable Elimination - Cross Region,Elim_CrossRegion,AP_Intercompany,AR_Intercompany,0,N,Monthly,Eliminate cross-region intercompany receivable against payable balances

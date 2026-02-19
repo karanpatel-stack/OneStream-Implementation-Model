@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_ADJUST_Plant_US01_Detroit_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_US01_Detroit,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_US02_Houston_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_US02_Houston,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_US03_Charlotte_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_US03_Charlotte,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_CA01_Toronto_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_CA01_Toronto,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_MX01_Monterrey_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_MX01_Monterrey,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_DE01_Munich_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_DE01_Munich,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_DE02_Stuttgart_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_DE02_Stuttgart,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_UK01_Birmingham_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_UK01_Birmingham,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_FR01_Lyon_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_FR01_Lyon,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_CN01_Shanghai_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_CN01_Shanghai,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_CN02_Shenzhen_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_CN02_Shenzhen,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_JP01_Osaka_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_JP01_Osaka,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month
+JE_ADJUST_Plant_IN01_Pune_{Period}_001,ADJUST,Monthly Payroll Accrual,Plant_IN01_Pune,SGA_Salaries,ACCR_Payroll,0,Y,Monthly,Accrue estimated payroll for period - reverses on first day of next month

@@ -1,0 +1,14 @@
+JE_ID,JE_Type,Description,Entity,Account_Debit,Account_Credit,Amount,Reversing,Frequency,Notes
+JE_RECLASS_Plant_US01_Detroit_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_US01_Detroit,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_US02_Houston_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_US02_Houston,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_US03_Charlotte_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_US03_Charlotte,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_CA01_Toronto_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_CA01_Toronto,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_MX01_Monterrey_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_MX01_Monterrey,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_DE01_Munich_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_DE01_Munich,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_DE02_Stuttgart_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_DE02_Stuttgart,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_UK01_Birmingham_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_UK01_Birmingham,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_FR01_Lyon_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_FR01_Lyon,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_CN01_Shanghai_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_CN01_Shanghai,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_CN02_Shenzhen_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_CN02_Shenzhen,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_JP01_Osaka_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_JP01_Osaka,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
+JE_RECLASS_Plant_IN01_Pune_{Period}_001,RECLASS,AR/AP Netting - Same Counterparty,Plant_IN01_Pune,AP_Trade,AR_Trade,0,Y,Monthly,Net AR against AP for same intercompany or external counterparty - auto-reverses
