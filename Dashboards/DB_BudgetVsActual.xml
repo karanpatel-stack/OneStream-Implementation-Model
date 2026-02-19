@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_BudgetVsActual"
+  Description="Budget vs Actual Reporting Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#PriorYear,S#FlexBudget" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                                         DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants"                     DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#TotalPL.Descendants"                       DefaultMember="A#TotalPL" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"                            DefaultMember="F#YTD" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_BudgetVsActual"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="MainCube"
+      SuppressNoData="True"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="IncludeAnnotations"       Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="3" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Budget vs Actual"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+        <LabelComponent
+          Name="PeriodLabel"
+          Text="{POV.Time.MemberDescription} | {POV.Entity.MemberDescription}"
+          FontFamily="Segoe UI" FontSize="12" ForeColor="#A0B4D0" />
+      </Panel>
+      <Panel Row="0" Column="4" ColumnSpan="8" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity.Descendants"
+          DefaultMember="E#TopEntity"
+          Label="Entity" Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="PeriodFilter"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period" Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="FlowToggle"
+          FilterType="ButtonGroup"
+          Dimension="Flow"
+          MemberFilter="F#Periodic,F#YTD"
+          DefaultMember="F#YTD"
+          Label="Flow"
+          ButtonActiveColor="#3498DB" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: MAIN BVA GRID -->
+    <Row Index="1" Height="500" HeightUnit="Pixel">
+      <Panel Row="1" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Budget vs Actual - P&amp;L Detail" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="BvAGrid"
+          DataAdapter="DDA_BudgetVsActual"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="28"
+          EnableSorting="False"
+          FreezeColumns="1"
+          ShowHierarchy="True"
+          ExpandLevel="2"
+          CollapsibleRows="True"
+          IndentSize="20"
+          ShowTotalRow="False">
+
+          <RowDimension Dimension="Account" MemberFilter="A#TotalPL.Descendants" ShowHierarchy="True">
+            <ExpandableHierarchy DefaultExpandLevel="2" MaxExpandLevel="6" />
+          </RowDimension>
+
+          <Columns>
+            <Column Header="Account"
+                    Binding="Account.Description"
+                    Width="260" Alignment="Left"
+                    Frozen="True" />
+
+            <Column Header="Actual"
+                    Binding="S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                    Width="120" Alignment="Right"
+                    Format="#,##0" />
+
+            <Column Header="Budget"
+                    Binding="S#Budget:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                    Width="120" Alignment="Right"
+                    Format="#,##0" />
+
+            <Column Header="Variance ($)"
+                    Binding="Calculated.BudgetVariance"
+                    CalculatedExpression="[Actual] - [Budget]"
+                    Width="120" Alignment="Right"
+                    Format="+#,##0;-#,##0">
+              <ConditionalFormat>
+                <Rule Condition="RowType == 'Revenue' AND Value >= 0"  BackgroundColor="#27AE6018" ForeColor="#27AE60" />
+                <Rule Condition="RowType == 'Revenue' AND Value &lt; 0"   BackgroundColor="#E74C3C18" ForeColor="#E74C3C" />
+                <Rule Condition="RowType == 'Expense' AND Value &lt;= 0"  BackgroundColor="#27AE6018" ForeColor="#27AE60" />
+                <Rule Condition="RowType == 'Expense' AND Value > 0"   BackgroundColor="#E74C3C18" ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+
+            <Column Header="Variance (%)"
+                    Binding="Calculated.BudgetVariancePct"
+                    CalculatedExpression="([Actual] - [Budget]) / ABS([Budget])"
+                    Width="100" Alignment="Center"
+                    Format="+0.0%;-0.0%">
+              <ConditionalFormat>
+                <Rule Condition="RowType == 'Revenue' AND Value >= 0"  ForeColor="#27AE60" />
+                <Rule Condition="RowType == 'Revenue' AND Value &lt; 0"   ForeColor="#E74C3C" />
+                <Rule Condition="RowType == 'Expense' AND Value &lt;= 0"  ForeColor="#27AE60" />
+                <Rule Condition="RowType == 'Expense' AND Value > 0"   ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+
+            <Column Header="Flex Budget"
+                    Binding="S#FlexBudget:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                    Width="120" Alignment="Right"
+                    Format="#,##0"
+                    ForeColor="#A0B4D0" />
+
+            <Column Header="Prior Year"
+                    Binding="S#PriorYear:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                    Width="120" Alignment="Right"
+                    Format="#,##0"
+                    ForeColor="#A0B4D0" />
+
+            <Column Header="Commentary"
+                    Binding="Annotation.Commentary"
+                    Width="250" Alignment="Left"
+                    CellType="TextInput"
+                    FontStyle="Italic" ForeColor="#8CA8CC"
+                    MaxLength="500"
+                    Editable="True"
+                    EditableCondition="ABS([BudgetVariancePct]) >= 0.05"
+                    Placeholder="Required for variances > 5%">
+              <ConditionalFormat>
+                <Rule Condition="ABS(BudgetVariancePct) >= 0.05 AND Value == ''" BackgroundColor="#E74C3C20" BorderColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+
+          <RowStyles>
+            <RowStyle MemberFilter="A#Revenue,A#GrossProfit,A#EBITDA,A#EBIT,A#NetIncome"
+                      FontWeight="Bold" BackgroundColor="#243B6740" FontSize="12" />
+            <RowStyle MemberFilter="A#TotalCOGS,A#TotalOPEX"
+                      FontWeight="SemiBold" BackgroundColor="#243B6720" />
+          </RowStyles>
+        </GridComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: SUMMARY CHARTS -->
+    <Row Index="2" Height="260" HeightUnit="Pixel">
+      <!-- Top Favorable Variances -->
+      <Panel Row="2" Column="0" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Top 10 Favorable Variances" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="FavorableVariancesChart"
+          ChartType="HorizontalBar"
+          DataAdapter="DDA_BudgetVsActual"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="False"
+          TooltipEnabled="True" TooltipFormat="#,##0"
+          TopN="10" TopNSortDirection="Descending"
+          DataFilter="FavorableVariance = True">
+
+          <XAxis
+            Title="Favorable Variance ($)"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="Account"
+            MemberFilter="A#TotalPL.Leaves"
+            LabelFontSize="10" LabelForeColor="#D0D8E8" />
+
+          <Series Name="Favorable"
+                  Expression="Calculated.FavorableVariance"
+                  Color="#27AE60" BarWidth="0.6" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Top Unfavorable Variances -->
+      <Panel Row="2" Column="6" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Top 10 Unfavorable Variances" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="UnfavorableVariancesChart"
+          ChartType="HorizontalBar"
+          DataAdapter="DDA_BudgetVsActual"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="False"
+          TooltipEnabled="True" TooltipFormat="#,##0"
+          TopN="10" TopNSortDirection="Descending"
+          DataFilter="UnfavorableVariance = True">
+
+          <XAxis
+            Title="Unfavorable Variance ($)"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="Account"
+            MemberFilter="A#TotalPL.Leaves"
+            LabelFontSize="10" LabelForeColor="#D0D8E8" />
+
+          <Series Name="Unfavorable"
+                  Expression="Calculated.UnfavorableVariance"
+                  Color="#E74C3C" BarWidth="0.6" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Favorable"   Value="#27AE60" />
+      <Color Name="Unfavorable" Value="#E74C3C" />
+      <Color Name="Neutral"     Value="#F39C12" />
+      <Color Name="Actual"      Value="#3498DB" />
+      <Color Name="Budget"      Value="#E67E22" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

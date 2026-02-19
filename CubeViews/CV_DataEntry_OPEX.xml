@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_DataEntry_OPEX - Operating Expense Input Form
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_DataEntry_OPEX"
+           Description="Operating expense input by department with SGA, R&amp;D, and Marketing sub-accounts"
+           CubeName="Finance"
+           ViewType="DataEntry"
+           IsEnabled="true"
+           AllowDataInput="true"
+           SuppressNoData="false"
+           SuppressZeros="false"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: Account Dimension - OPEX Hierarchy                  -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- SGA Sub-Accounts -->
+        <Member Name="OPEX_SGA" DisplayName="Selling, General &amp; Administrative" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="SGA_Salaries" DisplayName="Salaries &amp; Wages" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_Benefits" DisplayName="Employee Benefits" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_Travel" DisplayName="Travel &amp; Entertainment" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_OfficeLease" DisplayName="Office Lease &amp; Rent" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_Utilities" DisplayName="Utilities" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_Insurance" DisplayName="Insurance" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_ProfFees" DisplayName="Professional Fees" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_OfficeSupplies" DisplayName="Office Supplies" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_Telecom" DisplayName="Telecommunications" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_Depreciation" DisplayName="SGA Depreciation" IsInput="true" IndentLevel="1" />
+        <Member Name="SGA_Other" DisplayName="Other SGA" IsInput="true" IndentLevel="1" />
+
+        <!-- R&D Sub-Accounts -->
+        <Member Name="OPEX_RD" DisplayName="Research &amp; Development" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="RD_Salaries" DisplayName="R&amp;D Salaries &amp; Wages" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Benefits" DisplayName="R&amp;D Benefits" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Materials" DisplayName="Lab Materials &amp; Supplies" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Equipment" DisplayName="Lab Equipment" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Testing" DisplayName="Testing &amp; Certification" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Prototyping" DisplayName="Prototyping Costs" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Consulting" DisplayName="External R&amp;D Consulting" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Patents" DisplayName="Patent &amp; IP Costs" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Software" DisplayName="R&amp;D Software Licenses" IsInput="true" IndentLevel="1" />
+        <Member Name="RD_Other" DisplayName="Other R&amp;D" IsInput="true" IndentLevel="1" />
+
+        <!-- Marketing Sub-Accounts -->
+        <Member Name="OPEX_Marketing" DisplayName="Marketing" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="MKT_Salaries" DisplayName="Marketing Salaries" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_Advertising" DisplayName="Advertising &amp; Media" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_Digital" DisplayName="Digital Marketing" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_TradeShows" DisplayName="Trade Shows &amp; Events" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_Collateral" DisplayName="Marketing Collateral" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_PR" DisplayName="Public Relations" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_Sponsorship" DisplayName="Sponsorships" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_MarketResearch" DisplayName="Market Research" IsInput="true" IndentLevel="1" />
+        <Member Name="MKT_Other" DisplayName="Other Marketing" IsInput="true" IndentLevel="1" />
+
+        <!-- Total OPEX (Calculated) -->
+        <Member Name="TotalOPEX" DisplayName="Total Operating Expenses" IsInput="false" IndentLevel="0" IsBold="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Time Dimension - Monthly, Quarterly, Annual      -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <Dimension Name="Time" AliasTable="Default">
+      <MemberSelections>
+        <Member Name="M1" DisplayName="Jan" IsInput="true" />
+        <Member Name="M2" DisplayName="Feb" IsInput="true" />
+        <Member Name="M3" DisplayName="Mar" IsInput="true" />
+        <Member Name="Q1" DisplayName="Q1" IsInput="false" IsBold="true" />
+        <Member Name="M4" DisplayName="Apr" IsInput="true" />
+        <Member Name="M5" DisplayName="May" IsInput="true" />
+        <Member Name="M6" DisplayName="Jun" IsInput="true" />
+        <Member Name="Q2" DisplayName="Q2" IsInput="false" IsBold="true" />
+        <Member Name="M7" DisplayName="Jul" IsInput="true" />
+        <Member Name="M8" DisplayName="Aug" IsInput="true" />
+        <Member Name="M9" DisplayName="Sep" IsInput="true" />
+        <Member Name="Q3" DisplayName="Q3" IsInput="false" IsBold="true" />
+        <Member Name="M10" DisplayName="Oct" IsInput="true" />
+        <Member Name="M11" DisplayName="Nov" IsInput="true" />
+        <Member Name="M12" DisplayName="Dec" IsInput="true" />
+        <Member Name="Q4" DisplayName="Q4" IsInput="false" IsBold="true" />
+        <Member Name="YearTotal" DisplayName="Full Year" IsInput="false" IsBold="true" />
+      </MemberSelections>
+    </Dimension>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="E_NA_Plant01">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Scenario" IsSelectable="true" DefaultMember="Budget">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="Budget" />
+          <Member Name="Forecast" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="UD2_CostCenter" IsSelectable="true" DefaultMember="AllCostCenters">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllCostCenters" />
+      </SelectionFilter>
+    </Dimension>
+
+    <!-- Fixed POV members -->
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Local" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+    <Dimension Name="View" IsSelectable="false" DefaultMember="Periodic" />
+    <Dimension Name="UD1_Product" IsSelectable="false" DefaultMember="AllProducts" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <ConditionalFormat Name="InputCells">
+      <Condition>
+        <CellProperty Property="IsInput" Value="true" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#FFF9E6</BackgroundColor>
+        <BorderColor>#D4C577</BorderColor>
+        <BorderStyle>Thin</BorderStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="SubtotalRows">
+      <Condition>
+        <RowMember Dimension="Account" Members="OPEX_SGA,OPEX_RD,OPEX_Marketing" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#E6F0FA</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <BorderBottomStyle>Thin</BorderBottomStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="TotalOPEXRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="TotalOPEX" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#D6E8D6</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <BorderTopColor>#333333</BorderTopColor>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="QuarterColumns">
+      <Condition>
+        <ColumnMember Dimension="Time" Members="Q1,Q2,Q3,Q4" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#EEF3FA</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="YearTotalColumn">
+      <Condition>
+        <ColumnMember Dimension="Time" Members="YearTotal" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#D6E8D6</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+        <BorderLeftStyle>Double</BorderLeftStyle>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION                                               -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <ProtectedIntersections>
+      <Intersection ColumnMembers="Q1,Q2,Q3,Q4,YearTotal" IsProtected="true" />
+      <Intersection RowMembers="OPEX_SGA,OPEX_RD,OPEX_Marketing,TotalOPEX" IsProtected="true" />
+    </ProtectedIntersections>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- DATA ENTRY OPTIONS                                            -->
+  <!-- ============================================================ -->
+  <DataEntryOptions>
+    <AllowSpreadEntry>true</AllowSpreadEntry>
+    <SpreadMethod>EvenSpread</SpreadMethod>
+    <SpreadAnnualToMonthly>true</SpreadAnnualToMonthly>
+    <SpreadAnnualMethod>EqualMonthly</SpreadAnnualMethod>
+    <AllowAnnotations>true</AllowAnnotations>
+    <RequireAnnotationOnChange>false</RequireAnnotationOnChange>
+    <ValidationRule>
+      <MinValue>0</MinValue>
+      <MaxValue>999999999</MaxValue>
+      <AllowNegative>false</AllowNegative>
+    </ValidationRule>
+    <SubmitAction>SaveAndCalc</SubmitAction>
+    <AutoCalcOnSave>true</AutoCalcOnSave>
+  </DataEntryOptions>
+
+</CubeView>

@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_CAPEXTracker"
+  Description="Capital Expenditure Project Tracker Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#Forecast" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                          DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants"      DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#CAPEXAccounts.Descendants"  DefaultMember="A#TotalCAPEX" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"             DefaultMember="F#YTD" />
+    <POVBinding Dimension="UD1"       MemberFilter="UD1#CAPEXProjects.Base"       DefaultMember="UD1#AllProjects" />
+    <POVBinding Dimension="UD2"       MemberFilter="UD2#CAPEXCategories.Base"     DefaultMember="UD2#AllCategories" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_CAPEXTracker"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="CAPEXCube"
+      SuppressNoData="True"
+      SuppressZeros="True">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="IncludeProjectMetadata"   Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="CAPEX Tracker"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+      </Panel>
+      <Panel Row="0" Column="4" ColumnSpan="8" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="CategoryFilter"
+          FilterType="DropDown"
+          Dimension="UD2"
+          MemberFilter="UD2#AllCategories,UD2#Expansion,UD2#Maintenance,UD2#Automation,UD2#RnD"
+          DefaultMember="UD2#AllCategories"
+          Label="Category" Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity.Descendants"
+          DefaultMember="E#TopEntity"
+          Label="Entity" Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="StatusFilter"
+          FilterType="MultiSelect"
+          CustomValues="Active|Active,OnHold|On Hold,Completed|Completed,Cancelled|Cancelled"
+          DefaultValue="Active"
+          Label="Status" Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: PROJECT LIST GRID WITH PROGRESS BARS -->
+    <Row Index="1" Height="340" HeightUnit="Pixel">
+      <Panel Row="1" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Capital Projects" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="ProjectListGrid"
+          DataAdapter="DDA_CAPEXTracker"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="10" HeaderFontWeight="Bold"
+          CellFontSize="10" CellForeColor="#D0D8E8"
+          CellPadding="5"
+          RowHeight="34"
+          EnableSorting="True"
+          EnableFiltering="True"
+          FreezeColumns="2"
+          ShowTotalRow="True"
+          TotalRowBackgroundColor="#243B67" TotalRowFontWeight="Bold">
+
+          <RowDimension Dimension="UD1" MemberFilter="UD1#CAPEXProjects.Base" ShowHierarchy="False" />
+
+          <Columns>
+            <Column Header="Project ID"      Binding="UD1.Name"                    Width="100" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Project Name"    Binding="UD1.Description"             Width="200" Alignment="Left" />
+            <Column Header="Category"        Binding="UD2.Description"             Width="110" Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="Expansion"    BackgroundColor="#3498DB30" ForeColor="#3498DB" BorderRadius="10" />
+                <Badge Value="Maintenance"  BackgroundColor="#E67E2230" ForeColor="#E67E22" BorderRadius="10" />
+                <Badge Value="Automation"   BackgroundColor="#2ECC7130" ForeColor="#2ECC71" BorderRadius="10" />
+                <Badge Value="R&amp;D"      BackgroundColor="#9B59B630" ForeColor="#9B59B6" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+            <Column Header="Status"          Binding="Project.Status"              Width="90"  Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="Active"     BackgroundColor="#27AE6030" ForeColor="#27AE60" BorderRadius="10" />
+                <Badge Value="On Hold"    BackgroundColor="#F39C1230" ForeColor="#F39C12" BorderRadius="10" />
+                <Badge Value="Completed"  BackgroundColor="#3498DB30" ForeColor="#3498DB" BorderRadius="10" />
+                <Badge Value="Cancelled"  BackgroundColor="#95A5A630" ForeColor="#95A5A6" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+            <Column Header="% Complete"      Binding="Project.PercentComplete"     Width="120" Alignment="Center">
+              <ProgressBarCell
+                TrackColor="#243B67" TrackHeight="14" TrackBorderRadius="7"
+                FillColorExpression="Value >= 0.80 ? '#27AE60' : (Value >= 0.50 ? '#3498DB' : '#F39C12')"
+                ShowLabel="True" LabelFontSize="9" LabelForeColor="#FFFFFF" LabelFormat="0%" />
+            </Column>
+            <Column Header="Budget ($K)"     Binding="A#CAPEXBudget:S#Budget:F#YTD" Width="110" Alignment="Right" Format="#,##0" />
+            <Column Header="Actual ($K)"     Binding="A#CAPEXActual:S#Actual:F#YTD" Width="110" Alignment="Right" Format="#,##0" />
+            <Column Header="Forecast ($K)"   Binding="A#CAPEXForecast:S#Forecast:F#YTD" Width="110" Alignment="Right" Format="#,##0" />
+            <Column Header="Variance ($K)"   Binding="Calculated.CAPEXVariance"    Width="110" Alignment="Right" Format="+#,##0;-#,##0">
+              <ConditionalFormat>
+                <Rule Condition="Value &lt;= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value > 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Var %"           Binding="Calculated.CAPEXVariancePct" Width="80"  Alignment="Center" Format="+0.0%;-0.0%">
+              <ConditionalFormat>
+                <Rule Condition="Value &lt;= 0"   ForeColor="#27AE60" />
+                <Rule Condition="Value &lt;= 0.1" ForeColor="#F39C12" />
+                <Rule Condition="Value > 0.1"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: DONUT CHART + SPEND TREND -->
+    <Row Index="2" Height="290" HeightUnit="Pixel">
+
+      <!-- CAPEX by Category Donut -->
+      <Panel Row="2" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="CAPEX by Category" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CAPEXByCategoryDonut"
+          ChartType="Doughnut"
+          DataAdapter="DDA_CAPEXTracker"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Right"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0,K"
+          InnerRadius="0.55">
+
+          <Slices>
+            <Slice Name="Expansion"
+                   Expression="A#CAPEXActual:S#Actual:T#{POV.Time}:E#{POV.Entity}:UD2#Expansion:F#YTD"
+                   Color="#3498DB" />
+            <Slice Name="Maintenance"
+                   Expression="A#CAPEXActual:S#Actual:T#{POV.Time}:E#{POV.Entity}:UD2#Maintenance:F#YTD"
+                   Color="#E67E22" />
+            <Slice Name="Automation"
+                   Expression="A#CAPEXActual:S#Actual:T#{POV.Time}:E#{POV.Entity}:UD2#Automation:F#YTD"
+                   Color="#2ECC71" />
+            <Slice Name="R&amp;D"
+                   Expression="A#CAPEXActual:S#Actual:T#{POV.Time}:E#{POV.Entity}:UD2#RnD:F#YTD"
+                   Color="#9B59B6" />
+          </Slices>
+
+          <CenterLabel Text="Total CAPEX" FontSize="10" ForeColor="#8CA8CC"
+                       ValueExpression="A#TotalCAPEX:S#Actual:T#{POV.Time}:F#YTD"
+                       ValueFormat="#,##0,K"
+                       ValueFontSize="18" ValueForeColor="#FFFFFF" ValueFontWeight="Bold" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Monthly Spend Trend vs Plan -->
+      <Panel Row="2" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Monthly CAPEX Spend vs Plan" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CAPEXSpendTrendChart"
+          ChartType="ComboChart"
+          DataAdapter="DDA_CAPEXTracker"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#CurrentYear.Base"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis Position="Left"
+            Title="Monthly Spend ($K)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis Position="Right"
+            Title="Cumulative ($K)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0" />
+
+          <Series Name="Actual Spend"
+                  SeriesType="Bar"
+                  YAxisPosition="Left"
+                  Expression="A#TotalCAPEX:S#Actual:E#{POV.Entity}:UD2#{POV.UD2}:F#Periodic"
+                  Color="#3498DB" BarWidth="0.4" />
+          <Series Name="Planned Spend"
+                  SeriesType="Bar"
+                  YAxisPosition="Left"
+                  Expression="A#TotalCAPEX:S#Budget:E#{POV.Entity}:UD2#{POV.UD2}:F#Periodic"
+                  Color="#E67E2260" BarWidth="0.4" />
+          <Series Name="Cumulative Actual"
+                  SeriesType="Line"
+                  YAxisPosition="Right"
+                  Expression="A#TotalCAPEX:S#Actual:E#{POV.Entity}:UD2#{POV.UD2}:F#YTD"
+                  Color="#2ECC71" LineWidth="2" MarkerType="Circle" MarkerSize="4" />
+          <Series Name="Cumulative Plan"
+                  SeriesType="Line"
+                  YAxisPosition="Right"
+                  Expression="A#TotalCAPEX:S#Budget:E#{POV.Entity}:UD2#{POV.UD2}:F#YTD"
+                  Color="#E74C3C" LineWidth="2" LineStyle="Dashed" MarkerType="Diamond" MarkerSize="4" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: SUMMARY KPI TILES -->
+    <Row Index="3" Height="110" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_TotalBudget"
+          Title="Total CAPEX Budget"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0,K"
+          DataAdapter="DDA_CAPEXTracker"
+          ValueExpression="A#TotalCAPEX:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#YTD">
+          <Icon IconType="FontAwesome" IconName="fa-file-invoice-dollar" IconColor="#3498DB" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+      <Panel Row="3" Column="3" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_TotalSpent"
+          Title="Total CAPEX Spent"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0,K"
+          DataAdapter="DDA_CAPEXTracker"
+          ValueExpression="A#TotalCAPEX:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#YTD">
+          <Icon IconType="FontAwesome" IconName="fa-money-check-alt" IconColor="#E67E22" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+      <Panel Row="3" Column="6" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_ActiveProjects"
+          Title="Active Projects"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0"
+          DataAdapter="DDA_CAPEXTracker"
+          ValueExpression="Count(UD1#CAPEXProjects.Base WHERE Status='Active')">
+          <Icon IconType="FontAwesome" IconName="fa-tasks" IconColor="#2ECC71" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+      <Panel Row="3" Column="9" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_BudgetRemaining"
+          Title="Budget Remaining"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0,K"
+          DataAdapter="DDA_CAPEXTracker"
+          ValueExpression="A#CAPEXBudgetRemaining:T#{POV.Time}:E#{POV.Entity}:F#YTD">
+          <Icon IconType="FontAwesome" IconName="fa-piggy-bank" IconColor="#9B59B6" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Expansion"   Value="#3498DB" />
+      <Color Name="Maintenance" Value="#E67E22" />
+      <Color Name="Automation"  Value="#2ECC71" />
+      <Color Name="RnD"         Value="#9B59B6" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

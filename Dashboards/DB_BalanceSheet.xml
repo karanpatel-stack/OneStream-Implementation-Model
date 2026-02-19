@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_BalanceSheet"
+  Description="Balance Sheet Drill-Down Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget"         DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                       DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants"   DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#TotalBS.Descendants"     DefaultMember="A#TotalBS" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#EndBal"                  DefaultMember="F#EndBal" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_BalanceSheet"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="MainCube"
+      SuppressNoData="True"
+      SuppressZeros="True">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="5000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="3" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Balance Sheet"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF"
+          HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <LabelComponent
+          Name="Subtitle"
+          Text="As of {POV.Time.MemberDescription}"
+          FontFamily="Segoe UI" FontSize="12"
+          ForeColor="#A0B4D0"
+          HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#Americas,E#EMEA,E#APAC,E#Corporate"
+          DefaultMember="E#TopEntity"
+          Label="Entity"
+          LabelForeColor="#A0B4D0"
+          Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="PeriodFilter"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period"
+          LabelForeColor="#A0B4D0"
+          Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: COLLAPSIBLE BS TREE GRID -->
+    <Row Index="1" Height="480" HeightUnit="Pixel">
+      <Panel Row="1" Column="0" ColumnSpan="9" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Balance Sheet Detail" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="BSTreeGrid"
+          DataAdapter="DDA_BalanceSheet"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="30"
+          EnableSorting="False"
+          FreezeColumns="1"
+          ShowHierarchy="True"
+          ExpandLevel="2"
+          CollapsibleRows="True"
+          IndentSize="20">
+
+          <RowDimension Dimension="Account" MemberFilter="A#TotalBS.Descendants" ShowHierarchy="True">
+            <HierarchyGroups>
+              <Group Name="Assets"           RootMember="A#TotalAssets"       DisplayOrder="1" />
+              <Group Name="Current Assets"   RootMember="A#CurrentAssets"     DisplayOrder="2" ParentGroup="Assets" />
+              <Group Name="Fixed Assets"     RootMember="A#FixedAssets"       DisplayOrder="3" ParentGroup="Assets" />
+              <Group Name="Other Assets"     RootMember="A#OtherAssets"       DisplayOrder="4" ParentGroup="Assets" />
+              <Group Name="Liabilities"      RootMember="A#TotalLiabilities"  DisplayOrder="5" />
+              <Group Name="Current Liab."    RootMember="A#CurrentLiabilities" DisplayOrder="6" ParentGroup="Liabilities" />
+              <Group Name="Long-Term Liab."  RootMember="A#LTLiabilities"     DisplayOrder="7" ParentGroup="Liabilities" />
+              <Group Name="Equity"           RootMember="A#TotalEquity"       DisplayOrder="8" />
+            </HierarchyGroups>
+          </RowDimension>
+
+          <Columns>
+            <Column Header="Account"
+                    Binding="Account.Description"
+                    Width="260" Alignment="Left" />
+            <Column Header="Current Period"
+                    Binding="S#{POV.Scenario}:T#{POV.Time}:F#EndBal"
+                    Width="140" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="Prior Period"
+                    Binding="S#{POV.Scenario}:T#PriorPeriod:F#EndBal"
+                    Width="140" Alignment="Right" Format="#,##0.0,,M" ForeColor="#A0B4D0" />
+            <Column Header="Change ($M)"
+                    Binding="Calculated.PeriodChange"
+                    CalculatedExpression="[CurrentPeriod] - [PriorPeriod]"
+                    Width="120" Alignment="Right" Format="+#,##0.0,,M;-#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value > 0"  ForeColor="#3498DB" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E67E22" />
+                <Rule Condition="Value == 0" ForeColor="#95A5A6" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Change %"
+                    Binding="Calculated.PeriodChangePct"
+                    CalculatedExpression="([CurrentPeriod] - [PriorPeriod]) / ABS([PriorPeriod])"
+                    Width="100" Alignment="Center" Format="+0.0%;-0.0%">
+              <ConditionalFormat>
+                <Rule Condition="Value > 0"  ForeColor="#3498DB" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E67E22" />
+                <Rule Condition="Value == 0" ForeColor="#95A5A6" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+
+          <RowStyles>
+            <RowStyle MemberFilter="A#TotalAssets,A#TotalLiabilities,A#TotalEquity,A#TotalLiabilitiesAndEquity"
+                      FontWeight="Bold" BackgroundColor="#243B6760" FontSize="12" />
+            <RowStyle MemberFilter="A#CurrentAssets,A#FixedAssets,A#OtherAssets,A#CurrentLiabilities,A#LTLiabilities"
+                      FontWeight="SemiBold" BackgroundColor="#243B6730" />
+          </RowStyles>
+        </GridComponent>
+      </Panel>
+
+      <!-- Key Ratios Panel -->
+      <Panel Row="1" Column="9" ColumnSpan="3" RowSpan="1"
+             PanelType="KPIPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Key Ratios" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <KPIListComponent
+          Name="KeyRatios"
+          DataAdapter="DDA_BalanceSheet"
+          Orientation="Vertical"
+          ItemSpacing="20"
+          ItemPadding="12">
+
+          <!-- Current Ratio -->
+          <KPIItem
+            Name="CurrentRatio"
+            Title="Current Ratio"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="0.00x"
+            Expression="A#CurrentAssets:F#EndBal / A#CurrentLiabilities:F#EndBal"
+            DataAdapter="DDA_BalanceSheet">
+            <Threshold Low="1.0" Mid="1.5" High="2.0"
+                       LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" />
+            <SubLabel Text="Current Assets / Current Liabilities" FontSize="9" ForeColor="#6B7FA0" />
+          </KPIItem>
+
+          <!-- Quick Ratio -->
+          <KPIItem
+            Name="QuickRatio"
+            Title="Quick Ratio"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="0.00x"
+            Expression="(A#CurrentAssets:F#EndBal - A#Inventory:F#EndBal) / A#CurrentLiabilities:F#EndBal"
+            DataAdapter="DDA_BalanceSheet">
+            <Threshold Low="0.8" Mid="1.0" High="1.5"
+                       LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" />
+            <SubLabel Text="(CA - Inventory) / CL" FontSize="9" ForeColor="#6B7FA0" />
+          </KPIItem>
+
+          <!-- Debt-to-Equity Ratio -->
+          <KPIItem
+            Name="DebtToEquity"
+            Title="Debt-to-Equity"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="0.00x"
+            Expression="A#TotalLiabilities:F#EndBal / A#TotalEquity:F#EndBal"
+            DataAdapter="DDA_BalanceSheet">
+            <Threshold Low="0.5" Mid="1.5" High="2.5"
+                       LowColor="#27AE60" MidColor="#F39C12" HighColor="#E74C3C" />
+            <SubLabel Text="Total Liabilities / Total Equity" FontSize="9" ForeColor="#6B7FA0" />
+          </KPIItem>
+
+          <!-- Working Capital -->
+          <KPIItem
+            Name="WorkingCapital"
+            Title="Working Capital"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="#,##0.0,,M"
+            Expression="A#CurrentAssets:F#EndBal - A#CurrentLiabilities:F#EndBal"
+            DataAdapter="DDA_BalanceSheet">
+            <Threshold Low="0" Mid="50000000" High="100000000"
+                       LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" />
+            <SubLabel Text="Current Assets - Current Liabilities" FontSize="9" ForeColor="#6B7FA0" />
+          </KPIItem>
+
+          <!-- Total Assets -->
+          <KPIItem
+            Name="TotalAssetsKPI"
+            Title="Total Assets"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            ValueFontSize="24" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="#,##0.0,,M"
+            Expression="A#TotalAssets:F#EndBal"
+            DataAdapter="DDA_BalanceSheet">
+            <SubLabel Text="{POV.Time.MemberDescription}" FontSize="9" ForeColor="#6B7FA0" />
+          </KPIItem>
+        </KPIListComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: BS COMPOSITION CHARTS -->
+    <Row Index="2" Height="280" HeightUnit="Pixel">
+      <!-- Asset Composition -->
+      <Panel Row="2" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Asset Composition" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="AssetCompositionChart"
+          ChartType="Doughnut"
+          DataAdapter="DDA_BalanceSheet"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Right"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M"
+          InnerRadius="0.55">
+
+          <Slices>
+            <Slice Name="Cash"           Expression="A#CashAndEquivalents:F#EndBal" Color="#3498DB" />
+            <Slice Name="Receivables"    Expression="A#AccountsReceivable:F#EndBal" Color="#2ECC71" />
+            <Slice Name="Inventory"      Expression="A#Inventory:F#EndBal"          Color="#E67E22" />
+            <Slice Name="Other Current"  Expression="A#OtherCurrentAssets:F#EndBal" Color="#F39C12" />
+            <Slice Name="PP&amp;E Net"   Expression="A#PPENet:F#EndBal"             Color="#9B59B6" />
+            <Slice Name="Intangibles"    Expression="A#Intangibles:F#EndBal"        Color="#1ABC9C" />
+            <Slice Name="Other Assets"   Expression="A#OtherAssets:F#EndBal"        Color="#95A5A6" />
+          </Slices>
+
+          <CenterLabel Text="Total Assets" FontSize="10" ForeColor="#8CA8CC"
+                       ValueExpression="A#TotalAssets:F#EndBal" ValueFormat="#,##0.0,,M"
+                       ValueFontSize="16" ValueForeColor="#FFFFFF" ValueFontWeight="Bold" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Liability Composition -->
+      <Panel Row="2" Column="4" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Liabilities &amp; Equity Composition" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="LiabEquityChart"
+          ChartType="Doughnut"
+          DataAdapter="DDA_BalanceSheet"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Right"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M"
+          InnerRadius="0.55">
+
+          <Slices>
+            <Slice Name="Payables"       Expression="A#AccountsPayable:F#EndBal"   Color="#E74C3C" />
+            <Slice Name="Short-Term Debt" Expression="A#ShortTermDebt:F#EndBal"    Color="#E67E22" />
+            <Slice Name="Other CL"       Expression="A#OtherCurrentLiab:F#EndBal"  Color="#F39C12" />
+            <Slice Name="Long-Term Debt" Expression="A#LongTermDebt:F#EndBal"      Color="#9B59B6" />
+            <Slice Name="Other LT Liab"  Expression="A#OtherLTLiab:F#EndBal"      Color="#95A5A6" />
+            <Slice Name="Equity"         Expression="A#TotalEquity:F#EndBal"       Color="#3498DB" />
+          </Slices>
+
+          <CenterLabel Text="Total L&amp;E" FontSize="10" ForeColor="#8CA8CC"
+                       ValueExpression="A#TotalLiabilitiesAndEquity:F#EndBal" ValueFormat="#,##0.0,,M"
+                       ValueFontSize="16" ValueForeColor="#FFFFFF" ValueFontWeight="Bold" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- BS Trend Mini Chart -->
+      <Panel Row="2" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Balance Sheet Trend" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="BSTrendChart"
+          ChartType="Line"
+          DataAdapter="DDA_BalanceSheet"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="9" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingSixMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,,M"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Total Assets"
+                  Expression="A#TotalAssets:F#EndBal:E#{POV.Entity}"
+                  Color="#3498DB" LineWidth="2" MarkerType="Circle" MarkerSize="4" />
+          <Series Name="Total Liab"
+                  Expression="A#TotalLiabilities:F#EndBal:E#{POV.Entity}"
+                  Color="#E74C3C" LineWidth="2" MarkerType="Square" MarkerSize="4" />
+          <Series Name="Total Equity"
+                  Expression="A#TotalEquity:F#EndBal:E#{POV.Entity}"
+                  Color="#2ECC71" LineWidth="2" MarkerType="Diamond" MarkerSize="4" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Assets"      Value="#3498DB" />
+      <Color Name="Liabilities" Value="#E74C3C" />
+      <Color Name="Equity"      Value="#2ECC71" />
+      <Color Name="Neutral"     Value="#95A5A6" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

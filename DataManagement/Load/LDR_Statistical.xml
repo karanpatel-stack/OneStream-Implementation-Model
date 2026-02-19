@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Load Rule
+  Load: Statistical Data
+  Purpose: Load non-financial statistical and operational metrics into the Finance cube
+  Target Cube: Finance (Statistical accounts)
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <LoadRule>
+
+      <!-- ============================================================
+           LOAD IDENTITY
+           ============================================================ -->
+      <LoadName>Statistical_Data</LoadName>
+      <LoadDescription>Loads non-financial statistical and operational data into the Finance cube under statistical accounts. Includes production volumes (units produced, units scrapped), machine hours, downtime hours, quality defect counts, and other manufacturing KPIs from the MES system. Data type is integer/decimal (not currency) and does not participate in currency translation. Supports manufacturing variance analysis and operational reporting.</LoadDescription>
+      <IsActive>true</IsActive>
+      <LoadType>CubeLoad</LoadType>
+      <TargetCube>Finance</TargetCube>
+
+      <!-- ============================================================
+           SOURCE STAGES
+           ============================================================ -->
+      <SourceStages>
+        <Stage name="MES_Production" priority="1" description="MES production statistics (volumes, hours, defects)" />
+        <Stage name="SAP_ProductionOrders" priority="2" description="SAP production order quantities and variances" />
+      </SourceStages>
+
+      <!-- ============================================================
+           TRANSFORM PIPELINE
+           ============================================================ -->
+      <TransformPipeline>
+        <Transform name="EntityMapping"        order="1" description="Map plant/line to OneStream entity" />
+        <Transform name="ProductMapping"       order="2" description="Map product codes to UD1" />
+        <Transform name="DerivedMembers"        order="3" description="Derive period from production date, set defaults" />
+        <Transform name="DataValidation"        order="4" description="Validate statistical values" />
+      </TransformPipeline>
+
+      <!-- ============================================================
+           STATISTICAL ACCOUNT MAPPINGS
+           Map MES production fields to OneStream statistical accounts.
+           ============================================================ -->
+      <StatisticalAccountMappings>
+        <Description>Each MES production record generates multiple statistical account records in the cube. Production line and product code determine the entity and UD1 dimensions.</Description>
+
+        <AccountMapping>
+          <!-- Production Volumes -->
+          <Map sourceField="SRC_UnitsProduced"   targetAccount="A_Stat_ProductionVolume"  description="Good units produced" dataType="Decimal" unit="Units" />
+          <Map sourceField="SRC_UnitsScrapped"   targetAccount="A_Stat_ScrapVolume"       description="Units scrapped/rejected" dataType="Decimal" unit="Units" />
+          <Map sourceField="SRC_TotalUnits"      targetAccount="A_Stat_TotalVolume"       description="Total units (produced + scrapped)" dataType="Decimal" unit="Units" />
+
+          <!-- Operational Hours -->
+          <Map sourceField="SRC_MachineHours"    targetAccount="A_Stat_MachineHours"      description="Total machine run hours" dataType="Decimal" unit="Hours" />
+          <Map sourceField="SRC_DowntimeHours"   targetAccount="A_Stat_DowntimeHours"     description="Unplanned downtime hours" dataType="Decimal" unit="Hours" />
+
+          <!-- Quality Metrics -->
+          <Map sourceField="SRC_QualityDefects"  targetAccount="A_Stat_QualityDefects"    description="Quality defect count" dataType="Integer" unit="Count" />
+
+          <!-- Derived KPIs (calculated during staging) -->
+          <Map sourceField="SRC_ScrapRate"       targetAccount="A_Stat_ScrapRate"         description="Scrap rate percentage" dataType="Decimal" unit="Percent" />
+          <Map sourceField="SRC_Utilization"     targetAccount="A_Stat_Utilization"       description="Machine utilization percentage" dataType="Decimal" unit="Percent" />
+          <Map sourceField="SRC_OEE"             targetAccount="A_Stat_OEE"               description="Overall Equipment Effectiveness" dataType="Decimal" unit="Percent" />
+        </AccountMapping>
+
+        <!-- SAP Production Order statistical data -->
+        <AccountMapping source="SAP_ProductionOrders">
+          <Map sourceField="SRC_PlannedQty"      targetAccount="A_Stat_PlannedVolume"     description="Planned production quantity" dataType="Decimal" unit="Units" />
+          <Map sourceField="SRC_ActualQty"        targetAccount="A_Stat_ActualVolume_SAP"  description="Actual delivered quantity (SAP)" dataType="Decimal" unit="Units" />
+          <Map sourceField="SRC_QtyVariance"      targetAccount="A_Stat_VolumeVariance"    description="Production quantity variance" dataType="Decimal" unit="Units" />
+        </AccountMapping>
+      </StatisticalAccountMappings>
+
+      <!-- ============================================================
+           DIMENSION MAPPINGS
+           ============================================================ -->
+      <DimensionMappings>
+        <Mapping dimension="Scenario"       sourceColumn="OS_Scenario"         defaultValue="Actual"        description="Actual statistical data" />
+        <Mapping dimension="Time"           sourceColumn="OS_Time"             defaultValue=""              description="Period from production date" />
+        <Mapping dimension="Entity"         sourceColumn="OS_Entity"           defaultValue=""              description="Plant entity" />
+        <Mapping dimension="Account"        sourceColumn="OS_Stat_Account"     defaultValue=""              description="Statistical account" />
+        <Mapping dimension="Flow"           sourceColumn="OS_Flow"             defaultValue="F_Movement"    description="Periodic movement" />
+        <Mapping dimension="Consolidation"  sourceColumn="OS_Consolidation"    defaultValue="C_Local"       description="Local" />
+        <Mapping dimension="UD1"            sourceColumn="OS_UD1_Product"      defaultValue="Prod_Unassigned" description="Product from MES product code" />
+        <Mapping dimension="UD2"            sourceColumn="OS_UD2_CostCenter"   defaultValue="CC_Mfg_Assembly" description="Manufacturing cost center" />
+        <Mapping dimension="UD3"            sourceColumn="OS_UD3"              defaultValue="UD3_None"      description="Reserved" />
+        <Mapping dimension="UD4"            sourceColumn="OS_UD4"              defaultValue="UD4_None"      description="Reserved" />
+        <Mapping dimension="UD5"            sourceColumn="OS_UD5_Intercompany" defaultValue="IC_None"       description="Intercompany" />
+        <Mapping dimension="UD6"            sourceColumn="OS_UD6"              defaultValue="UD6_None"      description="Reserved" />
+        <Mapping dimension="UD7"            sourceColumn="OS_UD7"              defaultValue="UD7_None"      description="Reserved" />
+        <Mapping dimension="UD8"            sourceColumn="OS_UD8_Version"      defaultValue="Working"       description="Working version" />
+      </DimensionMappings>
+
+      <!-- ============================================================
+           AMOUNT MAPPING
+           ============================================================ -->
+      <AmountMapping>
+        <AmountColumn>OS_Amount</AmountColumn>
+        <!-- Statistical data: no currency translation -->
+        <AmountType>Statistical</AmountType>
+        <CurrencyTranslation>None</CurrencyTranslation>
+        <Description>Statistical amounts are loaded as numeric values without currency context. They do not participate in OneStream currency translation processes.</Description>
+      </AmountMapping>
+
+      <!-- ============================================================
+           LOAD METHOD
+           ============================================================ -->
+      <LoadMethod>
+        <Type>Merge</Type>
+        <Description>Merge statistical data. Daily MES data is aggregated to monthly periods during staging.</Description>
+        <ConflictResolution>
+          <Strategy>LatestWins</Strategy>
+          <AggregateMultiple>true</AggregateMultiple>
+          <AggregationMethod>Sum</AggregationMethod>
+        </ConflictResolution>
+      </LoadMethod>
+
+      <!-- ============================================================
+           PRE-LOAD AND POST-LOAD ACTIONS
+           ============================================================ -->
+      <PreLoadActions>
+        <Action name="ClearStatData" order="1">
+          <Type>CubeClear</Type>
+          <ClearScope>
+            <Scenario>Actual</Scenario>
+            <Time>@@LoadPeriod</Time>
+            <Entity>@@LoadEntity</Entity>
+            <Account>A_Stat_*</Account>
+            <UD8>Working</UD8>
+          </ClearScope>
+        </Action>
+      </PreLoadActions>
+
+      <PostLoadActions>
+        <Action name="UpdateLoadLog" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (LoadName, LoadDate, Entity, Period, Scenario, LoadedRows, Status) VALUES ('Statistical_Data', GETDATE(), @@LoadEntity, @@LoadPeriod, 'Actual', @@LoadedRecordCount, 'Complete')</SQL>
+        </Action>
+      </PostLoadActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>5000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelLoading>false</EnableParallelLoading>
+        <LogDetailLevel>Full</LogDetailLevel>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+      <ErrorHandling>
+        <OnLoadError>
+          <Action>LogAndContinue</Action>
+        </OnLoadError>
+        <MaxErrorRows>100</MaxErrorRows>
+        <ContinueOnWarning>true</ContinueOnWarning>
+      </ErrorHandling>
+
+    </LoadRule>
+  </DataManagement>
+</OneStreamXF>

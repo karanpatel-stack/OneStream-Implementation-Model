@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: SAP Trial Balance
+  Purpose: Extract trial balance data from SAP S/4HANA Universal Journal (ACDOCA)
+           and classic GL tables (FAGLFLEXA) for financial consolidation
+  Source Connection: CONN_SAP_HANA
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>SAP_TrialBalance</StageName>
+      <StageDescription>Extracts trial balance data from SAP S/4HANA ACDOCA (Universal Journal) with fallback to FAGLFLEXA for legacy ledger entries. Retrieves debit/credit amounts by company code, GL account, cost center, and profit center for the specified fiscal year and period. Data feeds the Finance cube for actual financial reporting and consolidation.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>DatabaseQuery</StageType>
+      <SourceConnection>CONN_SAP_HANA</SourceConnection>
+      <TargetStagingTable>STG_SAP_TrialBalance</TargetStagingTable>
+
+      <!-- ============================================================
+           SOURCE QUERY
+           Primary extraction from ACDOCA (S/4HANA Universal Journal)
+           with supplementary data from FAGLFLEXA for completeness.
+           ============================================================ -->
+      <SourceQuery>
+        <SQL><![CDATA[
+          /*
+            SAP S/4HANA Trial Balance Extraction
+            Source: ACDOCA (Universal Journal) aggregated by key dimensions
+            Filters: Client 100, specified fiscal year/period, company code range
+            Note: Amounts are extracted in both transaction and local currency
+          */
+          SELECT
+            a.RBUKRS                          AS CompanyCode,
+            a.RACCT                           AS GLAccount,
+            a.RCNTR                           AS CostCenter,
+            a.PRCTR                           AS ProfitCenter,
+            a.GJAHR                           AS FiscalYear,
+            a.POPER                           AS Period,
+            a.RBUSA                           AS BusinessArea,
+            a.RFAREA                          AS FunctionalArea,
+            a.RSEGMENT                        AS Segment,
+            a.RTCUR                           AS TransactionCurrency,
+            a.RKCUR                           AS LocalCurrency,
+            a.RHCUR                           AS GroupCurrency,
+            SUM(CASE WHEN a.DRCRK = 'S' THEN a.TSL ELSE 0 END) AS DebitAmountTC,
+            SUM(CASE WHEN a.DRCRK = 'H' THEN a.TSL ELSE 0 END) AS CreditAmountTC,
+            SUM(a.TSL)                        AS NetAmountTC,
+            SUM(CASE WHEN a.DRCRK = 'S' THEN a.HSL ELSE 0 END) AS DebitAmountLC,
+            SUM(CASE WHEN a.DRCRK = 'H' THEN a.HSL ELSE 0 END) AS CreditAmountLC,
+            SUM(a.HSL)                        AS NetAmountLC,
+            SUM(a.KSL)                        AS GroupCurrencyAmount,
+            COUNT(*)                          AS LineCount
+          FROM ACDOCA a
+          WHERE a.RCLNT   = '100'                       /* SAP Client */
+            AND a.RLDNR   = '0L'                        /* Leading Ledger */
+            AND a.GJAHR   = :FiscalYear                  /* Parameterized fiscal year */
+            AND a.POPER   BETWEEN :PeriodFrom AND :PeriodTo  /* Period range */
+            AND a.RBUKRS  BETWEEN :CompanyCodeFrom AND :CompanyCodeTo /* Company code range */
+            AND a.RBUKRS  IN ('1000','1100','1200','2000','2100','3000','3100','4000')
+            AND a.RACCT   NOT LIKE '0%'                  /* Exclude statistical accounts here */
+          GROUP BY
+            a.RBUKRS, a.RACCT, a.RCNTR, a.PRCTR,
+            a.GJAHR, a.POPER, a.RBUSA, a.RFAREA, a.RSEGMENT,
+            a.RTCUR, a.RKCUR, a.RHCUR
+          ORDER BY
+            a.RBUKRS, a.RACCT, a.POPER
+        ]]></SQL>
+
+        <!-- Query parameters with default values -->
+        <Parameters>
+          <Parameter name="FiscalYear" dataType="String" defaultValue="2026" description="SAP Fiscal Year (GJAHR)" />
+          <Parameter name="PeriodFrom" dataType="String" defaultValue="001" description="Starting period (001-016)" />
+          <Parameter name="PeriodTo" dataType="String" defaultValue="012" description="Ending period (001-016)" />
+          <Parameter name="CompanyCodeFrom" dataType="String" defaultValue="1000" description="Starting company code" />
+          <Parameter name="CompanyCodeTo" dataType="String" defaultValue="9999" description="Ending company code" />
+        </Parameters>
+      </SourceQuery>
+
+      <!-- ============================================================
+           SUPPLEMENTARY QUERY
+           Fallback/supplementary query for FAGLFLEXA (classic GL)
+           Used when legacy data is not yet migrated to ACDOCA.
+           ============================================================ -->
+      <SupplementaryQuery name="FAGLFLEXA_Legacy">
+        <SQL><![CDATA[
+          /*
+            SAP Classic GL - FAGLFLEXA Trial Balance (for legacy periods)
+            Used only for fiscal years prior to S/4HANA migration cutover
+          */
+          SELECT
+            f.RBUKRS                          AS CompanyCode,
+            f.RACCT                           AS GLAccount,
+            f.RCNTR                           AS CostCenter,
+            f.PRCTR                           AS ProfitCenter,
+            f.RYEAR                           AS FiscalYear,
+            f.RPMAX                           AS Period,
+            f.RBUSA                           AS BusinessArea,
+            f.RFAREA                          AS FunctionalArea,
+            f.SEGMENT                         AS Segment,
+            f.RTCUR                           AS TransactionCurrency,
+            f.RKCUR                           AS LocalCurrency,
+            ''                                AS GroupCurrency,
+            SUM(f.TSL_DEBIT)                  AS DebitAmountTC,
+            SUM(f.TSL_CREDIT)                 AS CreditAmountTC,
+            SUM(f.TSL_DEBIT + f.TSL_CREDIT)   AS NetAmountTC,
+            SUM(f.HSL_DEBIT)                  AS DebitAmountLC,
+            SUM(f.HSL_CREDIT)                 AS CreditAmountLC,
+            SUM(f.HSL_DEBIT + f.HSL_CREDIT)   AS NetAmountLC,
+            0                                 AS GroupCurrencyAmount,
+            COUNT(*)                          AS LineCount
+          FROM FAGLFLEXA f
+          WHERE f.RCLNT   = '100'
+            AND f.RLDNR   = '0L'
+            AND f.RYEAR   = :FiscalYear
+            AND f.RPMAX   BETWEEN :PeriodFrom AND :PeriodTo
+            AND f.RBUKRS  BETWEEN :CompanyCodeFrom AND :CompanyCodeTo
+          GROUP BY
+            f.RBUKRS, f.RACCT, f.RCNTR, f.PRCTR,
+            f.RYEAR, f.RPMAX, f.RBUSA, f.RFAREA, f.SEGMENT,
+            f.RTCUR, f.RKCUR
+          ORDER BY
+            f.RBUKRS, f.RACCT, f.RPMAX
+        ]]></SQL>
+        <UseWhen>FiscalYear is less than S4HANA_CUTOVER_YEAR</UseWhen>
+      </SupplementaryQuery>
+
+      <!-- ============================================================
+           COLUMN MAPPINGS
+           Map source query columns to staging table columns.
+           ============================================================ -->
+      <ColumnMappings>
+        <Column ordinal="1"  sourceName="CompanyCode"          stagingColumn="SRC_Entity"          dataType="String"   maxLength="10"  nullable="false" description="SAP Company Code (BUKRS)" />
+        <Column ordinal="2"  sourceName="GLAccount"            stagingColumn="SRC_Account"         dataType="String"   maxLength="10"  nullable="false" description="SAP GL Account Number (RACCT)" />
+        <Column ordinal="3"  sourceName="CostCenter"           stagingColumn="SRC_CostCenter"      dataType="String"   maxLength="10"  nullable="true"  description="SAP Cost Center (RCNTR)" />
+        <Column ordinal="4"  sourceName="ProfitCenter"         stagingColumn="SRC_ProfitCenter"    dataType="String"   maxLength="10"  nullable="true"  description="SAP Profit Center (PRCTR)" />
+        <Column ordinal="5"  sourceName="FiscalYear"           stagingColumn="SRC_Year"            dataType="String"   maxLength="4"   nullable="false" description="SAP Fiscal Year (GJAHR)" />
+        <Column ordinal="6"  sourceName="Period"               stagingColumn="SRC_Period"          dataType="String"   maxLength="3"   nullable="false" description="SAP Posting Period (POPER)" />
+        <Column ordinal="7"  sourceName="BusinessArea"         stagingColumn="SRC_BusinessArea"    dataType="String"   maxLength="4"   nullable="true"  description="SAP Business Area (RBUSA)" />
+        <Column ordinal="8"  sourceName="FunctionalArea"       stagingColumn="SRC_FunctionalArea"  dataType="String"   maxLength="16"  nullable="true"  description="SAP Functional Area (RFAREA)" />
+        <Column ordinal="9"  sourceName="Segment"              stagingColumn="SRC_Segment"         dataType="String"   maxLength="10"  nullable="true"  description="SAP Segment (RSEGMENT)" />
+        <Column ordinal="10" sourceName="TransactionCurrency"  stagingColumn="SRC_TransCurrency"   dataType="String"   maxLength="5"   nullable="false" description="Transaction Currency (RTCUR)" />
+        <Column ordinal="11" sourceName="LocalCurrency"        stagingColumn="SRC_LocalCurrency"   dataType="String"   maxLength="5"   nullable="false" description="Local/Company Code Currency (RKCUR)" />
+        <Column ordinal="12" sourceName="GroupCurrency"        stagingColumn="SRC_GroupCurrency"    dataType="String"   maxLength="5"   nullable="true"  description="Group Currency (RHCUR)" />
+        <Column ordinal="13" sourceName="DebitAmountTC"        stagingColumn="SRC_DebitTC"         dataType="Decimal"  precision="23" scale="2" nullable="true" description="Debit in Transaction Currency" />
+        <Column ordinal="14" sourceName="CreditAmountTC"       stagingColumn="SRC_CreditTC"        dataType="Decimal"  precision="23" scale="2" nullable="true" description="Credit in Transaction Currency" />
+        <Column ordinal="15" sourceName="NetAmountTC"          stagingColumn="SRC_NetAmountTC"     dataType="Decimal"  precision="23" scale="2" nullable="true" description="Net Amount in Transaction Currency" />
+        <Column ordinal="16" sourceName="DebitAmountLC"        stagingColumn="SRC_DebitLC"         dataType="Decimal"  precision="23" scale="2" nullable="false" description="Debit in Local Currency" />
+        <Column ordinal="17" sourceName="CreditAmountLC"       stagingColumn="SRC_CreditLC"        dataType="Decimal"  precision="23" scale="2" nullable="false" description="Credit in Local Currency" />
+        <Column ordinal="18" sourceName="NetAmountLC"          stagingColumn="SRC_NetAmountLC"     dataType="Decimal"  precision="23" scale="2" nullable="false" description="Net Amount in Local Currency" />
+        <Column ordinal="19" sourceName="GroupCurrencyAmount"  stagingColumn="SRC_GroupAmount"     dataType="Decimal"  precision="23" scale="2" nullable="true" description="Group Currency Amount" />
+        <Column ordinal="20" sourceName="LineCount"            stagingColumn="SRC_LineCount"       dataType="Integer"  nullable="true" description="Number of journal lines aggregated" />
+      </ColumnMappings>
+
+      <!-- ============================================================
+           FILTERS AND SELECTION CRITERIA
+           ============================================================ -->
+      <Filters>
+        <Filter name="FiscalYear" description="Restrict to current and prior fiscal year">
+          <Type>Parameter</Type>
+          <AllowedValues>2020,2021,2022,2023,2024,2025,2026</AllowedValues>
+        </Filter>
+        <Filter name="CompanyCodeRange" description="Filter by company code range for phased loads">
+          <Type>Range</Type>
+          <Ranges>
+            <Range name="US_Entities">1000-1299</Range>
+            <Range name="DE_Entities">2000-2299</Range>
+            <Range name="CN_Entities">3000-3299</Range>
+            <Range name="MX_Entities">4000-4299</Range>
+          </Ranges>
+        </Filter>
+        <Filter name="ExcludeStatistical" description="Exclude statistical account postings from trial balance">
+          <Type>Exclusion</Type>
+          <Pattern>GLAccount starts with '0'</Pattern>
+        </Filter>
+      </Filters>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <!-- Truncate staging table before new extraction -->
+        <Action name="ClearStagingTable" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_SAP_TrialBalance</SQL>
+        </Action>
+        <!-- Log extraction start -->
+        <Action name="LogExtractionStart" order="2">
+          <Type>Log</Type>
+          <Message>Starting SAP Trial Balance extraction for FiscalYear={FiscalYear}, Period={PeriodFrom}-{PeriodTo}</Message>
+          <LogLevel>Info</LogLevel>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <!-- Record row count for audit -->
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status) SELECT 'SAP_TrialBalance', GETDATE(), COUNT(*), 'Staged' FROM STG_SAP_TrialBalance</SQL>
+        </Action>
+        <!-- Validate minimum expected rows -->
+        <Action name="ValidateMinRows" order="2">
+          <Type>Validation</Type>
+          <MinimumRows>100</MinimumRows>
+          <OnFailure>Warn</OnFailure>
+          <Message>SAP Trial Balance extraction returned fewer rows than expected. Verify source data availability.</Message>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>10000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelExecution>false</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

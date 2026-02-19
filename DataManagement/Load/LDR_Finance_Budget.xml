@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Load Rule
+  Load: Finance Budget
+  Purpose: Load budget data from Excel templates into the Finance cube under Budget scenario
+  Target Cube: Finance
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <LoadRule>
+
+      <!-- ============================================================
+           LOAD IDENTITY
+           ============================================================ -->
+      <LoadName>Finance_Budget</LoadName>
+      <LoadDescription>Loads annual budget and periodic forecast data from Excel templates into the Finance cube under the Budget scenario. Handles Revenue, COGS, OPEX, Headcount, and CAPEX budget categories. Supports version control with Working version for in-progress budgets and Final version for approved budgets. Budget data is loaded to all 12 months from the unpivoted template data.</LoadDescription>
+      <IsActive>true</IsActive>
+      <LoadType>CubeLoad</LoadType>
+      <TargetCube>Finance</TargetCube>
+
+      <!-- ============================================================
+           SOURCE STAGES
+           ============================================================ -->
+      <SourceStages>
+        <Stage name="Excel_Budget" priority="1" description="Budget data from Excel template submissions" />
+      </SourceStages>
+
+      <!-- ============================================================
+           TRANSFORM PIPELINE
+           ============================================================ -->
+      <TransformPipeline>
+        <Transform name="CurrencyConversion"  order="1" description="Standardize currency codes" />
+        <Transform name="AccountMapping"       order="2" description="Map budget accounts to OneStream accounts" />
+        <Transform name="EntityMapping"        order="3" description="Map entity codes to OneStream entities" />
+        <Transform name="ProductMapping"       order="4" description="Map product codes to UD1" />
+        <Transform name="CostCenterMapping"    order="5" description="Map cost centers to UD2" />
+        <Transform name="DerivedMembers"        order="6" description="Derive Scenario=Budget, Flow, Version" />
+        <Transform name="DataValidation"        order="7" description="Validate all fields" />
+      </TransformPipeline>
+
+      <!-- ============================================================
+           DIMENSION MAPPINGS
+           ============================================================ -->
+      <DimensionMappings>
+        <Mapping dimension="Scenario"       sourceColumn="OS_Scenario"         defaultValue="Budget"        description="Budget scenario (overridden to Budget)" />
+        <Mapping dimension="Time"           sourceColumn="OS_Time"             defaultValue=""              description="Monthly period from unpivoted template" />
+        <Mapping dimension="Entity"         sourceColumn="OS_Entity"           defaultValue=""              description="Budget owner entity" />
+        <Mapping dimension="Account"        sourceColumn="OS_Account"          defaultValue=""              description="Budget line item account" />
+        <Mapping dimension="Flow"           sourceColumn="OS_Flow"             defaultValue="F_BudgetInput" description="Budget input flow" />
+        <Mapping dimension="Consolidation"  sourceColumn="OS_Consolidation"    defaultValue="C_Local"       description="Local for budget input" />
+        <Mapping dimension="UD1"            sourceColumn="OS_UD1_Product"      defaultValue="Prod_Unassigned" description="Product line (from Revenue/COGS sheets)" />
+        <Mapping dimension="UD2"            sourceColumn="OS_UD2_CostCenter"   defaultValue="CC_Unassigned" description="Cost Center (from OPEX/Headcount sheets)" />
+        <Mapping dimension="UD3"            sourceColumn="OS_UD3"              defaultValue="UD3_None"      description="Reserved" />
+        <Mapping dimension="UD4"            sourceColumn="OS_UD4"              defaultValue="UD4_None"      description="Reserved" />
+        <Mapping dimension="UD5"            sourceColumn="OS_UD5_Intercompany" defaultValue="IC_None"       description="Intercompany" />
+        <Mapping dimension="UD6"            sourceColumn="OS_UD6"              defaultValue="UD6_None"      description="Reserved" />
+        <Mapping dimension="UD7"            sourceColumn="OS_UD7"              defaultValue="UD7_None"      description="Reserved" />
+        <Mapping dimension="UD8"            sourceColumn="OS_UD8_Version"      defaultValue="Working"       description="Working version (not yet approved)" />
+      </DimensionMappings>
+
+      <!-- ============================================================
+           AMOUNT MAPPING
+           ============================================================ -->
+      <AmountMapping>
+        <AmountColumn>OS_Amount</AmountColumn>
+        <!-- Budget currency determined by entity's local currency -->
+        <CurrencyColumn>OS_Currency</CurrencyColumn>
+        <AmountType>LocalCurrency</AmountType>
+        <!-- Budget amounts follow the same natural sign convention as actuals -->
+        <ApplySignConvention>true</ApplySignConvention>
+      </AmountMapping>
+
+      <!-- ============================================================
+           LOAD METHOD
+           ============================================================ -->
+      <LoadMethod>
+        <Type>Merge</Type>
+        <Description>Merge budget data. Full replacement of Working version for the budget entity and year. Previous Working data is cleared before new budget is loaded.</Description>
+        <ConflictResolution>
+          <Strategy>LatestWins</Strategy>
+          <AggregateMultiple>true</AggregateMultiple>
+          <AggregationMethod>Sum</AggregationMethod>
+        </ConflictResolution>
+      </LoadMethod>
+
+      <!-- ============================================================
+           VERSION CONTROL
+           Budget-specific version management settings.
+           ============================================================ -->
+      <VersionControl>
+        <DefaultVersion>Working</DefaultVersion>
+        <AllowedVersions>Working,V1,V2,V3,Final</AllowedVersions>
+        <!-- Lock check: prevent loading to Final version unless explicitly approved -->
+        <LockCheck>
+          <CheckVersionLock>true</CheckVersionLock>
+          <OnLocked>RejectLoad</OnLocked>
+          <LockMessage>Budget version '{Version}' is locked for entity '{Entity}'. Cannot overwrite approved budget. Contact Finance to unlock.</LockMessage>
+        </LockCheck>
+        <!-- Version promotion: move Working to Final during budget approval -->
+        <Promotion>
+          <PromoteAction>CopyWorkingToVersion</PromoteAction>
+          <RequiresApproval>true</RequiresApproval>
+          <ApprovalWorkflow>BudgetApproval</ApprovalWorkflow>
+        </Promotion>
+      </VersionControl>
+
+      <!-- ============================================================
+           PRE-LOAD ACTIONS
+           ============================================================ -->
+      <PreLoadActions>
+        <Action name="ClearBudgetData" order="1">
+          <Type>CubeClear</Type>
+          <Description>Clear existing Working version budget data for the entity and full year being loaded</Description>
+          <ClearScope>
+            <Scenario>Budget</Scenario>
+            <Time>@@BudgetYear</Time>
+            <Entity>@@LoadEntity</Entity>
+            <Account>All</Account>
+            <Flow>F_BudgetInput</Flow>
+            <Consolidation>C_Local</Consolidation>
+            <UD8>Working</UD8>
+          </ClearScope>
+          <ConfirmClear>true</ConfirmClear>
+        </Action>
+      </PreLoadActions>
+
+      <!-- ============================================================
+           POST-LOAD ACTIONS
+           ============================================================ -->
+      <PostLoadActions>
+        <Action name="UpdateLoadLog" order="1">
+          <Type>SQL</Type>
+          <SQL><![CDATA[
+            INSERT INTO DM_LoadLog (
+              LoadName, LoadDate, Entity, Period, Scenario,
+              StagedRows, LoadedRows, RejectedRows,
+              Duration, Status, SourceFile
+            )
+            VALUES (
+              'Finance_Budget', GETDATE(), @@LoadEntity, @@BudgetYear, 'Budget',
+              @@StagedRowCount, @@LoadedRecordCount, @@RejectedRowCount,
+              @@LoadDurationSeconds, 'Complete', @@SourceFileName
+            )
+          ]]></SQL>
+        </Action>
+
+        <Action name="NotifyBudgetOwner" order="2">
+          <Type>Notification</Type>
+          <Recipients>@@BudgetOwnerEmail</Recipients>
+          <Subject>Budget Load Complete: {@@LoadEntity} - {@@BudgetYear}</Subject>
+          <Body>Your budget template has been successfully loaded into OneStream. Loaded {@@LoadedRecordCount} records. Please review in the Budget Review dashboard.</Body>
+        </Action>
+      </PostLoadActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>5000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelLoading>false</EnableParallelLoading>
+        <LogDetailLevel>Full</LogDetailLevel>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+      <!-- ============================================================
+           ERROR HANDLING
+           ============================================================ -->
+      <ErrorHandling>
+        <OnLoadError>
+          <Action>RollbackAndNotify</Action>
+          <RollbackScope>CurrentEntity</RollbackScope>
+          <Notification>
+            <Enabled>true</Enabled>
+            <Recipients>dm_admin@company.com,@@BudgetOwnerEmail</Recipients>
+            <Subject>Budget Load FAILED: {@@LoadEntity} - {@@BudgetYear}</Subject>
+          </Notification>
+        </OnLoadError>
+        <MaxErrorRows>50</MaxErrorRows>
+        <ContinueOnWarning>true</ContinueOnWarning>
+      </ErrorHandling>
+
+    </LoadRule>
+  </DataManagement>
+</OneStreamXF>

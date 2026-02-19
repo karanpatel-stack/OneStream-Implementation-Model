@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_AccountReconStatus"
+  Description="Account Reconciliation Status Tracker Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual"                DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                     DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants" DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#ReconAccounts.Descendants" DefaultMember="A#ReconAccounts" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_AcctReconStatus"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="AccountReconciliation"
+      CubeName="MainCube"
+      SuppressNoData="False"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeReconDetails"      Value="True" />
+        <Parameter Name="IncludeAssignments"       Value="True" />
+        <Parameter Name="IncludeExceptions"        Value="True" />
+        <Parameter Name="MaxRows"                  Value="20000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Account Reconciliation Status"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#TopEntity.Children"
+          DefaultMember="E#TopEntity"
+          Label="Entity" Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="PeriodFilter"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period" Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="StatusFilter"
+          FilterType="MultiSelect"
+          CustomValues="Reconciled|Reconciled,InProgress|In Progress,Overdue|Overdue,NotStarted|Not Started"
+          DefaultValue="All"
+          Label="Status" Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: SUMMARY STATS TILES -->
+    <Row Index="1" Height="130" HeightUnit="Pixel">
+
+      <!-- Total Accounts -->
+      <Panel Row="1" Column="0" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_TotalAccounts"
+          Title="Total Accounts"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="30" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0"
+          DataAdapter="DDA_AcctReconStatus"
+          ValueExpression="Recon.TotalAccountCount:E#{POV.Entity}:T#{POV.Time}">
+          <Icon IconType="FontAwesome" IconName="fa-list-alt" IconColor="#3498DB" IconSize="20" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- % Reconciled -->
+      <Panel Row="1" Column="3" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_PctReconciled"
+          Title="% Reconciled"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="30" ValueFontWeight="Bold" ValueForeColor="#27AE60"
+          ValueFormat="0.0%"
+          DataAdapter="DDA_AcctReconStatus"
+          ValueExpression="Recon.PercentReconciled:E#{POV.Entity}:T#{POV.Time}">
+          <ProgressIndicator
+            TrackColor="#243B67" TrackHeight="8" TrackBorderRadius="4"
+            FillColor="#27AE60"
+            ValueBinding="Recon.PercentReconciled" />
+          <Icon IconType="FontAwesome" IconName="fa-check-double" IconColor="#27AE60" IconSize="20" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- In Progress -->
+      <Panel Row="1" Column="6" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_InProgress"
+          Title="In Progress"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="30" ValueFontWeight="Bold" ValueForeColor="#F39C12"
+          ValueFormat="#,##0"
+          DataAdapter="DDA_AcctReconStatus"
+          ValueExpression="Recon.InProgressCount:E#{POV.Entity}:T#{POV.Time}">
+          <Icon IconType="FontAwesome" IconName="fa-spinner" IconColor="#F39C12" IconSize="20" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- Overdue -->
+      <Panel Row="1" Column="9" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_Overdue"
+          Title="Overdue"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="30" ValueFontWeight="Bold" ValueForeColor="#E74C3C"
+          ValueFormat="#,##0"
+          DataAdapter="DDA_AcctReconStatus"
+          ValueExpression="Recon.OverdueCount:E#{POV.Entity}:T#{POV.Time}">
+          <Icon IconType="FontAwesome" IconName="fa-exclamation-triangle" IconColor="#E74C3C" IconSize="20" />
+        </KPITileComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: ACCOUNT LIST + AGING DISTRIBUTION -->
+    <Row Index="2" Height="340" HeightUnit="Pixel">
+
+      <!-- Account Recon List -->
+      <Panel Row="2" Column="0" ColumnSpan="8" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Account Reconciliation Status" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="AccountReconGrid"
+          DataAdapter="DDA_AcctReconStatus"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="10" HeaderFontWeight="Bold"
+          CellFontSize="10" CellForeColor="#D0D8E8"
+          CellPadding="5"
+          RowHeight="30"
+          EnableSorting="True"
+          EnableFiltering="True"
+          FreezeColumns="2"
+          MaxVisibleRows="10"
+          EnablePagination="True"
+          PageSize="50">
+
+          <Columns>
+            <Column Header="Account #"       Binding="Account.Name"             Width="100" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Account Name"    Binding="Account.Description"      Width="180" Alignment="Left" />
+            <Column Header="Entity"          Binding="Entity.Description"       Width="120" Alignment="Left" />
+            <Column Header="Balance"         Binding="Recon.GLBalance"          Width="120" Alignment="Right" Format="#,##0" />
+            <Column Header="Recon Balance"   Binding="Recon.ReconBalance"       Width="120" Alignment="Right" Format="#,##0" />
+            <Column Header="Difference"      Binding="Recon.Difference"         Width="110" Alignment="Right" Format="+#,##0;-#,##0">
+              <ConditionalFormat>
+                <Rule Condition="Value == 0"     ForeColor="#27AE60" />
+                <Rule Condition="ABS(Value) > 0" ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Status"          Binding="Recon.Status"             Width="100" Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="Reconciled"   BackgroundColor="#27AE6030" ForeColor="#27AE60" BorderRadius="10" />
+                <Badge Value="In Progress"  BackgroundColor="#F39C1230" ForeColor="#F39C12" BorderRadius="10" />
+                <Badge Value="Overdue"      BackgroundColor="#E74C3C30" ForeColor="#E74C3C" BorderRadius="10" />
+                <Badge Value="Not Started"  BackgroundColor="#95A5A630" ForeColor="#95A5A6" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+            <Column Header="Due Date"        Binding="Recon.DueDate"            Width="100" Alignment="Center" Format="MM/dd/yyyy">
+              <ConditionalFormat>
+                <Rule Condition="IsPastDue == True" ForeColor="#E74C3C" FontWeight="Bold" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Risk"            Binding="Recon.RiskLevel"          Width="70"  Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="High"   BackgroundColor="#E74C3C30" ForeColor="#E74C3C" BorderRadius="10" />
+                <Badge Value="Medium" BackgroundColor="#F39C1230" ForeColor="#F39C12" BorderRadius="10" />
+                <Badge Value="Low"    BackgroundColor="#27AE6030" ForeColor="#27AE60" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+
+      <!-- Aging Distribution -->
+      <Panel Row="2" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Aging Distribution" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="AgingDistributionChart"
+          ChartType="Doughnut"
+          DataAdapter="DDA_AcctReconStatus"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0"
+          InnerRadius="0.50">
+
+          <Slices>
+            <Slice Name="Current"
+                   Expression="Recon.AgingCurrent:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#27AE60" />
+            <Slice Name="1-5 Days"
+                   Expression="Recon.Aging1to5:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#3498DB" />
+            <Slice Name="6-10 Days"
+                   Expression="Recon.Aging6to10:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#F39C12" />
+            <Slice Name="11-30 Days"
+                   Expression="Recon.Aging11to30:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#E67E22" />
+            <Slice Name="30+ Days"
+                   Expression="Recon.Aging30Plus:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#E74C3C" />
+          </Slices>
+
+          <CenterLabel Text="Accounts" FontSize="9" ForeColor="#8CA8CC"
+                       ValueExpression="Recon.TotalAccountCount"
+                       ValueFormat="#,##0"
+                       ValueFontSize="18" ValueForeColor="#FFFFFF" ValueFontWeight="Bold" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: PREPARER/REVIEWER GRID + EXCEPTION DETAILS -->
+    <Row Index="3" Height="280" HeightUnit="Pixel">
+
+      <!-- Preparer/Reviewer Assignment Grid -->
+      <Panel Row="3" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Preparer / Reviewer Assignments" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="AssignmentGrid"
+          DataAdapter="DDA_AcctReconStatus"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="10" HeaderFontWeight="Bold"
+          CellFontSize="10" CellForeColor="#D0D8E8"
+          CellPadding="5"
+          RowHeight="30"
+          EnableSorting="True"
+          GroupBy="Preparer">
+
+          <Columns>
+            <Column Header="Preparer"         Binding="Recon.Preparer"             Width="130" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Reviewer"         Binding="Recon.Reviewer"             Width="130" Alignment="Left" />
+            <Column Header="Total Assigned"   Binding="Recon.TotalAssigned"        Width="100" Alignment="Center" />
+            <Column Header="Reconciled"       Binding="Recon.ReconciledCount"      Width="90"  Alignment="Center" ForeColor="#27AE60" />
+            <Column Header="Pending"          Binding="Recon.PendingCount"         Width="80"  Alignment="Center" ForeColor="#F39C12" />
+            <Column Header="Overdue"          Binding="Recon.OverdueCount"         Width="80"  Alignment="Center" ForeColor="#E74C3C" />
+            <Column Header="Completion %"     Binding="Recon.CompletionPct"        Width="100" Alignment="Center">
+              <ProgressBarCell
+                TrackColor="#243B67" TrackHeight="14" TrackBorderRadius="7"
+                FillColorExpression="Value >= 0.90 ? '#27AE60' : (Value >= 0.70 ? '#3498DB' : '#F39C12')"
+                ShowLabel="True" LabelFormat="0%" />
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+
+      <!-- Exception Details -->
+      <Panel Row="3" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Exception Details" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="ExceptionGrid"
+          DataAdapter="DDA_AcctReconStatus"
+          DataFilter="Recon.HasException == True"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#4A1525" HeaderForeColor="#FFFFFF" HeaderFontSize="10" HeaderFontWeight="Bold"
+          CellFontSize="10" CellForeColor="#D0D8E8"
+          CellPadding="5"
+          RowHeight="28"
+          EnableSorting="True"
+          DefaultSortColumn="ExceptionAmount"
+          DefaultSortDirection="Descending"
+          MaxVisibleRows="8">
+
+          <Columns>
+            <Column Header="Account"          Binding="Account.Description"        Width="160" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Entity"           Binding="Entity.Description"         Width="110" Alignment="Left" />
+            <Column Header="Exception Type"   Binding="Recon.ExceptionType"        Width="120" Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="Unreconciled Item" BackgroundColor="#E74C3C30" ForeColor="#E74C3C" BorderRadius="10" />
+                <Badge Value="Stale Item"        BackgroundColor="#F39C1230" ForeColor="#F39C12" BorderRadius="10" />
+                <Badge Value="Threshold Breach"  BackgroundColor="#9B59B630" ForeColor="#9B59B6" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+            <Column Header="Amount"           Binding="Recon.ExceptionAmount"      Width="110" Alignment="Right" Format="#,##0" />
+            <Column Header="Age (Days)"       Binding="Recon.ExceptionAge"         Width="80"  Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 30" ForeColor="#E74C3C" FontWeight="Bold" />
+                <Rule Condition="Value >= 15" ForeColor="#F39C12" />
+                <Rule Condition="Value &lt; 15"  ForeColor="#3498DB" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Assigned To"      Binding="Recon.ExceptionAssignee"    Width="120" Alignment="Left" />
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Reconciled"  Value="#27AE60" />
+      <Color Name="InProgress"  Value="#F39C12" />
+      <Color Name="Overdue"     Value="#E74C3C" />
+      <Color Name="NotStarted"  Value="#95A5A6" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

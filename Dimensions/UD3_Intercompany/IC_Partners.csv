@@ -1,0 +1,23 @@
+MemberName,ParentName,Description,MappedEntity
+Total_ICPartners,,Total Intercompany Partners,
+IC_None,Total_ICPartners,No Intercompany Partner,
+IC_Corporate_HQ,Total_ICPartners,IC Partner - Corporate HQ,Corporate_HQ
+IC_SS_IT,Total_ICPartners,IC Partner - Shared Services IT,SS_IT
+IC_SS_HR,Total_ICPartners,IC Partner - Shared Services HR,SS_HR
+IC_SS_Finance,Total_ICPartners,IC Partner - Shared Services Finance,SS_Finance
+IC_Americas,Total_ICPartners,IC Partners - Americas Region,
+IC_US01_Detroit,IC_Americas,IC Partner - Detroit Plant,Plant_US01_Detroit
+IC_US02_Houston,IC_Americas,IC Partner - Houston Plant,Plant_US02_Houston
+IC_US03_Charlotte,IC_Americas,IC Partner - Charlotte Plant,Plant_US03_Charlotte
+IC_CA01_Toronto,IC_Americas,IC Partner - Toronto Plant,Plant_CA01_Toronto
+IC_MX01_Monterrey,IC_Americas,IC Partner - Monterrey Plant,Plant_MX01_Monterrey
+IC_EMEA,Total_ICPartners,IC Partners - EMEA Region,
+IC_DE01_Munich,IC_EMEA,IC Partner - Munich Plant,Plant_DE01_Munich
+IC_DE02_Stuttgart,IC_EMEA,IC Partner - Stuttgart Plant,Plant_DE02_Stuttgart
+IC_UK01_Birmingham,IC_EMEA,IC Partner - Birmingham Plant,Plant_UK01_Birmingham
+IC_FR01_Lyon,IC_EMEA,IC Partner - Lyon Plant,Plant_FR01_Lyon
+IC_APAC,Total_ICPartners,IC Partners - APAC Region,
+IC_CN01_Shanghai,IC_APAC,IC Partner - Shanghai Plant,Plant_CN01_Shanghai
+IC_CN02_Shenzhen,IC_APAC,IC Partner - Shenzhen Plant,Plant_CN02_Shenzhen
+IC_JP01_Osaka,IC_APAC,IC Partner - Osaka Plant,Plant_JP01_Osaka
+IC_IN01_Pune,IC_APAC,IC Partner - Pune Plant,Plant_IN01_Pune

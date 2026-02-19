@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: Oracle EBS General Ledger
+  Purpose: Extract GL journal data from Oracle E-Business Suite R12
+  Source Connection: CONN_Oracle_EBS
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>Oracle_GL</StageName>
+      <StageDescription>Extracts General Ledger journal data from Oracle E-Business Suite R12 by joining GL_JE_HEADERS, GL_JE_LINES, and GL_CODE_COMBINATIONS. Retrieves entered and accounted amounts with full chart of accounts segment breakdown for subsidiaries operating on Oracle EBS. Supports both primary and reporting currencies.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>DatabaseQuery</StageType>
+      <SourceConnection>CONN_Oracle_EBS</SourceConnection>
+      <TargetStagingTable>STG_Oracle_GL</TargetStagingTable>
+
+      <!-- ============================================================
+           SOURCE QUERY
+           Joins GL journal headers, lines, and code combinations
+           for complete chart-of-accounts detail with amounts.
+           ============================================================ -->
+      <SourceQuery>
+        <SQL><![CDATA[
+          /*
+            Oracle EBS R12 General Ledger Extraction
+            Source: GL_JE_HEADERS + GL_JE_LINES + GL_CODE_COMBINATIONS + GL_LEDGERS
+            Aggregates journal entries by code combination and period
+          */
+          SELECT
+            led.LEDGER_ID                     AS LedgerID,
+            led.NAME                          AS LedgerName,
+            led.CURRENCY_CODE                 AS LedgerCurrency,
+            h.PERIOD_NAME                     AS Period,
+            h.DEFAULT_EFFECTIVE_DATE          AS EffectiveDate,
+            h.JE_CATEGORY                     AS JournalCategory,
+            h.JE_SOURCE                       AS JournalSource,
+            h.STATUS                          AS HeaderStatus,
+            /* Chart of Accounts Segments */
+            gcc.SEGMENT1                      AS Segment1_Company,
+            gcc.SEGMENT2                      AS Segment2_Account,
+            gcc.SEGMENT3                      AS Segment3_CostCenter,
+            gcc.SEGMENT4                      AS Segment4_Product,
+            gcc.SEGMENT5                      AS Segment5_Intercompany,
+            gcc.SEGMENT6                      AS Segment6_Future,
+            gcc.CONCATENATED_SEGMENTS         AS FullAccountString,
+            gcc.ACCOUNT_TYPE                  AS AccountType,
+            gcc.ENABLED_FLAG                  AS AccountEnabled,
+            /* Entered Amounts (transaction/source currency) */
+            l.ENTERED_DR                      AS EnteredDr,
+            l.ENTERED_CR                      AS EnteredCr,
+            NVL(l.ENTERED_DR, 0) - NVL(l.ENTERED_CR, 0) AS EnteredNet,
+            /* Accounted Amounts (functional/ledger currency) */
+            l.ACCOUNTED_DR                    AS AccountedDr,
+            l.ACCOUNTED_CR                    AS AccountedCr,
+            NVL(l.ACCOUNTED_DR, 0) - NVL(l.ACCOUNTED_CR, 0) AS AccountedNet,
+            /* Currency details */
+            h.CURRENCY_CODE                   AS Currency,
+            h.CURRENCY_CONVERSION_RATE        AS ConversionRate,
+            h.CURRENCY_CONVERSION_TYPE        AS ConversionType,
+            h.CURRENCY_CONVERSION_DATE        AS ConversionDate,
+            /* Reference and audit fields */
+            h.JE_HEADER_ID                    AS HeaderID,
+            l.JE_LINE_NUM                     AS LineNumber,
+            l.DESCRIPTION                     AS LineDescription,
+            l.REFERENCE_1                     AS Reference1,
+            l.REFERENCE_2                     AS Reference2,
+            h.POSTED_DATE                     AS PostedDate,
+            h.CREATION_DATE                   AS CreationDate
+          FROM GL.GL_JE_HEADERS h
+          INNER JOIN GL.GL_JE_LINES l
+            ON h.JE_HEADER_ID = l.JE_HEADER_ID
+            AND h.LEDGER_ID = l.LEDGER_ID
+          INNER JOIN GL.GL_CODE_COMBINATIONS gcc
+            ON l.CODE_COMBINATION_ID = gcc.CODE_COMBINATION_ID
+          INNER JOIN GL.GL_LEDGERS led
+            ON h.LEDGER_ID = led.LEDGER_ID
+          WHERE h.STATUS = 'P'                            /* Posted journals only */
+            AND led.LEDGER_CATEGORY_CODE = 'PRIMARY'      /* Primary ledger only */
+            AND h.PERIOD_NAME = :PeriodName               /* Parameterized period */
+            AND h.ACTUAL_FLAG = 'A'                       /* Actuals (not budget/encumbrance) */
+            AND gcc.ENABLED_FLAG = 'Y'                    /* Active code combinations only */
+            AND gcc.SEGMENT1 IN ('01','02','03','04','05','06','07','08')  /* Active companies */
+          ORDER BY
+            gcc.SEGMENT1, gcc.SEGMENT2, h.PERIOD_NAME
+        ]]></SQL>
+
+        <Parameters>
+          <Parameter name="PeriodName" dataType="String" defaultValue="FEB-26" description="Oracle GL Period Name (MON-YY format)" />
+        </Parameters>
+      </SourceQuery>
+
+      <!-- ============================================================
+           AGGREGATED QUERY ALTERNATIVE
+           Use when line-level detail is not needed; provides
+           period balances by code combination.
+           ============================================================ -->
+      <SupplementaryQuery name="AggregatedBalances">
+        <SQL><![CDATA[
+          /*
+            Oracle EBS GL Balances - Aggregated by Code Combination
+            Alternative extraction using GL_BALANCES for period-end balances
+          */
+          SELECT
+            b.LEDGER_ID                       AS LedgerID,
+            b.PERIOD_NAME                     AS Period,
+            b.CURRENCY_CODE                   AS Currency,
+            gcc.SEGMENT1                      AS Segment1_Company,
+            gcc.SEGMENT2                      AS Segment2_Account,
+            gcc.SEGMENT3                      AS Segment3_CostCenter,
+            gcc.SEGMENT4                      AS Segment4_Product,
+            gcc.SEGMENT5                      AS Segment5_Intercompany,
+            gcc.ACCOUNT_TYPE                  AS AccountType,
+            SUM(NVL(b.PERIOD_NET_DR, 0))     AS PeriodNetDr,
+            SUM(NVL(b.PERIOD_NET_CR, 0))     AS PeriodNetCr,
+            SUM(NVL(b.BEGIN_BALANCE_DR, 0))  AS BeginBalanceDr,
+            SUM(NVL(b.BEGIN_BALANCE_CR, 0))  AS BeginBalanceCr
+          FROM GL.GL_BALANCES b
+          INNER JOIN GL.GL_CODE_COMBINATIONS gcc
+            ON b.CODE_COMBINATION_ID = gcc.CODE_COMBINATION_ID
+          WHERE b.ACTUAL_FLAG = 'A'
+            AND b.PERIOD_NAME = :PeriodName
+            AND b.CURRENCY_CODE <> 'STAT'
+            AND gcc.ENABLED_FLAG = 'Y'
+          GROUP BY
+            b.LEDGER_ID, b.PERIOD_NAME, b.CURRENCY_CODE,
+            gcc.SEGMENT1, gcc.SEGMENT2, gcc.SEGMENT3,
+            gcc.SEGMENT4, gcc.SEGMENT5, gcc.ACCOUNT_TYPE
+        ]]></SQL>
+      </SupplementaryQuery>
+
+      <!-- ============================================================
+           COLUMN MAPPINGS
+           ============================================================ -->
+      <ColumnMappings>
+        <Column ordinal="1"  sourceName="LedgerID"            stagingColumn="SRC_LedgerID"          dataType="Integer"  nullable="false" description="Oracle Ledger ID" />
+        <Column ordinal="2"  sourceName="LedgerName"          stagingColumn="SRC_LedgerName"        dataType="String"   maxLength="30"  nullable="true"  description="Ledger Name" />
+        <Column ordinal="3"  sourceName="LedgerCurrency"      stagingColumn="SRC_LedgerCurrency"    dataType="String"   maxLength="15"  nullable="true"  description="Ledger Functional Currency" />
+        <Column ordinal="4"  sourceName="Period"              stagingColumn="SRC_Period"            dataType="String"   maxLength="15"  nullable="false" description="GL Period Name (MON-YY)" />
+        <Column ordinal="5"  sourceName="EffectiveDate"       stagingColumn="SRC_EffectiveDate"     dataType="Date"     nullable="true"  description="Journal Effective Date" />
+        <Column ordinal="6"  sourceName="JournalCategory"     stagingColumn="SRC_JournalCategory"   dataType="String"   maxLength="25"  nullable="true"  description="Journal Category" />
+        <Column ordinal="7"  sourceName="JournalSource"       stagingColumn="SRC_JournalSource"     dataType="String"   maxLength="25"  nullable="true"  description="Journal Source" />
+        <Column ordinal="8"  sourceName="HeaderStatus"        stagingColumn="SRC_Status"            dataType="String"   maxLength="1"   nullable="true"  description="Header Status (P=Posted)" />
+        <Column ordinal="9"  sourceName="Segment1_Company"    stagingColumn="SRC_Company"           dataType="String"   maxLength="25"  nullable="false" description="Segment1: Company" />
+        <Column ordinal="10" sourceName="Segment2_Account"    stagingColumn="SRC_Account"           dataType="String"   maxLength="25"  nullable="false" description="Segment2: Natural Account" />
+        <Column ordinal="11" sourceName="Segment3_CostCenter" stagingColumn="SRC_CostCenter"        dataType="String"   maxLength="25"  nullable="true"  description="Segment3: Cost Center" />
+        <Column ordinal="12" sourceName="Segment4_Product"    stagingColumn="SRC_Product"           dataType="String"   maxLength="25"  nullable="true"  description="Segment4: Product" />
+        <Column ordinal="13" sourceName="Segment5_Intercompany" stagingColumn="SRC_Intercompany"    dataType="String"   maxLength="25"  nullable="true"  description="Segment5: Intercompany" />
+        <Column ordinal="14" sourceName="Segment6_Future"     stagingColumn="SRC_FutureSegment"     dataType="String"   maxLength="25"  nullable="true"  description="Segment6: Reserved/Future" />
+        <Column ordinal="15" sourceName="FullAccountString"   stagingColumn="SRC_FullAccount"       dataType="String"   maxLength="150" nullable="true"  description="Concatenated Segment String" />
+        <Column ordinal="16" sourceName="AccountType"         stagingColumn="SRC_AccountType"       dataType="String"   maxLength="1"   nullable="true"  description="Account Type (A/L/O/R/E)" />
+        <Column ordinal="17" sourceName="AccountEnabled"      stagingColumn="SRC_AccountEnabled"    dataType="String"   maxLength="1"   nullable="true"  description="Account Enabled Flag" />
+        <Column ordinal="18" sourceName="EnteredDr"           stagingColumn="SRC_EnteredDr"         dataType="Decimal"  precision="23" scale="2" nullable="true" description="Entered Debit Amount" />
+        <Column ordinal="19" sourceName="EnteredCr"           stagingColumn="SRC_EnteredCr"         dataType="Decimal"  precision="23" scale="2" nullable="true" description="Entered Credit Amount" />
+        <Column ordinal="20" sourceName="EnteredNet"          stagingColumn="SRC_EnteredNet"        dataType="Decimal"  precision="23" scale="2" nullable="true" description="Entered Net (Dr - Cr)" />
+        <Column ordinal="21" sourceName="AccountedDr"         stagingColumn="SRC_AccountedDr"       dataType="Decimal"  precision="23" scale="2" nullable="true" description="Accounted Debit (functional currency)" />
+        <Column ordinal="22" sourceName="AccountedCr"         stagingColumn="SRC_AccountedCr"       dataType="Decimal"  precision="23" scale="2" nullable="true" description="Accounted Credit (functional currency)" />
+        <Column ordinal="23" sourceName="AccountedNet"        stagingColumn="SRC_AccountedNet"      dataType="Decimal"  precision="23" scale="2" nullable="true" description="Accounted Net (functional currency)" />
+        <Column ordinal="24" sourceName="Currency"            stagingColumn="SRC_Currency"          dataType="String"   maxLength="15"  nullable="false" description="Transaction Currency Code" />
+        <Column ordinal="25" sourceName="ConversionRate"      stagingColumn="SRC_ConvRate"          dataType="Decimal"  precision="15" scale="8" nullable="true" description="Currency Conversion Rate" />
+        <Column ordinal="26" sourceName="ConversionType"      stagingColumn="SRC_ConvType"          dataType="String"   maxLength="30"  nullable="true"  description="Conversion Rate Type" />
+        <Column ordinal="27" sourceName="ConversionDate"      stagingColumn="SRC_ConvDate"          dataType="Date"     nullable="true"  description="Conversion Date" />
+        <Column ordinal="28" sourceName="HeaderID"            stagingColumn="SRC_HeaderID"          dataType="Integer"  nullable="true"  description="JE Header ID (audit reference)" />
+        <Column ordinal="29" sourceName="LineNumber"          stagingColumn="SRC_LineNumber"        dataType="Integer"  nullable="true"  description="JE Line Number" />
+        <Column ordinal="30" sourceName="LineDescription"     stagingColumn="SRC_LineDescription"   dataType="String"   maxLength="240" nullable="true"  description="Line Description" />
+        <Column ordinal="31" sourceName="PostedDate"          stagingColumn="SRC_PostedDate"        dataType="Date"     nullable="true"  description="Journal Posted Date" />
+        <Column ordinal="32" sourceName="CreationDate"        stagingColumn="SRC_CreationDate"      dataType="Date"     nullable="true"  description="Journal Creation Date" />
+      </ColumnMappings>
+
+      <!-- ============================================================
+           FILTERS
+           ============================================================ -->
+      <Filters>
+        <Filter name="PeriodFilter" description="Oracle GL period in MON-YY format">
+          <Type>Parameter</Type>
+          <AllowedValues>JAN-26,FEB-26,MAR-26,APR-26,MAY-26,JUN-26,JUL-26,AUG-26,SEP-26,OCT-26,NOV-26,DEC-26</AllowedValues>
+        </Filter>
+        <Filter name="CompanyFilter" description="Oracle EBS Company segments">
+          <Type>ValueList</Type>
+          <AllowedValues>01,02,03,04,05,06,07,08</AllowedValues>
+        </Filter>
+      </Filters>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <Action name="ClearStagingTable" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_Oracle_GL</SQL>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status) SELECT 'Oracle_GL', GETDATE(), COUNT(*), 'Staged' FROM STG_Oracle_GL</SQL>
+        </Action>
+        <Action name="ValidateBalanced" order="2">
+          <Type>Validation</Type>
+          <Description>Verify debits equal credits for each company/period</Description>
+          <SQL><![CDATA[
+            SELECT SRC_Company, SRC_Period,
+                   SUM(ISNULL(SRC_AccountedDr,0)) AS TotalDr,
+                   SUM(ISNULL(SRC_AccountedCr,0)) AS TotalCr,
+                   ABS(SUM(ISNULL(SRC_AccountedDr,0)) - SUM(ISNULL(SRC_AccountedCr,0))) AS Difference
+            FROM STG_Oracle_GL
+            GROUP BY SRC_Company, SRC_Period
+            HAVING ABS(SUM(ISNULL(SRC_AccountedDr,0)) - SUM(ISNULL(SRC_AccountedCr,0))) > 0.01
+          ]]></SQL>
+          <OnFailure>Warn</OnFailure>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>10000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelExecution>false</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

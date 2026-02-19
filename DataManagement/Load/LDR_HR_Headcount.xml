@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Load Rule
+  Load: HR Headcount
+  Purpose: Load headcount and compensation data from Workday HCM into the HR cube
+  Target Cube: HR
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <LoadRule>
+
+      <!-- ============================================================
+           LOAD IDENTITY
+           ============================================================ -->
+      <LoadName>HR_Headcount</LoadName>
+      <LoadDescription>Loads headcount, FTE, compensation, and workforce data from Workday HCM into the HR cube. Maps Workday positions and cost centers to OneStream dimensions. Supports both point-in-time headcount snapshots (end-of-period) and period compensation accruals. Data drives workforce cost planning, headcount reporting, and HR analytics within OneStream.</LoadDescription>
+      <IsActive>true</IsActive>
+      <LoadType>CubeLoad</LoadType>
+      <TargetCube>HR</TargetCube>
+
+      <!-- ============================================================
+           SOURCE STAGES
+           ============================================================ -->
+      <SourceStages>
+        <Stage name="Workday_Headcount" priority="1" description="Workday HCM headcount and compensation data" />
+      </SourceStages>
+
+      <!-- ============================================================
+           TRANSFORM PIPELINE
+           ============================================================ -->
+      <TransformPipeline>
+        <Transform name="CurrencyConversion"  order="1" description="Standardize compensation currency codes" />
+        <Transform name="EntityMapping"        order="2" description="Map Workday company to OneStream entity" />
+        <Transform name="CostCenterMapping"    order="3" description="Map Workday cost center to UD2" />
+        <Transform name="DerivedMembers"        order="4" description="Derive scenario, period, HR-specific dimensions" />
+        <Transform name="DataValidation"        order="5" description="Validate headcount and compensation data" />
+      </TransformPipeline>
+
+      <!-- ============================================================
+           DIMENSION MAPPINGS
+           ============================================================ -->
+      <DimensionMappings>
+        <Mapping dimension="Scenario"       sourceColumn="OS_Scenario"         defaultValue="Actual"        description="Actual headcount data" />
+        <Mapping dimension="Time"           sourceColumn="OS_Time"             defaultValue=""              description="Snapshot period" />
+        <Mapping dimension="Entity"         sourceColumn="OS_Entity"           defaultValue=""              description="Entity from Workday company" />
+        <Mapping dimension="Account"        sourceColumn="OS_HR_Account"       defaultValue=""              description="HR account (Headcount/FTE/BasePay/etc.)" />
+        <Mapping dimension="Flow"           sourceColumn="OS_Flow"             defaultValue="F_EndingBalance" description="Point-in-time headcount snapshot" />
+        <Mapping dimension="Consolidation"  sourceColumn="OS_Consolidation"    defaultValue="C_Local"       description="Local" />
+        <Mapping dimension="UD1"            sourceColumn="OS_UD1_Product"      defaultValue="Prod_Unassigned" description="Not used for HR data" />
+        <Mapping dimension="UD2"            sourceColumn="OS_UD2_CostCenter"   defaultValue=""              description="Cost Center from Workday" />
+        <Mapping dimension="UD3"            sourceColumn="OS_UD3"              defaultValue="UD3_None"      description="Reserved" />
+        <Mapping dimension="UD4"            sourceColumn="OS_UD4"              defaultValue="UD4_None"      description="Reserved" />
+        <Mapping dimension="UD5"            sourceColumn="OS_UD5_Intercompany" defaultValue="IC_None"       description="Intercompany" />
+        <Mapping dimension="UD6"            sourceColumn="OS_UD6"              defaultValue="UD6_None"      description="Reserved" />
+        <Mapping dimension="UD7"            sourceColumn="OS_UD7"              defaultValue="UD7_None"      description="Reserved" />
+        <Mapping dimension="UD8"            sourceColumn="OS_UD8_Version"      defaultValue="Working"       description="Working version" />
+      </DimensionMappings>
+
+      <!-- ============================================================
+           POSITION-TO-ACCOUNT MAPPING
+           Maps Workday data fields to OneStream HR accounts.
+           Each Workday worker generates multiple cube records.
+           ============================================================ -->
+      <PositionAccountMapping>
+        <Description>Each worker record from Workday is expanded into multiple account records in the HR cube. For example, one worker with FTE=1.0, BasePay=85000, BonusTarget=12750, BenefitsCost=25000 generates four cube intersections (one per account).</Description>
+
+        <AccountExpansion>
+          <!-- Headcount: count of workers -->
+          <Expansion sourceField="SRC_Headcount" targetAccount="A_HR_Headcount" description="Headcount (1 per active worker)">
+            <DataType>Integer</DataType>
+            <AggregationMethod>Sum</AggregationMethod>
+          </Expansion>
+
+          <!-- FTE: full-time equivalents -->
+          <Expansion sourceField="SRC_FTE" targetAccount="A_HR_FTE" description="Full-Time Equivalent">
+            <DataType>Decimal</DataType>
+            <AggregationMethod>Sum</AggregationMethod>
+          </Expansion>
+
+          <!-- Base Pay: annual base salary -->
+          <Expansion sourceField="SRC_BasePay" targetAccount="A_HR_BasePay" description="Annual Base Pay">
+            <DataType>Currency</DataType>
+            <AggregationMethod>Sum</AggregationMethod>
+            <!-- Divide annual amount by 12 for monthly loading -->
+            <PeriodAllocation>
+              <Method>EvenSpread</Method>
+              <Periods>12</Periods>
+            </PeriodAllocation>
+          </Expansion>
+
+          <!-- Bonus Target -->
+          <Expansion sourceField="SRC_BonusTarget" targetAccount="A_HR_BonusTarget" description="Annual Bonus Target">
+            <DataType>Currency</DataType>
+            <AggregationMethod>Sum</AggregationMethod>
+            <PeriodAllocation>
+              <Method>EvenSpread</Method>
+              <Periods>12</Periods>
+            </PeriodAllocation>
+          </Expansion>
+
+          <!-- Benefits Cost -->
+          <Expansion sourceField="SRC_BenefitsCost" targetAccount="A_HR_BenefitsCost" description="Annual Employer Benefits Cost">
+            <DataType>Currency</DataType>
+            <AggregationMethod>Sum</AggregationMethod>
+            <PeriodAllocation>
+              <Method>EvenSpread</Method>
+              <Periods>12</Periods>
+            </PeriodAllocation>
+          </Expansion>
+
+          <!-- Total Compensation -->
+          <Expansion sourceField="SRC_TotalComp" targetAccount="A_HR_TotalComp" description="Total Annual Compensation">
+            <DataType>Currency</DataType>
+            <AggregationMethod>Sum</AggregationMethod>
+            <PeriodAllocation>
+              <Method>EvenSpread</Method>
+              <Periods>12</Periods>
+            </PeriodAllocation>
+          </Expansion>
+
+          <!-- New Hires (derived: workers with hire date in current period) -->
+          <Expansion sourceField="DERIVED_NewHire" targetAccount="A_HR_NewHires" description="New hires in period">
+            <DataType>Integer</DataType>
+            <Condition>SRC_HireDate >= @@PeriodStart AND SRC_HireDate &lt;= @@PeriodEnd</Condition>
+            <DefaultValue>0</DefaultValue>
+          </Expansion>
+
+          <!-- Terminations (derived: workers with term date in current period) -->
+          <Expansion sourceField="DERIVED_Termination" targetAccount="A_HR_Terminations" description="Terminations in period">
+            <DataType>Integer</DataType>
+            <Condition>SRC_TermDate >= @@PeriodStart AND SRC_TermDate &lt;= @@PeriodEnd</Condition>
+            <DefaultValue>0</DefaultValue>
+          </Expansion>
+        </AccountExpansion>
+      </PositionAccountMapping>
+
+      <!-- ============================================================
+           AMOUNT MAPPING
+           ============================================================ -->
+      <AmountMapping>
+        <AmountColumn>OS_Amount</AmountColumn>
+        <CurrencyColumn>OS_Currency</CurrencyColumn>
+        <AmountType>Mixed</AmountType>
+        <MixedTypeNote>Headcount/FTE are statistical (no currency); compensation amounts use local currency.</MixedTypeNote>
+      </AmountMapping>
+
+      <!-- ============================================================
+           LOAD METHOD
+           ============================================================ -->
+      <LoadMethod>
+        <Type>Merge</Type>
+        <ConflictResolution>
+          <Strategy>LatestWins</Strategy>
+          <AggregateMultiple>true</AggregateMultiple>
+          <AggregationMethod>Sum</AggregationMethod>
+        </ConflictResolution>
+      </LoadMethod>
+
+      <!-- ============================================================
+           PRE-LOAD AND POST-LOAD ACTIONS
+           ============================================================ -->
+      <PreLoadActions>
+        <Action name="ClearHRData" order="1">
+          <Type>CubeClear</Type>
+          <ClearScope>
+            <Scenario>Actual</Scenario>
+            <Time>@@LoadPeriod</Time>
+            <Entity>All</Entity>
+            <Account>A_HR_*</Account>
+            <UD8>Working</UD8>
+          </ClearScope>
+        </Action>
+      </PreLoadActions>
+
+      <PostLoadActions>
+        <Action name="UpdateLoadLog" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (LoadName, LoadDate, Period, Scenario, LoadedRows, Status) VALUES ('HR_Headcount', GETDATE(), @@LoadPeriod, 'Actual', @@LoadedRecordCount, 'Complete')</SQL>
+        </Action>
+        <Action name="ReconcileHeadcount" order="2">
+          <Type>Validation</Type>
+          <Description>Reconcile loaded headcount against Workday source total</Description>
+          <SQL><![CDATA[
+            SELECT
+              'Workday_Source' AS Source,
+              COUNT(DISTINCT SRC_WorkerID) AS WorkerCount,
+              SUM(SRC_FTE) AS TotalFTE
+            FROM STG_Workday_Headcount
+            WHERE SRC_WorkerStatus = 'Active'
+          ]]></SQL>
+          <OnMismatch>Warn</OnMismatch>
+        </Action>
+      </PostLoadActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>2000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelLoading>false</EnableParallelLoading>
+        <LogDetailLevel>Full</LogDetailLevel>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+      <ErrorHandling>
+        <OnLoadError>
+          <Action>RollbackAndNotify</Action>
+        </OnLoadError>
+        <MaxErrorRows>50</MaxErrorRows>
+      </ErrorHandling>
+
+    </LoadRule>
+  </DataManagement>
+</OneStreamXF>

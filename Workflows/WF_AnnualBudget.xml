@@ -1,0 +1,799 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Workflow Definition
+  Workflow:    WF_AnnualBudget
+  Description: Annual Budget cycle workflow covering the full planning process
+               from kickoff through executive approval and publication.
+  Timeline:    September through November for the following fiscal year budget.
+  Owner:       FP&A / Office of the CFO
+-->
+<WorkflowDefinition
+  xmlns="http://www.intactsoft.com/OneStream/Workflows"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.intactsoft.com/OneStream/Workflows WorkflowSchema.xsd">
+
+  <!-- ================================================================== -->
+  <!-- WORKFLOW HEADER                                                    -->
+  <!-- ================================================================== -->
+  <Workflow
+    Name="WF_AnnualBudget"
+    DisplayName="Annual Budget"
+    Description="Comprehensive annual budget cycle workflow managing the end-to-end budget planning process from assumption setting and template distribution through departmental planning, consolidation review, executive approval, and final publication."
+    WorkflowType="Planning"
+    Frequency="Annual"
+    IsActive="true"
+    Version="1.0"
+    CreatedBy="Admin"
+    CreatedDate="2026-01-15"
+    ModifiedBy="Admin"
+    ModifiedDate="2026-02-18">
+
+    <!-- ================================================================ -->
+    <!-- VERSION CONTROL                                                  -->
+    <!-- ================================================================ -->
+    <VersionControl>
+      <Version Name="Working" DisplayName="Working" Description="Active draft version for data entry and modifications" IsDefault="true" Color="#2196F3" />
+      <Version Name="Submitted" DisplayName="Submitted" Description="Version submitted for management review" Color="#FF9800" />
+      <Version Name="Approved" DisplayName="Approved" Description="Management-approved version" Color="#4CAF50" />
+      <Version Name="Published" DisplayName="Published" Description="Final published budget version, locked from edits" IsFinal="true" Color="#7B1FA2" />
+
+      <Transition From="Working" To="Submitted" TriggerType="StepCompletion" />
+      <Transition From="Submitted" To="Working" TriggerType="Rejection" />
+      <Transition From="Submitted" To="Approved" TriggerType="Approval" />
+      <Transition From="Approved" To="Published" TriggerType="Publication" />
+    </VersionControl>
+
+    <!-- ================================================================ -->
+    <!-- STATUS TRANSITIONS                                               -->
+    <!-- ================================================================ -->
+    <StatusTransitions>
+      <Status Name="NotStarted" DisplayName="Not Started" IsInitial="true" Color="#9E9E9E" />
+      <Status Name="InProgress" DisplayName="In Progress" Color="#2196F3" />
+      <Status Name="UnderReview" DisplayName="Under Review" Color="#FF9800" />
+      <Status Name="Iterating" DisplayName="Iterating" Color="#FFC107" />
+      <Status Name="Approved" DisplayName="Approved" Color="#4CAF50" />
+      <Status Name="Published" DisplayName="Published" IsFinal="true" Color="#7B1FA2" />
+
+      <Transition From="NotStarted" To="InProgress" TriggerType="Automatic" />
+      <Transition From="InProgress" To="UnderReview" TriggerType="StepCompletion" />
+      <Transition From="UnderReview" To="Iterating" TriggerType="Rejection" />
+      <Transition From="UnderReview" To="Approved" TriggerType="Approval" />
+      <Transition From="Iterating" To="UnderReview" TriggerType="StepCompletion" />
+      <Transition From="Approved" To="Published" TriggerType="Publication" />
+    </StatusTransitions>
+
+    <!-- ================================================================ -->
+    <!-- GLOBAL NOTIFICATIONS                                             -->
+    <!-- ================================================================ -->
+    <Notifications>
+      <Notification
+        EventType="WorkflowStarted"
+        Template="WF_AnnualBudget_Kickoff"
+        Recipients="AllParticipants"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="StepTransition"
+        Template="WF_StepTransition_Generic"
+        Recipients="NextStepAssignee"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="DeadlineApproaching"
+        Template="WF_Budget_DeadlineReminder"
+        Recipients="StepAssignee"
+        Channel="Email"
+        TriggerDaysBefore="3" />
+      <Notification
+        EventType="WorkflowCompleted"
+        Template="WF_AnnualBudget_Published"
+        Recipients="AllParticipants,ExecutiveTeam"
+        Channel="Email,Dashboard" />
+    </Notifications>
+
+    <!-- ================================================================ -->
+    <!-- STEPS                                                            -->
+    <!-- ================================================================ -->
+    <Steps>
+
+      <!-- ============================================================== -->
+      <!-- STEP 1: Budget Kickoff                                         -->
+      <!-- ============================================================== -->
+      <Step
+        Order="1"
+        Name="BudgetKickoff"
+        DisplayName="Budget Kickoff"
+        Description="Establish planning assumptions, define growth targets and key economic indicators, configure planning templates, and distribute to budget owners across the organization."
+        StepType="Setup"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDate>September 1</PlannedStartDate>
+          <PlannedEndDate>September 7</PlannedEndDate>
+          <DurationDays>7</DurationDays>
+          <CycleMonth>September</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>FPADirector</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>48</EscalationHours>
+          <EscalationTarget>CFO</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EH_BudgetTemplateDistribution"
+            RuleType="EventHandler"
+            ExecutionOrder="1"
+            Description="Generate and distribute budget templates to all participating entities and departments based on the organizational hierarchy and planning scope."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="TemplateScope" Value="AllEntities" />
+              <Parameter Name="IncludeHistoricalData" Value="true" />
+              <Parameter Name="HistoricalPeriods" Value="3" />
+              <Parameter Name="SeedFromPriorBudget" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Assumptions>
+          <Assumption Name="RevenueGrowthTarget" DataType="Percentage" Description="Target revenue growth rate" />
+          <Assumption Name="InflationRate" DataType="Percentage" Description="Assumed inflation rate for cost escalation" />
+          <Assumption Name="FXRates" DataType="Rate" Description="Budgeted foreign exchange rates" />
+          <Assumption Name="HeadcountGrowth" DataType="Percentage" Description="Planned headcount growth percentage" />
+          <Assumption Name="MeritIncreasePool" DataType="Percentage" Description="Merit increase pool as percentage of base" />
+          <Assumption Name="CapitalBudgetEnvelope" DataType="Currency" Description="Total capital budget envelope" />
+        </Assumptions>
+
+        <Gates>
+          <Gate
+            Name="AssumptionsApproved"
+            Description="All planning assumptions must be reviewed and approved by the CFO before templates are distributed."
+            GateType="Approval"
+            IsBlocking="true">
+            <Condition>AssumptionsApprovalStatus = 'Approved'</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>CFO</ApproverRole>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_BudgetKickoff_Started"
+            Recipients="FPADirector,CFO"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="TemplatesDistributed"
+            Template="WF_BudgetKickoff_TemplatesReady"
+            Recipients="AllBudgetOwners"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 2: Revenue Planning                                       -->
+      <!-- ============================================================== -->
+      <Step
+        Order="2"
+        Name="RevenuePlanning"
+        DisplayName="Revenue Planning"
+        Description="Develop revenue plan using volume, price, and mix drivers by product line and sales channel. Leverage driver-based planning models to build bottoms-up revenue forecasts."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDate>September 8</PlannedStartDate>
+          <PlannedEndDate>September 30</PlannedEndDate>
+          <DurationDays>23</DurationDays>
+          <CycleMonth>September</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>SalesRevenueOwner</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>72</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_DriverBasedPlanning_Revenue"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Execute driver-based planning calculation for revenue using volume, price, and mix assumptions by product line, customer segment, and sales channel."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="PlanningModel" Value="Revenue" />
+              <Parameter Name="Drivers" Value="Volume,Price,Mix" />
+              <Parameter Name="Dimensions" Value="Product,Channel,Geography" />
+              <Parameter Name="Seasonality" Value="true" />
+              <Parameter Name="SeasonalityBasis" Value="PriorYearActuals" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="RevenueTargetMet"
+            Description="Total revenue plan must meet or exceed the growth target established in the assumptions."
+            GateType="Validation"
+            IsBlocking="false">
+            <Condition>PlannedRevenueGrowth &gt;= RevenueGrowthTarget</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>VPSales</ApproverRole>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_RevenuePlanning_Started"
+            Recipients="SalesRevenueOwner"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_RevenuePlanning_Complete"
+            Recipients="SalesRevenueOwner,FPADirector"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 3: COGS Planning                                          -->
+      <!-- ============================================================== -->
+      <Step
+        Order="3"
+        Name="COGSPlanning"
+        DisplayName="COGS Planning"
+        Description="Plan cost of goods sold including bill of materials costs, direct labor rates, manufacturing overhead, and overhead absorption calculations."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDate>September 15</PlannedStartDate>
+          <PlannedEndDate>October 7</PlannedEndDate>
+          <DurationDays>23</DurationDays>
+          <CycleMonth>September-October</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>PlantController</Role>
+          <SecondaryRole>ManufacturingController</SecondaryRole>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>72</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_BOMCostRollup"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Calculate product costs by rolling up bill of materials component costs, applying standard cost rates, and computing material cost variances."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="CostMethod" Value="StandardCost" />
+              <Parameter Name="BOMLevel" Value="AllLevels" />
+              <Parameter Name="IncludeScrap" Value="true" />
+              <Parameter Name="ScrapFactor" Value="0.02" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="CR_OverheadAbsorption"
+            RuleType="CalculationRule"
+            ExecutionOrder="2"
+            Description="Calculate manufacturing overhead absorption rates and allocate overhead costs to products based on configured allocation drivers."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="AbsorptionBasis" Value="DirectLaborHours" />
+              <Parameter Name="OverheadPools" Value="FixedMfg,VariableMfg" />
+              <Parameter Name="AllocationMethod" Value="ActivityBased" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="GrossMarginCheck"
+            Description="Planned gross margin must be within acceptable range compared to prior year and strategic targets."
+            GateType="Validation"
+            IsBlocking="false">
+            <Condition>PlannedGrossMargin &gt;= MinimumGrossMarginTarget</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>VPManufacturing</ApproverRole>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_COGSPlanning_Started"
+            Recipients="PlantController"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_COGSPlanning_Complete"
+            Recipients="PlantController,FPADirector"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 4: OPEX Planning                                          -->
+      <!-- ============================================================== -->
+      <Step
+        Order="4"
+        Name="OPEXPlanning"
+        DisplayName="OPEX Planning"
+        Description="Plan operating expenses at the department level using driver-based models. Covers all non-COGS operating expenses including SGA, R&amp;D, and shared services."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDate>September 15</PlannedStartDate>
+          <PlannedEndDate>October 15</PlannedEndDate>
+          <DurationDays>31</DurationDays>
+          <CycleMonth>September-October</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>DepartmentHead</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>72</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_DriverBasedPlanning_OPEX"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Execute driver-based planning for operating expenses, applying growth rates, inflation adjustments, and department-specific drivers to generate monthly expense plans."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="PlanningModel" Value="OPEX" />
+              <Parameter Name="Drivers" Value="Headcount,SquareFootage,Revenue" />
+              <Parameter Name="InflationAdjustment" Value="true" />
+              <Parameter Name="SpreadMethod" Value="Seasonal" />
+              <Parameter Name="ExpenseCategories" Value="SGA,RD,SharedServices,Marketing" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="OPEXBudgetEnvelope"
+            Description="Total OPEX must not exceed the department-level budget envelope established in the kickoff assumptions."
+            GateType="Validation"
+            IsBlocking="false">
+            <Condition>TotalOPEX &lt;= OPEXBudgetCeiling</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>HierarchicalApproval</ApprovalType>
+          <ApprovalLevels>
+            <Level Order="1" ApproverRole="DepartmentHead" />
+            <Level Order="2" ApproverRole="SVP" />
+          </ApprovalLevels>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_OPEXPlanning_Started"
+            Recipients="DepartmentHead"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_OPEXPlanning_Complete"
+            Recipients="DepartmentHead,FPADirector"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 5: Headcount Planning                                     -->
+      <!-- ============================================================== -->
+      <Step
+        Order="5"
+        Name="HeadcountPlanning"
+        DisplayName="Headcount Planning"
+        Description="Plan full-time equivalent positions, compensation structures, merit increases, bonus targets, and benefits costs. Integrate with OPEX for total people cost."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDate>September 15</PlannedStartDate>
+          <PlannedEndDate>October 15</PlannedEndDate>
+          <DurationDays>31</DurationDays>
+          <CycleMonth>September-October</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>HRBusinessPartner</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>72</EscalationHours>
+          <EscalationTarget>VPHumanResources</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_HeadcountPlanning"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Execute headcount planning model calculating FTE costs including base salary, merit increases, bonus accruals, payroll taxes, and benefits by employee level and department."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="PlanningModel" Value="Headcount" />
+              <Parameter Name="IncludeMeritIncrease" Value="true" />
+              <Parameter Name="MeritEffectiveMonth" Value="April" />
+              <Parameter Name="BonusAccrualMethod" Value="Monthly" />
+              <Parameter Name="BenefitsLoadFactor" Value="0.30" />
+              <Parameter Name="PayrollTaxRate" Value="0.0765" />
+              <Parameter Name="VacancyFactor" Value="0.05" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="HeadcountWithinTarget"
+            Description="Planned headcount growth must align with the growth targets established in assumptions."
+            GateType="Validation"
+            IsBlocking="false">
+            <Condition>PlannedFTEGrowth &lt;= HeadcountGrowthTarget * 1.05</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>MultiApprover</ApprovalType>
+          <ApproverRoles>
+            <ApproverRole>HRBusinessPartner</ApproverRole>
+            <ApproverRole>DepartmentHead</ApproverRole>
+          </ApproverRoles>
+          <ApprovalMode>All</ApprovalMode>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_HeadcountPlanning_Started"
+            Recipients="HRBusinessPartner"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_HeadcountPlanning_Complete"
+            Recipients="HRBusinessPartner,FPADirector"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 6: CAPEX Planning                                         -->
+      <!-- ============================================================== -->
+      <Step
+        Order="6"
+        Name="CAPEXPlanning"
+        DisplayName="CAPEX Planning"
+        Description="Plan capital expenditures by project, calculate depreciation schedules for new assets, and model the impact on the balance sheet and cash flow."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDate>October 1</PlannedStartDate>
+          <PlannedEndDate>October 21</PlannedEndDate>
+          <DurationDays>21</DurationDays>
+          <CycleMonth>October</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>EngineeringFacilities</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>72</EscalationHours>
+          <EscalationTarget>VPEngineering</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_CAPEXDepreciation"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Calculate depreciation schedules for planned capital expenditures using configured depreciation methods, useful lives, and in-service dates by asset category."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="DepreciationMethod" Value="StraightLine" />
+              <Parameter Name="AssetCategories" Value="Buildings,Equipment,IT,Vehicles" />
+              <Parameter Name="DefaultUsefulLife_Buildings" Value="30" />
+              <Parameter Name="DefaultUsefulLife_Equipment" Value="10" />
+              <Parameter Name="DefaultUsefulLife_IT" Value="3" />
+              <Parameter Name="DefaultUsefulLife_Vehicles" Value="5" />
+              <Parameter Name="SalvageValuePercent" Value="0.05" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="CAPEXWithinEnvelope"
+            Description="Total capital expenditures must not exceed the capital budget envelope defined in the assumptions."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>TotalCAPEX &lt;= CapitalBudgetEnvelope</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>ThresholdBased</ApprovalType>
+          <ApprovalThresholds>
+            <Threshold MaxAmount="100000" ApproverRole="DepartmentHead" />
+            <Threshold MaxAmount="500000" ApproverRole="SVP" />
+            <Threshold MaxAmount="999999999" ApproverRole="CFO" />
+          </ApprovalThresholds>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_CAPEXPlanning_Started"
+            Recipients="EngineeringFacilities"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_CAPEXPlanning_Complete"
+            Recipients="EngineeringFacilities,FPADirector"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 7: Review & Iteration                                     -->
+      <!-- ============================================================== -->
+      <Step
+        Order="7"
+        Name="ReviewAndIteration"
+        DisplayName="Review &amp; Iteration"
+        Description="Management review of the consolidated budget with top-down adjustments. Iterate between bottom-up submissions and top-down targets until convergence. Produce consolidated P&amp;L, balance sheet, and cash flow."
+        StepType="Review"
+        IsRequired="true"
+        AllowIteration="true"
+        MaxIterations="3">
+
+        <Timeline>
+          <PlannedStartDate>October 22</PlannedStartDate>
+          <PlannedEndDate>November 15</PlannedEndDate>
+          <DurationDays>25</DurationDays>
+          <CycleMonth>October-November</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>FPADirector</Role>
+          <SecondaryRole>SVP</SecondaryRole>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>48</EscalationHours>
+          <EscalationTarget>CFO</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_BudgetConsolidation"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Consolidate all departmental budget submissions into a unified P&amp;L, balance sheet, and cash flow statement at the company and segment levels."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="ConsolidationScope" Value="AllEntities" />
+              <Parameter Name="OutputStatements" Value="PL,BS,CF" />
+              <Parameter Name="IncludeEliminationsEstimate" Value="true" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="CR_VarianceAnalysis_BudgetVsTarget"
+            RuleType="CalculationRule"
+            ExecutionOrder="2"
+            Description="Analyze variances between bottom-up budget submissions and top-down strategic targets, highlighting gaps requiring management attention."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="CompareAgainst" Value="StrategicTargets" />
+              <Parameter Name="VarianceThresholdPercent" Value="5" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="BudgetConverged"
+            Description="Budget must converge with strategic targets within acceptable tolerance before proceeding to final approval."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>RevenueGap &lt;= 0.02 AND EBITDAGap &lt;= 0.03</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>MultiApprover</ApprovalType>
+          <ApproverRoles>
+            <ApproverRole>FPADirector</ApproverRole>
+            <ApproverRole>SVP</ApproverRole>
+          </ApproverRoles>
+          <ApprovalMode>All</ApprovalMode>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_BudgetReview_Started"
+            Recipients="FPADirector,SVPs"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="IterationRequired"
+            Template="WF_BudgetReview_IterationNeeded"
+            Recipients="AllBudgetOwners"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_BudgetReview_Complete"
+            Recipients="FPADirector,CFO"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>UnderReview</StatusOnEntry>
+        <StatusOnCompletion>UnderReview</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 8: Approval & Publish                                     -->
+      <!-- ============================================================== -->
+      <Step
+        Order="8"
+        Name="ApprovalAndPublish"
+        DisplayName="Approval &amp; Publish"
+        Description="Executive approval of the final budget by the CFO. Upon approval, the budget is locked, the version is set to Published, and it becomes the official plan for the fiscal year."
+        StepType="Certification"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDate>November 16</PlannedStartDate>
+          <PlannedEndDate>November 30</PlannedEndDate>
+          <DurationDays>15</DurationDays>
+          <CycleMonth>November</CycleMonth>
+        </Timeline>
+
+        <Assignment>
+          <Role>CFO</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>72</EscalationHours>
+          <EscalationTarget>CEO</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EH_SubmissionControl"
+            RuleType="EventHandler"
+            ExecutionOrder="1"
+            Description="Lock the budget version, prevent further data entry, promote version from Approved to Published, and distribute final budget package to all stakeholders."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="VersionAction" Value="PromoteToPublished" />
+              <Parameter Name="LockDataEntry" Value="true" />
+              <Parameter Name="LockCalculations" Value="true" />
+              <Parameter Name="GenerateBudgetPackage" Value="true" />
+              <Parameter Name="DistributionList" Value="AllBudgetOwners,ExecutiveTeam,BoardOfDirectors" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="AllStepsComplete"
+            Description="All prior workflow steps must be complete and approved before final publication."
+            GateType="WorkflowStatus"
+            IsBlocking="true">
+            <Condition>AllPriorStepsStatus = 'Approved'</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>Certification</ApprovalType>
+          <CertifierRole>CFO</CertifierRole>
+          <RequireDigitalSignature>true</RequireDigitalSignature>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_BudgetApproval_Ready"
+            Recipients="CFO"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="Approved"
+            Template="WF_AnnualBudget_Approved"
+            Recipients="AllParticipants,ExecutiveTeam"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="Published"
+            Template="WF_AnnualBudget_Published"
+            Recipients="AllParticipants,ExecutiveTeam,BoardOfDirectors"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>Approved</StatusOnEntry>
+        <StatusOnCompletion>Published</StatusOnCompletion>
+      </Step>
+
+    </Steps>
+
+    <!-- ================================================================ -->
+    <!-- TIMELINE SUMMARY                                                 -->
+    <!-- ================================================================ -->
+    <TimelineSummary>
+      <CycleStart>September</CycleStart>
+      <CycleEnd>November</CycleEnd>
+      <BudgetYear>Following Fiscal Year</BudgetYear>
+      <TotalDuration>91</TotalDuration>
+      <DurationUnit>Days</DurationUnit>
+      <Milestones>
+        <Milestone Date="September 7" Name="KickoffComplete" Description="Assumptions approved and templates distributed" />
+        <Milestone Date="September 30" Name="RevenuePlanComplete" Description="Revenue plans submitted and approved" />
+        <Milestone Date="October 15" Name="OperatingPlansComplete" Description="COGS, OPEX, and headcount plans submitted" />
+        <Milestone Date="October 21" Name="CAPEXComplete" Description="Capital expenditure plans submitted" />
+        <Milestone Date="November 15" Name="ReviewComplete" Description="Management review and iterations finalized" />
+        <Milestone Date="November 30" Name="BudgetPublished" Description="Budget approved by CFO and published" />
+      </Milestones>
+    </TimelineSummary>
+
+  </Workflow>
+</WorkflowDefinition>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Load Rule
+  Load: Finance Actuals
+  Purpose: Load actual financial data into the Finance cube from all ERP sources
+  Target Cube: Finance
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <LoadRule>
+
+      <!-- ============================================================
+           LOAD IDENTITY
+           ============================================================ -->
+      <LoadName>Finance_Actuals</LoadName>
+      <LoadDescription>Loads actual financial data into the Finance cube from SAP S/4HANA trial balance, Oracle EBS GL, and NetSuite GL staging tables. Applies all dimension mappings, sign conventions, and validations. Uses Merge load method with period-based clear-before-load to ensure data integrity. This is the primary load rule for monthly actual financial consolidation.</LoadDescription>
+      <IsActive>true</IsActive>
+      <LoadType>CubeLoad</LoadType>
+      <TargetCube>Finance</TargetCube>
+
+      <!-- ============================================================
+           SOURCE STAGES
+           Data flows from multiple staging tables through this load.
+           ============================================================ -->
+      <SourceStages>
+        <Stage name="SAP_TrialBalance" priority="1" description="SAP S/4HANA actual trial balance data" />
+        <Stage name="Oracle_GL" priority="2" description="Oracle EBS actual GL journal data" />
+        <Stage name="NetSuite_GL" priority="3" description="NetSuite actual GL transaction data" />
+      </SourceStages>
+
+      <!-- ============================================================
+           TRANSFORM PIPELINE
+           Transforms applied in order before loading to cube.
+           ============================================================ -->
+      <TransformPipeline>
+        <Transform name="CurrencyConversion"  order="1" description="Standardize currency codes to ISO 4217" />
+        <Transform name="AccountMapping"       order="2" description="Map source accounts to OneStream accounts" />
+        <Transform name="EntityMapping"        order="3" description="Map source companies to OneStream entities" />
+        <Transform name="ProductMapping"       order="4" description="Map products to UD1 dimension" />
+        <Transform name="CostCenterMapping"    order="5" description="Map cost centers to UD2 dimension" />
+        <Transform name="SignConvention"        order="6" description="Apply natural sign convention by account type" />
+        <Transform name="DerivedMembers"        order="7" description="Derive Scenario, Flow, Consolidation, and defaults" />
+        <Transform name="DataValidation"        order="8" description="Validate all fields before loading" />
+      </TransformPipeline>
+
+      <!-- ============================================================
+           DIMENSION MAPPINGS
+           Maps transformed staging columns to OneStream cube dimensions.
+           ============================================================ -->
+      <DimensionMappings>
+        <Mapping dimension="Scenario"       sourceColumn="OS_Scenario"         defaultValue="Actual"        description="Always 'Actual' for this load rule" />
+        <Mapping dimension="Time"           sourceColumn="OS_Time"             defaultValue=""              description="Period in YYYYMn format (e.g., 2026M1)" />
+        <Mapping dimension="Entity"         sourceColumn="OS_Entity"           defaultValue=""              description="Mapped entity member" />
+        <Mapping dimension="Account"        sourceColumn="OS_Account"          defaultValue=""              description="Mapped account member" />
+        <Mapping dimension="Flow"           sourceColumn="OS_Flow"             defaultValue="F_Movement"    description="Movement type (derived)" />
+        <Mapping dimension="Consolidation"  sourceColumn="OS_Consolidation"    defaultValue="C_Local"       description="Local for source data" />
+        <Mapping dimension="UD1"            sourceColumn="OS_UD1_Product"      defaultValue="Prod_Unassigned" description="Product line" />
+        <Mapping dimension="UD2"            sourceColumn="OS_UD2_CostCenter"   defaultValue="CC_Unassigned" description="Cost Center" />
+        <Mapping dimension="UD3"            sourceColumn="OS_UD3"              defaultValue="UD3_None"      description="Reserved" />
+        <Mapping dimension="UD4"            sourceColumn="OS_UD4"              defaultValue="UD4_None"      description="Reserved" />
+        <Mapping dimension="UD5"            sourceColumn="OS_UD5_Intercompany" defaultValue="IC_None"       description="Intercompany partner" />
+        <Mapping dimension="UD6"            sourceColumn="OS_UD6"              defaultValue="UD6_None"      description="Reserved" />
+        <Mapping dimension="UD7"            sourceColumn="OS_UD7"              defaultValue="UD7_None"      description="Reserved" />
+        <Mapping dimension="UD8"            sourceColumn="OS_UD8_Version"      defaultValue="Working"       description="Data version" />
+      </DimensionMappings>
+
+      <!-- ============================================================
+           AMOUNT MAPPING
+           ============================================================ -->
+      <AmountMapping>
+        <AmountColumn>OS_Amount</AmountColumn>
+        <CurrencyColumn>OS_Currency</CurrencyColumn>
+        <AmountType>LocalCurrency</AmountType>
+      </AmountMapping>
+
+      <!-- ============================================================
+           LOAD METHOD AND CONFLICT RESOLUTION
+           ============================================================ -->
+      <LoadMethod>
+        <!-- Merge: Update existing intersections, add new ones -->
+        <Type>Merge</Type>
+        <Description>Merge load updates existing data intersections with new values and creates new intersections where they do not exist. Combined with pre-load clear, this ensures a clean replacement of the period data.</Description>
+
+        <!-- Conflict resolution when multiple source records map to same intersection -->
+        <ConflictResolution>
+          <Strategy>LatestWins</Strategy>
+          <Description>When multiple source records map to the same cube intersection, the record processed last (based on source timestamp or processing order) takes precedence. For aggregated data, amounts are summed.</Description>
+          <AggregateMultiple>true</AggregateMultiple>
+          <AggregationMethod>Sum</AggregationMethod>
+        </ConflictResolution>
+      </LoadMethod>
+
+      <!-- ============================================================
+           PRE-LOAD ACTIONS
+           ============================================================ -->
+      <PreLoadActions>
+        <!-- Clear target data for the entity/period being loaded -->
+        <Action name="ClearTargetData" order="1">
+          <Type>CubeClear</Type>
+          <Description>Clear existing actual data in the Finance cube for the specific entity and period being loaded. This prevents data accumulation from multiple load runs and ensures reconcilable results.</Description>
+          <ClearScope>
+            <Scenario>Actual</Scenario>
+            <Time>@@LoadPeriod</Time>
+            <Entity>@@LoadEntity</Entity>
+            <Account>All</Account>
+            <Flow>All</Flow>
+            <Consolidation>C_Local</Consolidation>
+            <UD1>All</UD1>
+            <UD2>All</UD2>
+            <UD8>Working</UD8>
+          </ClearScope>
+          <ConfirmClear>true</ConfirmClear>
+          <LogClearedCount>true</LogClearedCount>
+        </Action>
+
+        <!-- Snapshot pre-load state for reconciliation -->
+        <Action name="SnapshotPreLoad" order="2">
+          <Type>Log</Type>
+          <Message>Pre-load snapshot: Entity={@@LoadEntity}, Period={@@LoadPeriod}, ClearedIntersections={@@ClearedCount}</Message>
+          <LogLevel>Info</LogLevel>
+        </Action>
+      </PreLoadActions>
+
+      <!-- ============================================================
+           POST-LOAD ACTIONS
+           ============================================================ -->
+      <PostLoadActions>
+        <!-- Run validation on loaded data -->
+        <Action name="ValidateLoadedData" order="1">
+          <Type>Validation</Type>
+          <Description>Verify that loaded data totals match staging table totals for reconciliation</Description>
+          <SQL><![CDATA[
+            /* Compare staging totals with cube loaded totals */
+            SELECT
+              'Staging' AS Source,
+              SUM(OS_Amount) AS TotalAmount,
+              COUNT(*) AS RecordCount
+            FROM STG_Validated_Finance_Actuals
+            WHERE OS_Entity = @@LoadEntity AND OS_Time = @@LoadPeriod
+            UNION ALL
+            SELECT
+              'Loaded' AS Source,
+              @@LoadedTotalAmount AS TotalAmount,
+              @@LoadedRecordCount AS RecordCount
+          ]]></SQL>
+          <ToleranceAmount>0.01</ToleranceAmount>
+          <OnMismatch>Warn</OnMismatch>
+        </Action>
+
+        <!-- Update load log -->
+        <Action name="UpdateLoadLog" order="2">
+          <Type>SQL</Type>
+          <SQL><![CDATA[
+            INSERT INTO DM_LoadLog (
+              LoadName, LoadDate, Entity, Period, Scenario,
+              StagedRows, LoadedRows, RejectedRows,
+              StagedAmount, LoadedAmount,
+              Duration, Status, SourceSystems
+            )
+            VALUES (
+              'Finance_Actuals', GETDATE(), @@LoadEntity, @@LoadPeriod, 'Actual',
+              @@StagedRowCount, @@LoadedRecordCount, @@RejectedRowCount,
+              @@StagedTotalAmount, @@LoadedTotalAmount,
+              @@LoadDurationSeconds, 'Complete', @@SourceSystems
+            )
+          ]]></SQL>
+        </Action>
+
+        <!-- Trigger downstream calculations if configured -->
+        <Action name="TriggerCalcIfEnabled" order="3">
+          <Type>Conditional</Type>
+          <Condition>@@AutoCalcEnabled = true</Condition>
+          <TrueAction>
+            <Type>BusinessRule</Type>
+            <RuleName>BR_PostLoad_Calculations</RuleName>
+            <Parameters>
+              <Parameter name="Entity" value="@@LoadEntity" />
+              <Parameter name="Period" value="@@LoadPeriod" />
+            </Parameter>
+          </TrueAction>
+        </Action>
+      </PostLoadActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>5000</BatchSize>
+        <CommandTimeout>600</CommandTimeout>
+        <EnableParallelLoading>false</EnableParallelLoading>
+        <LogDetailLevel>Full</LogDetailLevel>
+        <TrackDuration>true</TrackDuration>
+        <TrackRowCounts>true</TrackRowCounts>
+        <TrackAmountTotals>true</TrackAmountTotals>
+      </ExecutionSettings>
+
+      <!-- ============================================================
+           ERROR HANDLING
+           ============================================================ -->
+      <ErrorHandling>
+        <OnLoadError>
+          <Action>RollbackAndNotify</Action>
+          <RollbackScope>CurrentEntity</RollbackScope>
+          <Notification>
+            <Enabled>true</Enabled>
+            <Recipients>dm_admin@company.com</Recipients>
+            <Subject>OneStream DM: Finance Actuals Load FAILED - {@@LoadEntity}/{@@LoadPeriod}</Subject>
+            <IncludeErrorDetails>true</IncludeErrorDetails>
+          </Notification>
+        </OnLoadError>
+        <MaxErrorRows>100</MaxErrorRows>
+        <ContinueOnWarning>true</ContinueOnWarning>
+      </ErrorHandling>
+
+    </LoadRule>
+  </DataManagement>
+</OneStreamXF>

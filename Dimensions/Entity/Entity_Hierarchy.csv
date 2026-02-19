@@ -1,0 +1,36 @@
+MemberName,ParentName,Description
+Global,,Global Manufacturing Enterprise
+Corporate_HQ,Global,Corporate Headquarters
+SS_IT,Corporate_HQ,Shared Services - Information Technology
+SS_HR,Corporate_HQ,Shared Services - Human Resources
+SS_Finance,Corporate_HQ,Shared Services - Finance and Accounting
+Americas,Global,Americas Region
+US_Operations,Americas,United States Operations
+Plant_US01_Detroit,US_Operations,Detroit Manufacturing Plant - Heavy Machinery
+Plant_US02_Houston,US_Operations,Houston Manufacturing Plant - Energy Equipment
+Plant_US03_Charlotte,US_Operations,Charlotte Manufacturing Plant - Consumer Products
+Canada_Operations,Americas,Canada Operations
+Plant_CA01_Toronto,Canada_Operations,Toronto Manufacturing Plant - Precision Components
+Mexico_Operations,Americas,Mexico Operations
+Plant_MX01_Monterrey,Mexico_Operations,Monterrey Manufacturing Plant - Assembly Operations
+EMEA,Global,Europe Middle East and Africa Region
+Germany_Operations,EMEA,Germany Operations
+Plant_DE01_Munich,Germany_Operations,Munich Manufacturing Plant - Automotive Components
+Plant_DE02_Stuttgart,Germany_Operations,Stuttgart Manufacturing Plant - Precision Engineering
+UK_Operations,EMEA,United Kingdom Operations
+Plant_UK01_Birmingham,UK_Operations,Birmingham Manufacturing Plant - Aerospace Parts
+France_Operations,EMEA,France Operations
+Plant_FR01_Lyon,France_Operations,Lyon Manufacturing Plant - Industrial Automation
+APAC,Global,Asia Pacific Region
+China_Operations,APAC,China Operations
+Plant_CN01_Shanghai,China_Operations,Shanghai Manufacturing Plant - Electronics Assembly
+Plant_CN02_Shenzhen,China_Operations,Shenzhen Manufacturing Plant - Consumer Electronics
+Japan_Operations,APAC,Japan Operations
+Plant_JP01_Osaka,Japan_Operations,Osaka Manufacturing Plant - Robotics and Specialty
+India_Operations,APAC,India Operations
+Plant_IN01_Pune,India_Operations,Pune Manufacturing Plant - Cost-Effective Production
+Eliminations,Global,Intercompany Eliminations
+Elim_Americas,Eliminations,Americas Intercompany Eliminations
+Elim_EMEA,Eliminations,EMEA Intercompany Eliminations
+Elim_APAC,Eliminations,APAC Intercompany Eliminations
+Elim_CrossRegion,Eliminations,Cross-Region Intercompany Eliminations

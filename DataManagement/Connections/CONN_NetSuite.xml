@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Connection Definition
+  Connection: NetSuite SuiteAnalytics Connect
+  Purpose: NetSuite ERP data extraction via SuiteAnalytics Connect (ODBC)
+  Environment: Production
+  Created: 2026-02-18
+
+  IMPORTANT: Replace placeholder credentials and token values with actual
+  values from NetSuite Token-Based Authentication setup before deployment.
+  Store all secrets in OneStream Credential Vault.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <Connection>
+
+      <!-- ============================================================
+           CONNECTION IDENTITY
+           ============================================================ -->
+      <ConnectionName>NetSuite_SuiteAnalytics</ConnectionName>
+      <ConnectionDescription>NetSuite SuiteAnalytics Connect (ODBC) connection for extracting General Ledger transactions, account balances, and subsidiary financial data from NetSuite ERP. Used for subsidiaries operating on the NetSuite platform.</ConnectionDescription>
+      <ConnectionType>ODBC</ConnectionType>
+      <IsActive>true</IsActive>
+      <Category>ERP</Category>
+      <SourceSystem>NetSuite</SourceSystem>
+
+      <!-- ============================================================
+           NETSUITE ACCOUNT CONFIGURATION
+           ============================================================ -->
+      <NetSuiteConfiguration>
+        <!-- NetSuite Account ID (found under Setup > Company > Company Information) -->
+        <AccountId>%%NETSUITE_ACCOUNT_ID%%</AccountId>
+        <!-- Numeric format: 1234567 or with sandbox suffix: 1234567_SB1 -->
+        <AccountIdNumeric>%%NETSUITE_ACCOUNT_NUMERIC%%</AccountIdNumeric>
+
+        <!-- SuiteAnalytics Connect endpoint -->
+        <SuiteAnalyticsHost>%%NETSUITE_ACCOUNT_ID%%.connect.api.netsuite.com</SuiteAnalyticsHost>
+        <SuiteAnalyticsPort>1708</SuiteAnalyticsPort>
+
+        <!-- Role configuration: the integration role must have SuiteAnalytics permissions -->
+        <RoleId>%%NETSUITE_ROLE_ID%%</RoleId>
+        <RoleName>OneStream Integration Role</RoleName>
+        <!-- Role requires these permissions:
+             - SuiteAnalytics Connect (full)
+             - Transactions > Find Transaction (view)
+             - Reports > Financial Statements (view)
+             - Lists > Accounts (view)
+             - Lists > Subsidiaries (view)
+             - Lists > Departments (view)
+             - Lists > Classes (view)
+             - Lists > Locations (view)
+        -->
+      </NetSuiteConfiguration>
+
+      <!-- ============================================================
+           AUTHENTICATION - Token-Based Authentication (TBA)
+           ============================================================ -->
+      <Authentication>
+        <AuthenticationType>TokenBased</AuthenticationType>
+        <CredentialVaultKey>VAULT_NETSUITE_TBA</CredentialVaultKey>
+
+        <!-- Token-Based Authentication requires four credential components -->
+        <!-- All values must be obtained from NetSuite TBA setup -->
+        <TokenBasedAuth>
+          <!-- Consumer Key and Secret from the Integration Record in NetSuite -->
+          <ConsumerKey>%%CREDENTIAL_VAULT_CONSUMER_KEY%%</ConsumerKey>
+          <ConsumerSecret>%%CREDENTIAL_VAULT_CONSUMER_SECRET%%</ConsumerSecret>
+          <!-- Token ID and Secret generated for the specific user/role combination -->
+          <TokenId>%%CREDENTIAL_VAULT_TOKEN_ID%%</TokenId>
+          <TokenSecret>%%CREDENTIAL_VAULT_TOKEN_SECRET%%</TokenSecret>
+        </TokenBasedAuth>
+
+        <!-- Fallback: basic authentication (not recommended for production) -->
+        <BasicAuth>
+          <Username>SVC_ONESTREAM_NETSUITE</Username>
+          <Password>%%CREDENTIAL_VAULT%%</Password>
+        </BasicAuth>
+
+        <!-- Integration record details in NetSuite -->
+        <IntegrationRecord>
+          <IntegrationName>OneStream XF Data Management</IntegrationName>
+          <IntegrationId>%%NETSUITE_INTEGRATION_ID%%</IntegrationId>
+          <State>Enabled</State>
+          <TokenBasedAuthEnabled>true</TokenBasedAuthEnabled>
+        </IntegrationRecord>
+      </Authentication>
+
+      <!-- ============================================================
+           CONNECTION STRING
+           SuiteAnalytics Connect uses a specialized ODBC driver
+           provided by NetSuite (must be installed on app server).
+           ============================================================ -->
+      <ConnectionString>
+        DRIVER={NetSuite ODBC Driver 8.0};Host=%%NETSUITE_ACCOUNT_ID%%.connect.api.netsuite.com;Port=1708;Encrypted=1;Accountid=%%NETSUITE_ACCOUNT_ID%%;Roleid=%%NETSUITE_ROLE_ID%%;CustomProperties=AccountID=%%NETSUITE_ACCOUNT_ID%%;NegotiateSSLClose=0;Timeout=300
+      </ConnectionString>
+
+      <!-- Connection string with TBA credentials inline (resolved at runtime) -->
+      <AlternateConnectionString>
+        DRIVER={NetSuite ODBC Driver 8.0};Host=%%NETSUITE_ACCOUNT_ID%%.connect.api.netsuite.com;Port=1708;Encrypted=1;Accountid=%%NETSUITE_ACCOUNT_ID%%;Roleid=%%NETSUITE_ROLE_ID%%;ConsumerKey=%%CREDENTIAL_VAULT_CONSUMER_KEY%%;ConsumerSecret=%%CREDENTIAL_VAULT_CONSUMER_SECRET%%;TokenID=%%CREDENTIAL_VAULT_TOKEN_ID%%;TokenSecret=%%CREDENTIAL_VAULT_TOKEN_SECRET%%
+      </AlternateConnectionString>
+
+      <!-- ============================================================
+           TIMEOUT AND PERFORMANCE SETTINGS
+           ============================================================ -->
+      <TimeoutSettings>
+        <ConnectionTimeout>60</ConnectionTimeout>
+        <!-- SuiteAnalytics queries can be slow; allow longer execution -->
+        <CommandTimeout>600</CommandTimeout>
+        <FetchSize>5000</FetchSize>
+        <EnableConnectionPooling>true</EnableConnectionPooling>
+        <MinPoolSize>1</MinPoolSize>
+        <MaxPoolSize>5</MaxPoolSize>
+        <PoolIdleTimeout>180</PoolIdleTimeout>
+      </TimeoutSettings>
+
+      <!-- ============================================================
+           NETSUITE GOVERNANCE AND RATE LIMITS
+           SuiteAnalytics Connect has concurrency and governance limits.
+           ============================================================ -->
+      <GovernanceLimits>
+        <!-- Maximum concurrent SuiteAnalytics connections per account -->
+        <MaxConcurrentConnections>10</MaxConcurrentConnections>
+        <!-- Recommended: use no more than 3 for ETL to leave headroom -->
+        <RecommendedConcurrentConnections>3</RecommendedConcurrentConnections>
+        <!-- Query row limit per execution -->
+        <MaxRowsPerQuery>1000000</MaxRowsPerQuery>
+        <!-- Throttle delay between batch queries to stay within limits -->
+        <ThrottleDelayMilliseconds>500</ThrottleDelayMilliseconds>
+      </GovernanceLimits>
+
+      <!-- ============================================================
+           RETRY AND RESILIENCE
+           ============================================================ -->
+      <RetryPolicy>
+        <MaxRetries>3</MaxRetries>
+        <RetryIntervalSeconds>30</RetryIntervalSeconds>
+        <ExponentialBackoff>true</ExponentialBackoff>
+        <RetryOnErrors>
+          <ErrorCode>NS_CONNECTION_TIMEOUT</ErrorCode>
+          <ErrorCode>NS_GOVERNANCE_LIMIT</ErrorCode>
+          <ErrorCode>NS_SESSION_EXPIRED</ErrorCode>
+          <ErrorCode>ODBC_COMMUNICATION_ERROR</ErrorCode>
+        </RetryOnErrors>
+      </RetryPolicy>
+
+      <!-- ============================================================
+           TEST QUERY
+           ============================================================ -->
+      <TestQuery>
+        <SQL><![CDATA[
+          /* OneStream Connection Health Check - NetSuite SuiteAnalytics */
+          SELECT
+            Subsidiary.Name AS SubsidiaryName,
+            Subsidiary.SubsidiaryID AS SubsidiaryID
+          FROM
+            Subsidiary
+          WHERE
+            Subsidiary.IsElimination = 'No'
+            AND Subsidiary.IsInactive = 'No'
+          FETCH FIRST 5 ROWS ONLY
+        ]]></SQL>
+        <ExpectedResult>RowsReturned</ExpectedResult>
+        <TimeoutSeconds>30</TimeoutSeconds>
+      </TestQuery>
+
+      <!-- Validation queries to confirm data access -->
+      <ValidationQueries>
+        <Query name="CheckTransactionAccess">
+          <SQL><![CDATA[
+            SELECT COUNT(*) AS TxnCount
+            FROM Transaction_Lines
+            WHERE Transaction_Lines.Subsidiary = 1
+            FETCH FIRST 1 ROWS ONLY
+          ]]></SQL>
+        </Query>
+        <Query name="CheckAccountAccess">
+          <SQL><![CDATA[
+            SELECT COUNT(*) AS AcctCount
+            FROM Accounts
+            WHERE Accounts.IsInactive = 'No'
+            FETCH FIRST 1 ROWS ONLY
+          ]]></SQL>
+        </Query>
+      </ValidationQueries>
+
+      <!-- ============================================================
+           SCHEDULING AND MAINTENANCE
+           ============================================================ -->
+      <MaintenanceWindow>
+        <!-- NetSuite scheduled maintenance: typically weekends -->
+        <DayOfWeek>Sunday</DayOfWeek>
+        <StartTimeUTC>06:00</StartTimeUTC>
+        <EndTimeUTC>10:00</EndTimeUTC>
+        <BlockLoadsDuringMaintenance>true</BlockLoadsDuringMaintenance>
+      </MaintenanceWindow>
+
+      <!-- ============================================================
+           LOGGING AND AUDIT
+           ============================================================ -->
+      <Logging>
+        <LogLevel>Info</LogLevel>
+        <LogConnectionEvents>true</LogConnectionEvents>
+        <LogQueryExecution>true</LogQueryExecution>
+        <LogSlowQueryThresholdSeconds>120</LogSlowQueryThresholdSeconds>
+        <MaskSensitiveData>true</MaskSensitiveData>
+      </Logging>
+
+    </Connection>
+  </DataManagement>
+</OneStreamXF>

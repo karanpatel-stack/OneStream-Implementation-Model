@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_PlantPerformance"
+  Description="Plant Operations Performance Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget"     DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                   DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#Plants.Base"         DefaultMember="E#Plant_001" />
+    <POVBinding Dimension="Account"   MemberFilter="A#*"                   DefaultMember="A#OEE" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"      DefaultMember="F#Periodic" />
+    <POVBinding Dimension="UD1"       MemberFilter="UD1#ProductLines.Base" DefaultMember="UD1#AllProducts" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_PlantPerformance"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="OperationsCube"
+      SuppressNoData="True"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER WITH PLANT SELECTOR -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="6" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Plant Performance"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF"
+          HorizontalAlignment="Left" VerticalAlignment="Center" />
+      </Panel>
+
+      <Panel Row="0" Column="6" ColumnSpan="6" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="PlantSelector"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#Plants.Base"
+          DefaultMember="E#Plant_001"
+          Label="Select Plant"
+          LabelForeColor="#A0B4D0"
+          Width="250"
+          FontFamily="Segoe UI" FontSize="11"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4"
+          HorizontalAlignment="Right" VerticalAlignment="Center"
+          OnChange="RefreshAll" />
+        <FilterComponent
+          Name="PeriodSelector"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period"
+          LabelForeColor="#A0B4D0"
+          Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4"
+          HorizontalAlignment="Right" VerticalAlignment="Center" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: KPI CARDS -->
+    <Row Index="1" Height="130" HeightUnit="Pixel">
+
+      <!-- KPI - OEE -->
+      <Panel Row="1" Column="0" ColumnSpan="2" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_OEE"
+          Title="OEE"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="28" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.0%"
+          DataAdapter="DDA_PlantPerformance"
+          ValueExpression="A#OEE:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic">
+          <TargetComparison
+            TargetExpression="A#OEE:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            FavorableDirection="Up"
+            FavorableColor="#27AE60" UnfavorableColor="#E74C3C"
+            Format="+0.0%;-0.0%" />
+          <Icon IconType="FontAwesome" IconName="fa-cogs" IconColor="#3498DB" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI - Throughput -->
+      <Panel Row="1" Column="2" ColumnSpan="2" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_Throughput"
+          Title="Throughput (Units/Hr)"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="28" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0.0"
+          DataAdapter="DDA_PlantPerformance"
+          ValueExpression="A#Throughput:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic">
+          <TargetComparison
+            TargetExpression="A#Throughput:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            FavorableDirection="Up"
+            FavorableColor="#27AE60" UnfavorableColor="#E74C3C"
+            Format="+#,##0.0;-#,##0.0" />
+          <Icon IconType="FontAwesome" IconName="fa-tachometer-alt" IconColor="#2ECC71" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI - Scrap Rate -->
+      <Panel Row="1" Column="4" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_ScrapRate"
+          Title="Scrap Rate"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="28" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.00%"
+          DataAdapter="DDA_PlantPerformance"
+          ValueExpression="A#ScrapRate:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic">
+          <TargetComparison
+            TargetExpression="A#ScrapRate:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            FavorableDirection="Down"
+            FavorableColor="#27AE60" UnfavorableColor="#E74C3C"
+            Format="+0.00%;-0.00%" />
+          <Icon IconType="FontAwesome" IconName="fa-recycle" IconColor="#E74C3C" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI - Capacity Utilization -->
+      <Panel Row="1" Column="7" ColumnSpan="2" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_CapacityUtil"
+          Title="Capacity Utilization"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="28" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.0%"
+          DataAdapter="DDA_PlantPerformance"
+          ValueExpression="A#CapacityUtilization:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic">
+          <TargetComparison
+            TargetExpression="A#CapacityUtilization:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            FavorableDirection="Up"
+            FavorableColor="#27AE60" UnfavorableColor="#E74C3C"
+            Format="+0.0%;-0.0%" />
+          <Icon IconType="FontAwesome" IconName="fa-industry" IconColor="#E67E22" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI - Cost per Unit -->
+      <Panel Row="1" Column="9" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_CostPerUnit"
+          Title="Cost per Unit"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="28" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="$#,##0.00"
+          DataAdapter="DDA_PlantPerformance"
+          ValueExpression="A#CostPerUnit:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic">
+          <TargetComparison
+            TargetExpression="A#CostPerUnit:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            FavorableDirection="Down"
+            FavorableColor="#27AE60" UnfavorableColor="#E74C3C"
+            Format="+$#,##0.00;-$#,##0.00" />
+          <Icon IconType="FontAwesome" IconName="fa-dollar-sign" IconColor="#9B59B6" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: OEE BREAKDOWN + PRODUCTION VOLUME -->
+    <Row Index="2" Height="320" HeightUnit="Pixel">
+
+      <!-- OEE Component Breakdown - Stacked Bar -->
+      <Panel Row="2" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="OEE Component Breakdown" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="OEEBreakdownChart"
+          ChartType="StackedBar"
+          DataAdapter="DDA_PlantPerformance"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="0.0%"
+          BarWidth="0.6">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingSixMonths"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="OEE Components (%)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="0%"
+            MinValue="0" MaxValue="1.0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Availability"
+                  Expression="A#OEE_Availability:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB" StackGroup="OEE" />
+          <Series Name="Performance"
+                  Expression="A#OEE_Performance:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#E67E22" StackGroup="OEE" />
+          <Series Name="Quality"
+                  Expression="A#OEE_Quality:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#2ECC71" StackGroup="OEE" />
+
+          <ReferenceLine Name="OEE Target" Value="0.85"
+                         Color="#E74C3C" LineWidth="2" LineStyle="Dashed"
+                         Label="Target 85%" LabelFontSize="9" LabelForeColor="#E74C3C" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Production Volume Trend -->
+      <Panel Row="2" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Production Volume Trend (12 Months)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="ProductionVolumeTrend"
+          ChartType="ComboChart"
+          DataAdapter="DDA_PlantPerformance"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis Position="Left"
+            Title="Units Produced"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis Position="Right"
+            Title="Capacity Utilization %"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="0%"
+            MinValue="0" MaxValue="1.0" />
+
+          <Series Name="Actual Production"
+                  SeriesType="Bar"
+                  YAxisPosition="Left"
+                  Expression="A#UnitsProduced:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB" BarWidth="0.5" />
+          <Series Name="Planned Production"
+                  SeriesType="Line"
+                  YAxisPosition="Left"
+                  Expression="A#UnitsProduced:S#Budget:E#{POV.Entity}:F#Periodic"
+                  Color="#E67E22" LineWidth="2" LineStyle="Dashed"
+                  MarkerType="Diamond" MarkerSize="5" />
+          <Series Name="Capacity Util %"
+                  SeriesType="Line"
+                  YAxisPosition="Right"
+                  Expression="A#CapacityUtilization:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#2ECC71" LineWidth="2"
+                  MarkerType="Circle" MarkerSize="4" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: PLANT COMPARISON HEATMAP -->
+    <Row Index="3" Height="300" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="HeatmapPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Plant Comparison Heatmap" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <HeatmapComponent
+          Name="PlantComparisonHeatmap"
+          DataAdapter="DDA_PlantPerformance"
+          ShowValues="True"
+          ValueFontSize="10" ValueForeColor="#FFFFFF"
+          CellBorderColor="#1B2A4A" CellBorderWidth="2"
+          CellWidth="100" CellHeight="36"
+          TooltipEnabled="True">
+
+          <RowDimension Dimension="Entity" MemberFilter="E#Plants.Base" LabelFontSize="11" LabelForeColor="#D0D8E8" />
+
+          <ColumnMetrics>
+            <Metric Name="OEE"               Expression="A#OEE:F#Periodic"               Format="0.0%"    LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="0.60" MidValue="0.80" HighValue="0.95" />
+            <Metric Name="Throughput"         Expression="A#Throughput:F#Periodic"         Format="#,##0"   LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="50"   MidValue="80"   HighValue="120" />
+            <Metric Name="Scrap %"            Expression="A#ScrapRate:F#Periodic"          Format="0.0%"    LowColor="#27AE60" MidColor="#F39C12" HighColor="#E74C3C" LowValue="0.01" MidValue="0.03" HighValue="0.05" />
+            <Metric Name="Capacity Util"      Expression="A#CapacityUtilization:F#Periodic" Format="0.0%"  LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="0.60" MidValue="0.80" HighValue="0.95" />
+            <Metric Name="Cost/Unit"          Expression="A#CostPerUnit:F#Periodic"        Format="$#,##0" LowColor="#27AE60" MidColor="#F39C12" HighColor="#E74C3C" LowValue="10"   MidValue="25"   HighValue="50" />
+            <Metric Name="Downtime Hrs"       Expression="A#DowntimeHours:F#Periodic"      Format="#,##0"   LowColor="#27AE60" MidColor="#F39C12" HighColor="#E74C3C" LowValue="5"    MidValue="20"   HighValue="50" />
+          </ColumnMetrics>
+        </HeatmapComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- DRILL-THROUGH -->
+  <DrillThroughDefinitions>
+    <DrillThrough
+      Name="DrillToProductionVariance"
+      TargetDashboard="DB_ProductionVariance"
+      TriggerType="DoubleClick"
+      SourceComponent="PlantComparisonHeatmap"
+      PassPOV="True">
+      <ParameterMappings>
+        <Mapping Source="SelectedRow.Entity" Target="POV.Entity" />
+        <Mapping Source="POV.Time"           Target="POV.Time" />
+      </ParameterMappings>
+    </DrillThrough>
+  </DrillThroughDefinitions>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Primary"    Value="#3498DB" />
+      <Color Name="Secondary"  Value="#E67E22" />
+      <Color Name="Success"    Value="#27AE60" />
+      <Color Name="Danger"     Value="#E74C3C" />
+      <Color Name="Warning"    Value="#F39C12" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Sign Convention
+  Purpose: Apply debit/credit sign convention rules based on account type
+  Created: 2026-02-18
+
+  OneStream follows the natural sign convention where amounts represent the
+  "natural balance" direction for each account type. This transform converts
+  source system debit/credit representations into properly signed amounts.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>SignConvention</TransformName>
+      <TransformDescription>Applies debit/credit sign convention rules to convert source system amounts (which may arrive as separate debit/credit columns or with inconsistent signage) into a single properly-signed amount for OneStream loading. Uses the natural balance convention: Revenue and Liability/Equity accounts carry credit (positive) natural signs; Expense and Asset accounts carry debit (positive) natural signs. The sign convention is determined by the OneStream account type property.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Calculation</TransformType>
+      <ExecutionOrder>500</ExecutionOrder>
+
+      <!-- ============================================================
+           SIGN CONVENTION RULES
+           Based on account type from the chart of accounts.
+
+           Natural Sign Convention:
+           - Revenue:          Credit = Positive (income increases with credits)
+           - Expense/COGS:     Debit = Positive (expenses increase with debits)
+           - Asset:            Debit = Positive (assets increase with debits)
+           - Liability:        Credit = Positive (liabilities increase with credits)
+           - Equity:           Credit = Positive (equity increases with credits)
+           - Statistical:      Absolute value (no sign convention)
+           ============================================================ -->
+      <SignRules>
+
+        <!-- ====================== REVENUE ACCOUNTS ====================== -->
+        <Rule name="Revenue_Natural">
+          <Description>Revenue accounts: credit balance is the natural (positive) direction. Debits (returns, discounts) reduce revenue and are stored as negative.</Description>
+          <AccountTypeMatch>Revenue</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_Rev_*</Pattern>
+          </AccountPatterns>
+          <NaturalSide>Credit</NaturalSide>
+          <Calculation><![CDATA[
+            /* Revenue: Credit = Positive, Debit = Negative */
+            OS_Amount = ISNULL(SRC_CreditLC, 0) - ISNULL(SRC_DebitLC, 0)
+          ]]></Calculation>
+          <!-- When source provides a single net amount instead of Dr/Cr -->
+          <SingleAmountRule>
+            <SourceField>SRC_NetAmountLC</SourceField>
+            <FlipSign>true</FlipSign>
+            <Explanation>SAP stores revenue as credits (negative in ACDOCA). Flip sign to make positive in OneStream.</Explanation>
+          </SingleAmountRule>
+        </Rule>
+
+        <!-- ====================== EXPENSE ACCOUNTS ====================== -->
+        <Rule name="Expense_Natural">
+          <Description>Expense accounts (OPEX, SGA): debit balance is the natural (positive) direction. Credits (accrual reversals) reduce expense.</Description>
+          <AccountTypeMatch>Expense</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_OpEx_*</Pattern>
+          </AccountPatterns>
+          <NaturalSide>Debit</NaturalSide>
+          <Calculation><![CDATA[
+            /* Expense: Debit = Positive, Credit = Negative */
+            OS_Amount = ISNULL(SRC_DebitLC, 0) - ISNULL(SRC_CreditLC, 0)
+          ]]></Calculation>
+          <SingleAmountRule>
+            <SourceField>SRC_NetAmountLC</SourceField>
+            <FlipSign>false</FlipSign>
+            <Explanation>SAP stores expenses as debits (positive in ACDOCA). No sign flip needed.</Explanation>
+          </SingleAmountRule>
+        </Rule>
+
+        <!-- ====================== COGS ACCOUNTS ====================== -->
+        <Rule name="COGS_Natural">
+          <Description>Cost of Goods Sold: debit balance is the natural (positive) direction, same as expenses.</Description>
+          <AccountTypeMatch>COGS</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_COGS_*</Pattern>
+          </AccountPatterns>
+          <NaturalSide>Debit</NaturalSide>
+          <Calculation><![CDATA[
+            /* COGS: Debit = Positive, Credit = Negative */
+            OS_Amount = ISNULL(SRC_DebitLC, 0) - ISNULL(SRC_CreditLC, 0)
+          ]]></Calculation>
+          <SingleAmountRule>
+            <SourceField>SRC_NetAmountLC</SourceField>
+            <FlipSign>false</FlipSign>
+          </SingleAmountRule>
+        </Rule>
+
+        <!-- ====================== ASSET ACCOUNTS ====================== -->
+        <Rule name="Asset_Natural">
+          <Description>Asset accounts: debit balance is the natural (positive) direction. Assets increase with debits.</Description>
+          <AccountTypeMatch>Asset</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_BS_Cash</Pattern>
+            <Pattern>A_BS_AccountsReceivable</Pattern>
+            <Pattern>A_BS_Inventory_*</Pattern>
+            <Pattern>A_BS_PrepaidExpenses</Pattern>
+            <Pattern>A_BS_FixedAssets_*</Pattern>
+          </AccountPatterns>
+          <NaturalSide>Debit</NaturalSide>
+          <Calculation><![CDATA[
+            /* Assets: Debit = Positive, Credit = Negative */
+            OS_Amount = ISNULL(SRC_DebitLC, 0) - ISNULL(SRC_CreditLC, 0)
+          ]]></Calculation>
+          <SingleAmountRule>
+            <SourceField>SRC_NetAmountLC</SourceField>
+            <FlipSign>false</FlipSign>
+          </SingleAmountRule>
+        </Rule>
+
+        <!-- ====================== CONTRA-ASSET ACCOUNTS ====================== -->
+        <Rule name="ContraAsset_Natural">
+          <Description>Contra-asset accounts (accumulated depreciation, allowances): credit balance is natural (positive) direction. Stored as positive to reduce parent asset when subtracted.</Description>
+          <AccountTypeMatch>ContraAsset</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_BS_AccumDepreciation</Pattern>
+            <Pattern>A_BS_AllowanceDoubtful</Pattern>
+          </AccountPatterns>
+          <NaturalSide>Credit</NaturalSide>
+          <Calculation><![CDATA[
+            /* Contra-Asset: Credit = Positive (stored positive; net with parent asset) */
+            OS_Amount = ISNULL(SRC_CreditLC, 0) - ISNULL(SRC_DebitLC, 0)
+          ]]></Calculation>
+          <SingleAmountRule>
+            <SourceField>SRC_NetAmountLC</SourceField>
+            <FlipSign>true</FlipSign>
+          </SingleAmountRule>
+        </Rule>
+
+        <!-- ====================== LIABILITY ACCOUNTS ====================== -->
+        <Rule name="Liability_Natural">
+          <Description>Liability accounts: credit balance is the natural (positive) direction. Liabilities increase with credits.</Description>
+          <AccountTypeMatch>Liability</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_BS_AccountsPayable</Pattern>
+            <Pattern>A_BS_AccruedLiabilities</Pattern>
+            <Pattern>A_BS_LongTermDebt</Pattern>
+            <Pattern>A_BS_ShortTermDebt</Pattern>
+            <Pattern>A_BS_DeferredRevenue</Pattern>
+          </AccountPatterns>
+          <NaturalSide>Credit</NaturalSide>
+          <Calculation><![CDATA[
+            /* Liability: Credit = Positive, Debit = Negative */
+            OS_Amount = ISNULL(SRC_CreditLC, 0) - ISNULL(SRC_DebitLC, 0)
+          ]]></Calculation>
+          <SingleAmountRule>
+            <SourceField>SRC_NetAmountLC</SourceField>
+            <FlipSign>true</FlipSign>
+          </SingleAmountRule>
+        </Rule>
+
+        <!-- ====================== EQUITY ACCOUNTS ====================== -->
+        <Rule name="Equity_Natural">
+          <Description>Equity accounts: credit balance is the natural (positive) direction. Equity increases with credits.</Description>
+          <AccountTypeMatch>Equity</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_BS_CommonStock</Pattern>
+            <Pattern>A_BS_RetainedEarnings</Pattern>
+            <Pattern>A_BS_APIC</Pattern>
+            <Pattern>A_BS_CTA</Pattern>
+            <Pattern>A_BS_OCI</Pattern>
+          </AccountPatterns>
+          <NaturalSide>Credit</NaturalSide>
+          <Calculation><![CDATA[
+            /* Equity: Credit = Positive, Debit = Negative */
+            OS_Amount = ISNULL(SRC_CreditLC, 0) - ISNULL(SRC_DebitLC, 0)
+          ]]></Calculation>
+          <SingleAmountRule>
+            <SourceField>SRC_NetAmountLC</SourceField>
+            <FlipSign>true</FlipSign>
+          </SingleAmountRule>
+        </Rule>
+
+        <!-- ====================== STATISTICAL ACCOUNTS ====================== -->
+        <Rule name="Statistical_NoSign">
+          <Description>Statistical accounts: no sign convention. Values are loaded as-is (absolute or signed depending on metric).</Description>
+          <AccountTypeMatch>Statistical</AccountTypeMatch>
+          <AccountPatterns>
+            <Pattern>A_Stat_*</Pattern>
+          </AccountPatterns>
+          <NaturalSide>None</NaturalSide>
+          <Calculation><![CDATA[
+            /* Statistical: pass through as-is */
+            OS_Amount = CASE
+              WHEN SRC_DebitLC IS NOT NULL OR SRC_CreditLC IS NOT NULL
+              THEN ISNULL(SRC_DebitLC, 0) - ISNULL(SRC_CreditLC, 0)
+              ELSE ISNULL(SRC_NetAmountLC, SRC_Amount)
+            END
+          ]]></Calculation>
+        </Rule>
+
+      </SignRules>
+
+      <!-- ============================================================
+           SOURCE SYSTEM SPECIFIC ADJUSTMENTS
+           Different source systems may store amounts differently.
+           ============================================================ -->
+      <SourceSystemAdjustments>
+
+        <Adjustment sourceSystem="SAP" description="SAP ACDOCA stores all amounts with accounting sign (debit=positive, credit=negative). Use single amount field.">
+          <PreferredAmountField>SRC_NetAmountLC</PreferredAmountField>
+          <SignConvention>AccountingSign</SignConvention>
+        </Adjustment>
+
+        <Adjustment sourceSystem="Oracle" description="Oracle EBS provides separate ENTERED_DR and ENTERED_CR columns. Both are positive values.">
+          <PreferredAmountField>SeparateDrCr</PreferredAmountField>
+          <DebitField>SRC_AccountedDr</DebitField>
+          <CreditField>SRC_AccountedCr</CreditField>
+          <SignConvention>SeparateColumns</SignConvention>
+        </Adjustment>
+
+        <Adjustment sourceSystem="NetSuite" description="NetSuite provides Amount (signed) with debits positive and credits negative.">
+          <PreferredAmountField>SRC_Amount</PreferredAmountField>
+          <SignConvention>AccountingSign</SignConvention>
+        </Adjustment>
+
+      </SourceSystemAdjustments>
+
+      <!-- ============================================================
+           OUTPUT FIELDS
+           ============================================================ -->
+      <OutputFields>
+        <Field name="OS_Amount" dataType="Decimal" precision="23" scale="2" description="Final signed amount for OneStream loading" />
+        <Field name="OS_SignConventionApplied" dataType="String" maxLength="30" description="Sign rule that was applied (for audit)" />
+      </OutputFields>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

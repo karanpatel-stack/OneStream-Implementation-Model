@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Connection Definition
+  Connection: SAP HANA Production
+  Purpose: Primary ERP connection for SAP S/4HANA financial and manufacturing data
+  Environment: Production
+  Created: 2026-02-18
+
+  IMPORTANT: Replace placeholder credentials with actual service account credentials
+  managed through OneStream Credential Vault before deployment.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <Connection>
+
+      <!-- ============================================================
+           CONNECTION IDENTITY
+           ============================================================ -->
+      <ConnectionName>SAP_HANA_Production</ConnectionName>
+      <ConnectionDescription>SAP S/4HANA Production database connection for financial and manufacturing data extraction. Connects to the primary HANA instance hosting ACDOCA universal journal, production order tables (AFKO/AFPO), and material master data (MARA/MARC).</ConnectionDescription>
+      <ConnectionType>ODBC</ConnectionType>
+      <IsActive>true</IsActive>
+      <Category>ERP</Category>
+      <SourceSystem>SAP_S4HANA</SourceSystem>
+
+      <!-- ============================================================
+           SERVER AND DATABASE CONFIGURATION
+           ============================================================ -->
+      <ServerConfiguration>
+        <Server>sap-hana-prod.company.com</Server>
+        <Port>30015</Port>
+        <Database>SAPABAP1</Database>
+        <Schema>SAPHANADB</Schema>
+        <!-- HANA instance number used in port calculation: 3{instance}15 -->
+        <InstanceNumber>00</InstanceNumber>
+        <!-- Enable encryption for data in transit -->
+        <UseSSL>true</UseSSL>
+        <SSLCertificatePath>/certs/hana_prod_ca.pem</SSLCertificatePath>
+        <ValidateServerCertificate>true</ValidateServerCertificate>
+      </ServerConfiguration>
+
+      <!-- ============================================================
+           AUTHENTICATION
+           ============================================================ -->
+      <Authentication>
+        <AuthenticationType>ServiceAccount</AuthenticationType>
+        <!-- Credentials are stored in OneStream Credential Vault -->
+        <!-- DO NOT hardcode production credentials in this file -->
+        <CredentialVaultKey>VAULT_SAP_HANA_PROD</CredentialVaultKey>
+        <!-- Placeholder values for development/testing only -->
+        <Username>SVC_ONESTREAM_ETL</Username>
+        <Password>%%CREDENTIAL_VAULT%%</Password>
+        <!-- Service account requires the following HANA roles:
+             - MONITORING (for connection health checks)
+             - PUBLIC (base access)
+             - Custom role: ZOS_ETL_READ (read-only on finance/manufacturing schemas)
+        -->
+        <RequiredRoles>
+          <Role>MONITORING</Role>
+          <Role>PUBLIC</Role>
+          <Role>ZOS_ETL_READ</Role>
+        </RequiredRoles>
+      </Authentication>
+
+      <!-- ============================================================
+           CONNECTION STRING
+           ============================================================ -->
+      <!--
+        SAP HANA ODBC connection string pattern:
+        Uses the HANA ODBC driver installed on the OneStream application server.
+        The driver must be installed separately (SAP HANA Client package).
+      -->
+      <ConnectionString>
+        DRIVER={HDBODBC};SERVERNODE=sap-hana-prod.company.com:30015;DATABASE=SAPABAP1;SCHEMA=SAPHANADB;ENCRYPT=TRUE;sslCryptoProvider=openssl;sslTrustStore=/certs/hana_prod_ca.pem;CURRENTSCHEMA=SAPHANADB;CHAR_AS_UTF8=1;RECONNECT=TRUE
+      </ConnectionString>
+
+      <!-- Alternate ADO.NET connection string if using managed provider -->
+      <AlternateConnectionString>
+        Server=sap-hana-prod.company.com:30015;Database=SAPABAP1;UserID=SVC_ONESTREAM_ETL;Password=%%CREDENTIAL_VAULT%%;Encrypt=Yes;CurrentSchema=SAPHANADB
+      </AlternateConnectionString>
+
+      <!-- ============================================================
+           TIMEOUT AND PERFORMANCE SETTINGS
+           ============================================================ -->
+      <TimeoutSettings>
+        <!-- Connection timeout in seconds: time to establish initial connection -->
+        <ConnectionTimeout>30</ConnectionTimeout>
+        <!-- Command timeout in seconds: max query execution time -->
+        <CommandTimeout>300</CommandTimeout>
+        <!-- Bulk fetch size: number of rows per fetch operation -->
+        <FetchSize>10000</FetchSize>
+        <!-- Connection pool settings -->
+        <EnableConnectionPooling>true</EnableConnectionPooling>
+        <MinPoolSize>2</MinPoolSize>
+        <MaxPoolSize>10</MaxPoolSize>
+        <PoolIdleTimeout>120</PoolIdleTimeout>
+      </TimeoutSettings>
+
+      <!-- ============================================================
+           RETRY AND RESILIENCE
+           ============================================================ -->
+      <RetryPolicy>
+        <MaxRetries>3</MaxRetries>
+        <RetryIntervalSeconds>10</RetryIntervalSeconds>
+        <ExponentialBackoff>true</ExponentialBackoff>
+        <!-- Retry on these specific HANA error codes -->
+        <RetryOnErrors>
+          <ErrorCode>-10709</ErrorCode>  <!-- Connection failed -->
+          <ErrorCode>-10810</ErrorCode>  <!-- I/O error -->
+          <ErrorCode>-10</ErrorCode>     <!-- General network error -->
+        </RetryOnErrors>
+      </RetryPolicy>
+
+      <!-- ============================================================
+           TEST QUERY
+           Lightweight query to validate connectivity and permissions.
+           Executed during connection setup and health checks.
+           ============================================================ -->
+      <TestQuery>
+        <SQL><![CDATA[
+          /* OneStream Connection Health Check - SAP HANA */
+          SELECT
+            CURRENT_TIMESTAMP AS CheckTimestamp,
+            CURRENT_USER AS ConnectedUser,
+            CURRENT_SCHEMA AS ActiveSchema,
+            SESSION_CONTEXT('APPLICATION') AS Application,
+            (SELECT COUNT(*) FROM SYS.M_DATABASES WHERE ACTIVE_STATUS = 'YES') AS ActiveDatabases
+          FROM DUMMY
+        ]]></SQL>
+        <ExpectedResult>OneRowReturned</ExpectedResult>
+        <TimeoutSeconds>10</TimeoutSeconds>
+      </TestQuery>
+
+      <!-- Secondary validation: confirm access to key tables -->
+      <ValidationQueries>
+        <Query name="CheckACDOCA">
+          <SQL><![CDATA[
+            SELECT COUNT(*) AS RowCount
+            FROM ACDOCA
+            WHERE RCLNT = '100' AND GJAHR = YEAR(CURRENT_DATE)
+            LIMIT 1
+          ]]></SQL>
+        </Query>
+        <Query name="CheckAFKO">
+          <SQL><![CDATA[
+            SELECT COUNT(*) AS RowCount
+            FROM AFKO
+            WHERE MANDT = '100'
+            LIMIT 1
+          ]]></SQL>
+        </Query>
+      </ValidationQueries>
+
+      <!-- ============================================================
+           SCHEDULING AND MAINTENANCE
+           ============================================================ -->
+      <MaintenanceWindow>
+        <!-- SAP HANA maintenance window: Sundays 02:00-06:00 UTC -->
+        <DayOfWeek>Sunday</DayOfWeek>
+        <StartTimeUTC>02:00</StartTimeUTC>
+        <EndTimeUTC>06:00</EndTimeUTC>
+        <BlockLoadsDuringMaintenance>true</BlockLoadsDuringMaintenance>
+      </MaintenanceWindow>
+
+      <!-- ============================================================
+           LOGGING AND AUDIT
+           ============================================================ -->
+      <Logging>
+        <LogLevel>Info</LogLevel>
+        <LogConnectionEvents>true</LogConnectionEvents>
+        <LogQueryExecution>true</LogQueryExecution>
+        <LogSlowQueryThresholdSeconds>60</LogSlowQueryThresholdSeconds>
+        <MaskSensitiveData>true</MaskSensitiveData>
+      </Logging>
+
+    </Connection>
+  </DataManagement>
+</OneStreamXF>

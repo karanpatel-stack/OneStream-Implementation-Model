@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Workflow Definition
+  Workflow:    WF_PeoplePlanning
+  Description: People Planning workflow managing the end-to-end workforce
+               planning process from current-state headcount import through
+               position planning, compensation modeling, department review,
+               and finance integration.
+  Cycle:       Annual with quarterly refresh.
+  Owner:       HR / FP&A
+  Integration: Links to WF_AnnualBudget for P&L and Cash Flow impact.
+-->
+<WorkflowDefinition
+  xmlns="http://www.intactsoft.com/OneStream/Workflows"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.intactsoft.com/OneStream/Workflows WorkflowSchema.xsd">
+
+  <!-- ================================================================== -->
+  <!-- WORKFLOW HEADER                                                    -->
+  <!-- ================================================================== -->
+  <Workflow
+    Name="WF_PeoplePlanning"
+    DisplayName="People Planning"
+    Description="Comprehensive people planning workflow that imports current headcount from Workday, enables position-level planning for adds, removes, and modifications, models compensation including merit increases, bonus targets, and benefits, supports department-level review and approval, and integrates the resulting people costs into the Planning cube for P&amp;L and Cash Flow impact."
+    WorkflowType="Planning"
+    Frequency="Annual"
+    RefreshFrequency="Quarterly"
+    IsActive="true"
+    Version="1.0"
+    CreatedBy="Admin"
+    CreatedDate="2026-01-15"
+    ModifiedBy="Admin"
+    ModifiedDate="2026-02-18">
+
+    <!-- ================================================================ -->
+    <!-- WORKFLOW INTEGRATION                                             -->
+    <!-- ================================================================ -->
+    <WorkflowIntegration>
+      <LinkedWorkflow
+        Name="WF_AnnualBudget"
+        IntegrationType="DataProvider"
+        Description="People Planning feeds headcount costs into the Annual Budget workflow for OPEX and total company P&amp;L consolidation."
+        SyncDirection="PeoplePlanning_To_Budget"
+        SyncTrigger="OnPublish" />
+      <LinkedWorkflow
+        Name="WF_RollingForecast"
+        IntegrationType="DataProvider"
+        Description="Quarterly refresh of people plan feeds updated headcount assumptions into the Rolling Forecast."
+        SyncDirection="PeoplePlanning_To_Forecast"
+        SyncTrigger="OnQuarterlyRefresh" />
+    </WorkflowIntegration>
+
+    <!-- ================================================================ -->
+    <!-- CYCLE CONFIGURATION                                              -->
+    <!-- ================================================================ -->
+    <CycleConfiguration>
+      <AnnualCycle>
+        <StartMonth>August</StartMonth>
+        <EndMonth>October</EndMonth>
+        <Description>Annual people planning cycle aligned with the annual budget process, starting one month before budget kickoff.</Description>
+      </AnnualCycle>
+      <QuarterlyRefresh>
+        <RefreshMonths>January,April,July,October</RefreshMonths>
+        <RefreshScope>CurrentStateReload,CompensationUpdate,PositionChanges</RefreshScope>
+        <Description>Quarterly refresh to incorporate actual headcount changes, compensation adjustments, and revised hiring plans.</Description>
+      </QuarterlyRefresh>
+    </CycleConfiguration>
+
+    <!-- ================================================================ -->
+    <!-- STATUS TRANSITIONS                                               -->
+    <!-- ================================================================ -->
+    <StatusTransitions>
+      <Status Name="NotStarted" DisplayName="Not Started" IsInitial="true" Color="#9E9E9E" />
+      <Status Name="DataLoading" DisplayName="Data Loading" Color="#03A9F4" />
+      <Status Name="InProgress" DisplayName="In Progress" Color="#2196F3" />
+      <Status Name="UnderReview" DisplayName="Under Review" Color="#FF9800" />
+      <Status Name="Approved" DisplayName="Approved" Color="#4CAF50" />
+      <Status Name="Integrated" DisplayName="Integrated" IsFinal="true" Color="#7B1FA2" />
+
+      <Transition From="NotStarted" To="DataLoading" TriggerType="Automatic" />
+      <Transition From="DataLoading" To="InProgress" TriggerType="Automatic" />
+      <Transition From="InProgress" To="UnderReview" TriggerType="StepCompletion" />
+      <Transition From="UnderReview" To="InProgress" TriggerType="Rejection" />
+      <Transition From="UnderReview" To="Approved" TriggerType="Approval" />
+      <Transition From="Approved" To="Integrated" TriggerType="IntegrationComplete" />
+    </StatusTransitions>
+
+    <!-- ================================================================ -->
+    <!-- GLOBAL NOTIFICATIONS                                             -->
+    <!-- ================================================================ -->
+    <Notifications>
+      <Notification
+        EventType="WorkflowStarted"
+        Template="WF_PeoplePlanning_Kickoff"
+        Recipients="AllParticipants"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="StepTransition"
+        Template="WF_StepTransition_Generic"
+        Recipients="NextStepAssignee"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="QuarterlyRefreshStarted"
+        Template="WF_PeoplePlanning_Refresh"
+        Recipients="HRCompTeam,HiringManagers"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="WorkflowCompleted"
+        Template="WF_PeoplePlanning_Integrated"
+        Recipients="AllParticipants,FPADirector"
+        Channel="Email,Dashboard" />
+    </Notifications>
+
+    <!-- ================================================================ -->
+    <!-- STEPS                                                            -->
+    <!-- ================================================================ -->
+    <Steps>
+
+      <!-- ============================================================== -->
+      <!-- STEP 1: Current State Load                                     -->
+      <!-- ============================================================== -->
+      <Step
+        Order="1"
+        Name="CurrentStateLoad"
+        DisplayName="Current State Load"
+        Description="Import the current headcount roster from Workday HRIS, including employee details, positions, compensation data, department assignments, cost centers, and benefit elections. Establish the baseline for planning."
+        StepType="DataCollection"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>1</PlannedStartDay>
+          <PlannedEndDay>2</PlannedEndDay>
+          <DurationDays>2</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>System</Role>
+          <AssignmentType>SystemTriggered</AssignmentType>
+          <TriggerEvent>AnnualPlanningCycleStart</TriggerEvent>
+          <QuarterlyTrigger>QuarterlyRefreshStart</QuarterlyTrigger>
+          <EscalationHours>4</EscalationHours>
+          <EscalationTarget>HRISAdmin</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CN_Workday_Headcount"
+            RuleType="Connector"
+            ExecutionOrder="1"
+            Description="Execute the Workday HRIS connector to import the current employee roster including employee ID, name, position title, department, cost center, hire date, FTE status, base salary, bonus target, benefit elections, and manager hierarchy."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="SourceSystem" Value="Workday" />
+              <Parameter Name="DataScope" Value="ActiveEmployees" />
+              <Parameter Name="IncludeFields" Value="EmployeeID,Name,Position,Department,CostCenter,HireDate,FTE,BaseSalary,BonusTarget,BenefitPlan,ManagerID,JobLevel,Location" />
+              <Parameter Name="IncludeTerminations" Value="true" />
+              <Parameter Name="TerminationLookback" Value="90" />
+              <Parameter Name="IncludeOpenPositions" Value="true" />
+              <Parameter Name="RefreshMode" Value="FullReplace" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="EH_HeadcountDataValidation"
+            RuleType="EventHandler"
+            ExecutionOrder="2"
+            Description="Validate the imported headcount data for completeness, checking for missing cost centers, invalid compensation data, orphan positions, and duplicate records."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="ValidateCostCenter" Value="true" />
+              <Parameter Name="ValidateCompensation" Value="true" />
+              <Parameter Name="CheckDuplicates" Value="true" />
+              <Parameter Name="FlagMissingManagers" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="HeadcountDataLoaded"
+            Description="Workday data import must complete successfully with no critical validation errors before position planning can begin."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>ConnectorStatus = 'Success' AND CriticalErrorCount = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>false</ApprovalRequired>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_HC_DataLoad_Started"
+            Recipients="HRISAdmin"
+            Channel="Dashboard" />
+          <Notification
+            EventType="ValidationErrors"
+            Template="WF_HC_DataLoad_Errors"
+            Recipients="HRISAdmin,HRCompTeam"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_HC_DataLoad_Complete"
+            Recipients="HiringManagers,HRCompTeam"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>DataLoading</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 2: Position Planning                                      -->
+      <!-- ============================================================== -->
+      <Step
+        Order="2"
+        Name="PositionPlanning"
+        DisplayName="Position Planning"
+        Description="Hiring managers plan position changes for the planning horizon: add new positions, remove/eliminate positions, modify existing positions (transfers, promotions, reclassifications), and set compensation for new hires. Includes timing for planned start dates."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>3</PlannedStartDay>
+          <PlannedEndDay>15</PlannedEndDay>
+          <DurationDays>13</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>HiringManager</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>72</EscalationHours>
+          <EscalationTarget>DepartmentVP</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <!-- No automated business rules; this is a manual position planning step -->
+        </BusinessRules>
+
+        <PositionPlanningControls>
+          <AllowAddPosition>true</AllowAddPosition>
+          <AllowRemovePosition>true</AllowRemovePosition>
+          <AllowModifyPosition>true</AllowModifyPosition>
+          <RequireJustification>true</RequireJustification>
+          <JustificationMinLength>25</JustificationMinLength>
+          <RequireStartDate>true</RequireStartDate>
+          <RequireJobLevel>true</RequireJobLevel>
+          <RequireLocation>true</RequireLocation>
+          <CompensationRangeEnforcement>true</CompensationRangeEnforcement>
+          <ApplyVacancyFactor>true</ApplyVacancyFactor>
+          <DefaultVacancyFactor>0.05</DefaultVacancyFactor>
+          <PositionTypes>
+            <PositionType Name="NewHire" RequiresApproval="true" ApprovalThresholdLevel="Manager" />
+            <PositionType Name="Backfill" RequiresApproval="true" ApprovalThresholdLevel="Manager" />
+            <PositionType Name="Elimination" RequiresApproval="true" ApprovalThresholdLevel="VP" />
+            <PositionType Name="Transfer" RequiresApproval="true" ApprovalThresholdLevel="Manager" />
+            <PositionType Name="Promotion" RequiresApproval="true" ApprovalThresholdLevel="Manager" />
+            <PositionType Name="Contractor" RequiresApproval="true" ApprovalThresholdLevel="Manager" />
+          </PositionTypes>
+        </PositionPlanningControls>
+
+        <Gates>
+          <Gate
+            Name="AllPositionsPlanned"
+            Description="All hiring managers must submit their position plans with required justifications and start dates."
+            GateType="Submission"
+            IsBlocking="true">
+            <Condition>SubmittedDepartmentCount = AssignedDepartmentCount</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>HierarchicalApproval</ApprovalType>
+          <ApprovalLevels>
+            <Level Order="1" ApproverRole="HiringManager" />
+            <Level Order="2" ApproverRole="DepartmentVP" />
+          </ApprovalLevels>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_PositionPlanning_Started"
+            Recipients="HiringManager"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="DeadlineApproaching"
+            Template="WF_PositionPlanning_Reminder"
+            Recipients="HiringManager"
+            Channel="Email"
+            TriggerDaysBefore="3" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_PositionPlanning_Complete"
+            Recipients="HRCompTeam"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 3: Compensation Modeling                                  -->
+      <!-- ============================================================== -->
+      <Step
+        Order="3"
+        Name="CompensationModeling"
+        DisplayName="Compensation Modeling"
+        Description="HR and Compensation team applies merit increase schedules, bonus target percentages, payroll tax calculations, and benefits cost modeling to produce fully-loaded people costs by position, department, and time period."
+        StepType="Calculation"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>15</PlannedStartDay>
+          <PlannedEndDay>25</PlannedEndDay>
+          <DurationDays>10</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>HRCompTeam</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>48</EscalationHours>
+          <EscalationTarget>VPHumanResources</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_HeadcountPlanning"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Execute the headcount planning calculation model to compute fully-loaded people costs. Applies merit increase schedules, bonus accrual methods, payroll tax rates, benefits load factors, and vacancy assumptions to produce monthly cost projections by employee, position, department, and cost center."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="PlanningModel" Value="Headcount" />
+              <Parameter Name="CalculationScope" Value="AllPositions" />
+              <!-- Merit Increase Parameters -->
+              <Parameter Name="ApplyMeritIncrease" Value="true" />
+              <Parameter Name="MeritIncreasePool" Value="0.035" />
+              <Parameter Name="MeritEffectiveMonth" Value="April" />
+              <Parameter Name="MeritDistribution" Value="PerformanceBased" />
+              <!-- Bonus Parameters -->
+              <Parameter Name="BonusTargetSource" Value="PositionLevel" />
+              <Parameter Name="BonusAccrualMethod" Value="MonthlyAccrual" />
+              <Parameter Name="BonusPayoutMonth" Value="March" />
+              <!-- Payroll Tax Parameters -->
+              <Parameter Name="FederalPayrollTaxRate" Value="0.0765" />
+              <Parameter Name="StatePayrollTaxRate" Value="Variable" />
+              <Parameter Name="FUTARate" Value="0.006" />
+              <Parameter Name="FUTAWageBase" Value="7000" />
+              <!-- Benefits Parameters -->
+              <Parameter Name="BenefitsLoadFactor" Value="0.28" />
+              <Parameter Name="HealthInsuranceMethod" Value="PlanElection" />
+              <Parameter Name="RetirementMatchPercent" Value="0.04" />
+              <Parameter Name="RetirementMatchCap" Value="0.06" />
+              <!-- Vacancy and Timing -->
+              <Parameter Name="VacancyFactor" Value="0.05" />
+              <Parameter Name="RampUpNewHires" Value="true" />
+              <Parameter Name="RampUpMonths" Value="3" />
+              <Parameter Name="RampUpProductivity" Value="0.50,0.75,1.00" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <CompensationModelOutputs>
+          <Output Name="BaseSalary" Description="Annualized base salary by position" />
+          <Output Name="MeritIncrease" Description="Merit increase amount by position" />
+          <Output Name="BonusAccrual" Description="Bonus accrual by position and period" />
+          <Output Name="PayrollTaxes" Description="Employer payroll taxes by position" />
+          <Output Name="BenefitsCost" Description="Benefits cost by position and plan" />
+          <Output Name="FullyLoadedCost" Description="Total fully-loaded people cost" />
+          <Output Name="FTECount" Description="Full-time equivalent count by department and period" />
+          <Output Name="HeadcountCount" Description="Headcount by department and period" />
+        </CompensationModelOutputs>
+
+        <Gates>
+          <Gate
+            Name="CompModelComplete"
+            Description="Compensation model must calculate successfully for all positions without critical errors."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>CalculationStatus = 'Success' AND PositionsWithErrors = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>VPHumanResources</ApproverRole>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_CompModeling_Started"
+            Recipients="HRCompTeam"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="CalculationComplete"
+            Template="WF_CompModeling_Results"
+            Recipients="HRCompTeam,VPHumanResources"
+            Channel="Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_CompModeling_Complete"
+            Recipients="DepartmentVPs"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>UnderReview</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 4: Department Review                                      -->
+      <!-- ============================================================== -->
+      <Step
+        Order="4"
+        Name="DepartmentReview"
+        DisplayName="Department Review"
+        Description="Department VPs review the headcount plan and fully-loaded costs for their department, validate position changes, review total department people cost against budget envelope, and approve or request revisions."
+        StepType="Review"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>25</PlannedStartDay>
+          <PlannedEndDay>35</PlannedEndDay>
+          <DurationDays>10</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>DepartmentVP</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>48</EscalationHours>
+          <EscalationTarget>SVP</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <!-- No automated business rules; this is a review and approval step -->
+        </BusinessRules>
+
+        <ReviewDashboard>
+          <DashboardName>PeoplePlanning_DeptReview</DashboardName>
+          <Views>
+            <View Name="HeadcountSummary" Description="FTE and headcount summary by month" />
+            <View Name="CostSummary" Description="Fully-loaded cost by category and month" />
+            <View Name="PositionChanges" Description="Detail of all planned position changes" />
+            <View Name="VarianceToBudget" Description="People cost variance to prior year and budget envelope" />
+            <View Name="CompMixAnalysis" Description="Compensation mix analysis (base, bonus, benefits)" />
+          </Views>
+        </ReviewDashboard>
+
+        <ReviewChecklist>
+          <ChecklistItem Name="HeadcountAligned" Description="Planned headcount aligns with business needs and strategic plan" Required="true" />
+          <ChecklistItem Name="CostWithinEnvelope" Description="Total people cost within department budget envelope" Required="true" />
+          <ChecklistItem Name="NewPositionsJustified" Description="All new positions have adequate business justification" Required="true" />
+          <ChecklistItem Name="EliminationsValid" Description="Position eliminations reviewed for compliance and impact" Required="true" />
+          <ChecklistItem Name="CompRangesValid" Description="Compensation for all positions within approved ranges" Required="true" />
+        </ReviewChecklist>
+
+        <Gates>
+          <Gate
+            Name="DepartmentBudgetCheck"
+            Description="Department people cost must be within the allocated budget envelope or have documented executive exception approval."
+            GateType="Validation"
+            IsBlocking="false">
+            <Condition>DepartmentPeopleCost &lt;= DepartmentBudgetEnvelope OR ExceptionApproved = true</Condition>
+          </Gate>
+          <Gate
+            Name="ChecklistComplete"
+            Description="All review checklist items must be addressed."
+            GateType="Checklist"
+            IsBlocking="true">
+            <Condition>AllChecklistItemsComplete = true</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>MultiApprover</ApprovalType>
+          <ApproverRoles>
+            <ApproverRole>DepartmentVP</ApproverRole>
+            <ApproverRole>VPHumanResources</ApproverRole>
+          </ApproverRoles>
+          <ApprovalMode>All</ApprovalMode>
+          <AllowReject>true</AllowReject>
+          <RejectReturnToStep>PositionPlanning</RejectReturnToStep>
+          <RequireRejectionReason>true</RequireRejectionReason>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_DeptReview_Started"
+            Recipients="DepartmentVP"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="BudgetExceeded"
+            Template="WF_DeptReview_BudgetExceeded"
+            Recipients="DepartmentVP,FPADirector"
+            Channel="Email" />
+          <Notification
+            EventType="Approved"
+            Template="WF_DeptReview_Approved"
+            Recipients="HiringManagers,HRCompTeam,FPA"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="Rejected"
+            Template="WF_DeptReview_Rejected"
+            Recipients="HiringManagers,HRCompTeam"
+            Channel="Email" />
+        </Notifications>
+
+        <StatusOnEntry>UnderReview</StatusOnEntry>
+        <StatusOnCompletion>Approved</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 5: Finance Integration                                    -->
+      <!-- ============================================================== -->
+      <Step
+        Order="5"
+        Name="FinanceIntegration"
+        DisplayName="Finance Integration"
+        Description="Push the approved people plan data into the Planning cube, mapping headcount costs to the appropriate P&amp;L line items, balance sheet accruals, and cash flow impacts. Synchronize with the Annual Budget and Rolling Forecast workflows."
+        StepType="SystemProcess"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>35</PlannedStartDay>
+          <PlannedEndDay>40</PlannedEndDay>
+          <DurationDays>5</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>FPA</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>24</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EX_PeoplePlanToCube"
+            RuleType="ExtenderRule"
+            ExecutionOrder="1"
+            Description="Map and load the approved people plan data into the Finance Planning cube. Map compensation components to P&amp;L accounts (salaries, bonus, benefits, payroll tax), accrual accounts on the balance sheet, and cash disbursement timing for cash flow."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="SourceCube" Value="People" />
+              <Parameter Name="TargetCube" Value="Finance" />
+              <Parameter Name="MappingProfile" Value="PeoplePlan_To_Finance" />
+              <!-- P&L Account Mappings -->
+              <Parameter Name="SalariesAccount" Value="6100_Salaries" />
+              <Parameter Name="BonusAccount" Value="6200_Bonus" />
+              <Parameter Name="BenefitsAccount" Value="6300_Benefits" />
+              <Parameter Name="PayrollTaxAccount" Value="6400_PayrollTax" />
+              <Parameter Name="ContractorAccount" Value="6500_ContractLabor" />
+              <!-- Balance Sheet Mappings -->
+              <Parameter Name="BonusAccrualAccount" Value="2300_BonusAccrual" />
+              <Parameter Name="BenefitsAccrualAccount" Value="2310_BenefitsPayable" />
+              <Parameter Name="PayrollAccrualAccount" Value="2320_PayrollAccrual" />
+              <!-- Cash Flow Impact -->
+              <Parameter Name="CashFlowSection" Value="OperatingActivities" />
+              <Parameter Name="PaymentTiming" Value="SemiMonthly" />
+              <Parameter Name="BonusPaymentTiming" Value="Annual_March" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="EH_CrossWorkflowSync"
+            RuleType="EventHandler"
+            ExecutionOrder="2"
+            Description="Trigger synchronization with the Annual Budget workflow to incorporate the approved people costs into the consolidated budget. Also trigger Rolling Forecast update if applicable."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="SyncTarget_Budget" Value="WF_AnnualBudget" />
+              <Parameter Name="SyncTarget_Forecast" Value="WF_RollingForecast" />
+              <Parameter Name="SyncMode" Value="Replace" />
+              <Parameter Name="NotifyBudgetOwner" Value="true" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="CR_PeopleCostReconciliation"
+            RuleType="CalculationRule"
+            ExecutionOrder="3"
+            Description="Reconcile the people costs loaded into the Finance cube back to the People Planning cube to ensure data integrity and completeness of the integration."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="ReconciliationTolerance" Value="1.00" />
+              <Parameter Name="ReconciliationScope" Value="TotalCost,ByDepartment,ByCategory" />
+              <Parameter Name="GenerateReconReport" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="DataIntegrationComplete"
+            Description="People plan data must be successfully loaded into the Finance cube and reconciled within tolerance."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>LoadStatus = 'Success' AND ReconciliationVariance &lt;= 1.00</Condition>
+          </Gate>
+          <Gate
+            Name="CrossWorkflowSyncComplete"
+            Description="Synchronization with the Annual Budget workflow must complete successfully."
+            GateType="Validation"
+            IsBlocking="false">
+            <Condition>BudgetSyncStatus = 'Success'</Condition>
+          </Gate>
+        </Gates>
+
+        <IntegrationValidation>
+          <Validation Name="TotalCostMatch" Description="Total people cost in Finance cube matches People cube" />
+          <Validation Name="DepartmentCostMatch" Description="Department-level costs reconcile between cubes" />
+          <Validation Name="AccountMappingComplete" Description="All compensation components mapped to valid GL accounts" />
+          <Validation Name="PeriodAlignment" Description="Monthly cost phasing aligns between source and target" />
+        </IntegrationValidation>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>FPADirector</ApproverRole>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_FinIntegration_Started"
+            Recipients="FPA"
+            Channel="Dashboard" />
+          <Notification
+            EventType="IntegrationComplete"
+            Template="WF_FinIntegration_Complete"
+            Recipients="FPA,FPADirector"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="ReconciliationVariance"
+            Template="WF_FinIntegration_ReconError"
+            Recipients="FPA,FPADirector"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_PeoplePlanning_Integrated"
+            Recipients="AllParticipants,FPADirector,VPHumanResources"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>Approved</StatusOnEntry>
+        <StatusOnCompletion>Integrated</StatusOnCompletion>
+      </Step>
+
+    </Steps>
+
+    <!-- ================================================================ -->
+    <!-- TIMELINE SUMMARY                                                 -->
+    <!-- ================================================================ -->
+    <TimelineSummary>
+      <CycleType>Annual with Quarterly Refresh</CycleType>
+      <AnnualCycleStart>August</AnnualCycleStart>
+      <AnnualCycleEnd>October</AnnualCycleEnd>
+      <TotalDuration>40</TotalDuration>
+      <DurationUnit>Days</DurationUnit>
+      <QuarterlyRefreshDuration>15</QuarterlyRefreshDuration>
+      <Milestones>
+        <Milestone Day="2" Name="CurrentStateLoaded" Description="Workday headcount data imported and validated" />
+        <Milestone Day="15" Name="PositionsPlanned" Description="All position changes planned and submitted by hiring managers" />
+        <Milestone Day="25" Name="CompModelComplete" Description="Compensation modeling complete with fully-loaded costs" />
+        <Milestone Day="35" Name="DepartmentApproved" Description="Department VPs reviewed and approved headcount plans" />
+        <Milestone Day="40" Name="FinanceIntegrated" Description="People costs integrated into Finance Planning cube" />
+      </Milestones>
+    </TimelineSummary>
+
+  </Workflow>
+</WorkflowDefinition>

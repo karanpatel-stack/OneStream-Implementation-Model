@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Cost Center Mapping
+  Purpose: Map source system cost centers and departments to OneStream UD2 CostCenter dimension
+  Created: 2026-02-18
+
+  Maps SAP Cost Centers, Oracle EBS Segment3 Department codes, and Workday
+  organizational units to the OneStream UD2 (CostCenter) dimension.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>CostCenterMapping</TransformName>
+      <TransformDescription>Maps source system cost center and department codes to the OneStream UD2 CostCenter dimension. Covers SAP Cost Centers (RCNTR), Oracle EBS Segment3 Department values, and Workday Cost Center IDs. The UD2 hierarchy is organized by functional area (Manufacturing, Engineering, Sales, G&A, R&D) for departmental P&L and cost analysis.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Lookup</TransformType>
+      <ExecutionOrder>400</ExecutionOrder>
+
+      <!-- ============================================================
+           MAPPING CONFIGURATION
+           ============================================================ -->
+      <MappingConfig>
+        <SourceField>SRC_CostCenter</SourceField>
+        <TargetField>OS_UD2_CostCenter</TargetField>
+        <ContextField>SRC_SourceSystem</ContextField>
+        <CaseSensitive>false</CaseSensitive>
+        <TrimWhitespace>true</TrimWhitespace>
+      </MappingConfig>
+
+      <!-- ============================================================
+           MAPPING TABLE
+           ============================================================ -->
+      <MappingTable>
+
+        <!-- ====================== SAP COST CENTERS ====================== -->
+        <MappingGroup name="SAP_CostCenters" description="SAP Cost Center (RCNTR) to OneStream UD2">
+
+          <!-- Manufacturing -->
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1010" targetCostCenter="CC_Mfg_Assembly"         description="Manufacturing: Assembly" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1020" targetCostCenter="CC_Mfg_Machining"        description="Manufacturing: Machining" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1030" targetCostCenter="CC_Mfg_Welding"          description="Manufacturing: Welding/Fabrication" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1040" targetCostCenter="CC_Mfg_Painting"         description="Manufacturing: Painting/Coating" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1050" targetCostCenter="CC_Mfg_QualityControl"   description="Manufacturing: Quality Control" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1060" targetCostCenter="CC_Mfg_Maintenance"      description="Manufacturing: Plant Maintenance" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1070" targetCostCenter="CC_Mfg_MaterialHandling" description="Manufacturing: Material Handling/Warehouse" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC1080" targetCostCenter="CC_Mfg_PlantMgmt"        description="Manufacturing: Plant Management" />
+
+          <!-- Engineering and R&D -->
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC2010" targetCostCenter="CC_Eng_ProductDesign"    description="Engineering: Product Design" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC2020" targetCostCenter="CC_Eng_ProcessEng"       description="Engineering: Process Engineering" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC2030" targetCostCenter="CC_RD_Research"          description="R&D: Research" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC2040" targetCostCenter="CC_RD_Development"       description="R&D: New Product Development" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC2050" targetCostCenter="CC_RD_Testing"           description="R&D: Testing & Validation" />
+
+          <!-- Sales and Marketing -->
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC3010" targetCostCenter="CC_Sales_Domestic"       description="Sales: Domestic Sales" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC3020" targetCostCenter="CC_Sales_International"  description="Sales: International Sales" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC3030" targetCostCenter="CC_Sales_KeyAccounts"    description="Sales: Key Account Management" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC3040" targetCostCenter="CC_Mktg_Marketing"       description="Marketing: General Marketing" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC3050" targetCostCenter="CC_Mktg_Digital"         description="Marketing: Digital Marketing" />
+
+          <!-- General & Administrative -->
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC4010" targetCostCenter="CC_GA_Finance"           description="G&A: Finance & Accounting" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC4020" targetCostCenter="CC_GA_HR"                description="G&A: Human Resources" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC4030" targetCostCenter="CC_GA_IT"                description="G&A: Information Technology" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC4040" targetCostCenter="CC_GA_Legal"             description="G&A: Legal & Compliance" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC4050" targetCostCenter="CC_GA_Executive"         description="G&A: Executive Management" />
+          <Mapping sourceSystem="SAP" sourceCostCenter="CC4060" targetCostCenter="CC_GA_Facilities"        description="G&A: Facilities Management" />
+
+        </MappingGroup>
+
+        <!-- ====================== ORACLE EBS DEPARTMENTS ====================== -->
+        <MappingGroup name="Oracle_Departments" description="Oracle EBS Segment3 Department to OneStream UD2">
+          <Mapping sourceSystem="Oracle" sourceCostCenter="100" targetCostCenter="CC_Mfg_Assembly"         description="Oracle: Assembly Dept" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="110" targetCostCenter="CC_Mfg_Machining"        description="Oracle: Machining Dept" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="120" targetCostCenter="CC_Mfg_QualityControl"   description="Oracle: QC Dept" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="200" targetCostCenter="CC_Eng_ProductDesign"    description="Oracle: Engineering" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="300" targetCostCenter="CC_Sales_Domestic"       description="Oracle: Sales" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="310" targetCostCenter="CC_Sales_International"  description="Oracle: Intl Sales" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="400" targetCostCenter="CC_GA_Finance"           description="Oracle: Finance" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="410" targetCostCenter="CC_GA_HR"                description="Oracle: HR" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="420" targetCostCenter="CC_GA_IT"                description="Oracle: IT" />
+          <Mapping sourceSystem="Oracle" sourceCostCenter="430" targetCostCenter="CC_GA_Legal"             description="Oracle: Legal" />
+        </MappingGroup>
+
+        <!-- ====================== WORKDAY COST CENTERS ====================== -->
+        <MappingGroup name="Workday_CostCenters" description="Workday Cost Center ID to OneStream UD2">
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_MFG_001"  targetCostCenter="CC_Mfg_Assembly"        description="Workday: Manufacturing - Assembly" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_MFG_002"  targetCostCenter="CC_Mfg_Machining"       description="Workday: Manufacturing - Machining" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_MFG_003"  targetCostCenter="CC_Mfg_QualityControl"  description="Workday: Manufacturing - QC" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_ENG_001"  targetCostCenter="CC_Eng_ProductDesign"   description="Workday: Engineering" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_RD_001"   targetCostCenter="CC_RD_Research"         description="Workday: R&D Research" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_SLS_001"  targetCostCenter="CC_Sales_Domestic"      description="Workday: Sales Domestic" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_SLS_002"  targetCostCenter="CC_Sales_International" description="Workday: Sales International" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_MKT_001"  targetCostCenter="CC_Mktg_Marketing"      description="Workday: Marketing" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_FIN_001"  targetCostCenter="CC_GA_Finance"          description="Workday: Finance" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_HR_001"   targetCostCenter="CC_GA_HR"               description="Workday: HR" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_IT_001"   targetCostCenter="CC_GA_IT"               description="Workday: IT" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_LGL_001"  targetCostCenter="CC_GA_Legal"            description="Workday: Legal" />
+          <Mapping sourceSystem="Workday" sourceCostCenter="WD_EXC_001"  targetCostCenter="CC_GA_Executive"        description="Workday: Executive" />
+        </MappingGroup>
+
+      </MappingTable>
+
+      <!-- ============================================================
+           UNMAPPED HANDLING
+           ============================================================ -->
+      <UnmappedHandling>
+        <DefaultCostCenter>CC_Unassigned</DefaultCostCenter>
+        <OnUnmapped>
+          <Action>MapToDefault</Action>
+          <FlagForReview>true</FlagForReview>
+          <ReviewFlagColumn>OS_MappingFlag</ReviewFlagColumn>
+          <ReviewFlagValue>UNMAPPED_CC</ReviewFlagValue>
+          <LogToTable>DM_UnmappedCostCenters</LogToTable>
+        </OnUnmapped>
+      </UnmappedHandling>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_ExecutiveSummary"
+  Description="C-Suite Executive Summary - KPI Overview Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       GLOBAL POV BINDINGS
+       ════════════════════════════════════════════════════════════════════ -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#PriorYear" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                           DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Base"              DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#*"                           DefaultMember="A#TotalPL" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"              DefaultMember="F#YTD" />
+    <POVBinding Dimension="UD1"       MemberFilter="UD1#None"                      DefaultMember="UD1#None" />
+    <POVBinding Dimension="UD2"       MemberFilter="UD2#None"                      DefaultMember="UD2#None" />
+  </POVBindings>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       DATA ADAPTERS
+       ════════════════════════════════════════════════════════════════════ -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_ExecutiveSummary"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="MainCube"
+      SuppressNoData="True"
+      SuppressZeros="True">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="5000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       LAYOUT DEFINITION  (4 rows)
+       ════════════════════════════════════════════════════════════════════ -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- ─── HEADER ROW ────────────────────────────────────────────────── -->
+    <Row Index="0" Height="60" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="3" RowSpan="1"
+             PanelType="ImagePanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <ImageComponent
+          Name="CompanyLogo"
+          ImageSource="Images/CompanyLogo.png"
+          HorizontalAlignment="Left"
+          VerticalAlignment="Center"
+          Width="180" Height="40" />
+      </Panel>
+
+      <Panel Row="0" Column="3" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Executive Summary"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF"
+          HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <LabelComponent
+          Name="CurrentPeriodDisplay"
+          Text="{POV.Time.MemberDescription} | {POV.Scenario.MemberDescription}"
+          FontFamily="Segoe UI" FontSize="12" FontWeight="Normal"
+          ForeColor="#A0B4D0"
+          HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+      </Panel>
+
+      <Panel Row="0" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="ScenarioSelector"
+          FilterType="DropDown"
+          Dimension="Scenario"
+          MemberFilter="S#Actual,S#Budget,S#PriorYear"
+          DefaultMember="S#Actual"
+          Label="Scenario"
+          LabelForeColor="#A0B4D0"
+          Width="200"
+          FontFamily="Segoe UI" FontSize="11"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4"
+          HorizontalAlignment="Right" VerticalAlignment="Center" />
+        <FilterComponent
+          Name="PeriodSelector"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period"
+          LabelForeColor="#A0B4D0"
+          Width="160"
+          FontFamily="Segoe UI" FontSize="11"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4"
+          HorizontalAlignment="Right" VerticalAlignment="Center" />
+      </Panel>
+    </Row>
+
+    <!-- ─── ROW 1: KPI TILES ─────────────────────────────────────────── -->
+    <Row Index="1" Height="140" HeightUnit="Pixel">
+
+      <!-- KPI 1 - Revenue -->
+      <Panel Row="1" Column="0" ColumnSpan="2" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040">
+        <KPITileComponent
+          Name="KPI_Revenue"
+          Title="Revenue"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="26" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0.0,,M"
+          DataAdapter="DDA_ExecutiveSummary"
+          ValueExpression="A#Revenue:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#YTD">
+          <Comparison Name="vsBudget"
+                      Label="vs Budget"
+                      CompareExpression="A#Revenue:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Comparison Name="vsPY"
+                      Label="vs PY"
+                      CompareExpression="A#Revenue:S#PriorYear:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Icon IconType="FontAwesome" IconName="fa-dollar-sign" IconColor="#3498DB" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI 2 - Gross Margin % -->
+      <Panel Row="1" Column="2" ColumnSpan="2" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040">
+        <KPITileComponent
+          Name="KPI_GrossMarginPct"
+          Title="Gross Margin %"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="26" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.0%"
+          DataAdapter="DDA_ExecutiveSummary"
+          ValueExpression="A#GrossMarginPct:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#YTD">
+          <Comparison Name="vsBudget"
+                      Label="vs Budget"
+                      CompareExpression="A#GrossMarginPct:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+0.0 bps;-0.0 bps"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Comparison Name="vsPY"
+                      Label="vs PY"
+                      CompareExpression="A#GrossMarginPct:S#PriorYear:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+0.0 bps;-0.0 bps"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Icon IconType="FontAwesome" IconName="fa-percentage" IconColor="#2ECC71" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI 3 - EBITDA -->
+      <Panel Row="1" Column="4" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040">
+        <KPITileComponent
+          Name="KPI_EBITDA"
+          Title="EBITDA"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="26" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0.0,,M"
+          DataAdapter="DDA_ExecutiveSummary"
+          ValueExpression="A#EBITDA:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#YTD">
+          <Comparison Name="vsBudget"
+                      Label="vs Budget"
+                      CompareExpression="A#EBITDA:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Comparison Name="vsPY"
+                      Label="vs PY"
+                      CompareExpression="A#EBITDA:S#PriorYear:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Icon IconType="FontAwesome" IconName="fa-chart-line" IconColor="#E67E22" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI 4 - Net Income -->
+      <Panel Row="1" Column="7" ColumnSpan="2" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040">
+        <KPITileComponent
+          Name="KPI_NetIncome"
+          Title="Net Income"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="26" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0.0,,M"
+          DataAdapter="DDA_ExecutiveSummary"
+          ValueExpression="A#NetIncome:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#YTD">
+          <Comparison Name="vsBudget"
+                      Label="vs Budget"
+                      CompareExpression="A#NetIncome:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Comparison Name="vsPY"
+                      Label="vs PY"
+                      CompareExpression="A#NetIncome:S#PriorYear:T#{POV.Time}:E#{POV.Entity}:F#YTD"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Icon IconType="FontAwesome" IconName="fa-money-bill-wave" IconColor="#9B59B6" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+
+      <!-- KPI 5 - Cash Position -->
+      <Panel Row="1" Column="9" ColumnSpan="3" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040">
+        <KPITileComponent
+          Name="KPI_CashPosition"
+          Title="Cash Position"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="26" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="#,##0.0,,M"
+          DataAdapter="DDA_ExecutiveSummary"
+          ValueExpression="A#CashAndEquivalents:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#Periodic">
+          <Comparison Name="vsBudget"
+                      Label="vs Budget"
+                      CompareExpression="A#CashAndEquivalents:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Comparison Name="vsPY"
+                      Label="vs PY"
+                      CompareExpression="A#CashAndEquivalents:S#PriorYear:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                      Format="+#,##0.0,,M;-#,##0.0,,M"
+                      PercentFormat="+0.0%;-0.0%"
+                      FavorableDirection="Up"
+                      FavorableColor="#27AE60" UnfavorableColor="#E74C3C" NeutralColor="#F39C12" />
+          <Icon IconType="FontAwesome" IconName="fa-wallet" IconColor="#1ABC9C" IconSize="18" />
+        </KPITileComponent>
+      </Panel>
+    </Row>
+
+    <!-- ─── ROW 2: CHARTS ─────────────────────────────────────────────── -->
+    <Row Index="2" Height="320" HeightUnit="Pixel">
+
+      <!-- Revenue Trend Chart -->
+      <Panel Row="2" Column="0" ColumnSpan="7" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040"
+             Title="Revenue Trend (12 Months)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="RevenueTrendChart"
+          ChartType="Line"
+          DataAdapter="DDA_ExecutiveSummary"
+          AnimationEnabled="True" AnimationDuration="800"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            Title="Revenue ($M)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,,M"
+            GridLineColor="#2D4470" GridLineStyle="Dotted"
+            MinValue="Auto" MaxValue="Auto" />
+
+          <Series Name="Actual"
+                  Expression="A#Revenue:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB" LineWidth="3" LineStyle="Solid"
+                  MarkerType="Circle" MarkerSize="6"
+                  MarkerFillColor="#3498DB" MarkerBorderColor="#FFFFFF" />
+          <Series Name="Budget"
+                  Expression="A#Revenue:S#Budget:E#{POV.Entity}:F#Periodic"
+                  Color="#E67E22" LineWidth="2" LineStyle="Dashed"
+                  MarkerType="Diamond" MarkerSize="5"
+                  MarkerFillColor="#E67E22" MarkerBorderColor="#FFFFFF" />
+          <Series Name="Prior Year"
+                  Expression="A#Revenue:S#PriorYear:E#{POV.Entity}:F#Periodic"
+                  Color="#95A5A6" LineWidth="2" LineStyle="Dotted"
+                  MarkerType="Square" MarkerSize="4"
+                  MarkerFillColor="#95A5A6" MarkerBorderColor="#FFFFFF" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- P&L Waterfall Chart -->
+      <Panel Row="2" Column="7" ColumnSpan="5" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040"
+             Title="P&amp;L Waterfall" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="PLWaterfallChart"
+          ChartType="Waterfall"
+          DataAdapter="DDA_ExecutiveSummary"
+          AnimationEnabled="True" AnimationDuration="800"
+          ShowLegend="False"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M">
+
+          <XAxis
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="($M)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,,M"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <WaterfallCategories>
+            <Category Name="Revenue"       Expression="A#Revenue:S#{POV.Scenario}:T#{POV.Time}:F#YTD"       CategoryType="Total"      Color="#3498DB" />
+            <Category Name="COGS"           Expression="A#COGS:S#{POV.Scenario}:T#{POV.Time}:F#YTD"         CategoryType="Decrease"   Color="#E74C3C" />
+            <Category Name="Gross Profit"   Expression="A#GrossProfit:S#{POV.Scenario}:T#{POV.Time}:F#YTD"  CategoryType="Subtotal"   Color="#2ECC71" />
+            <Category Name="SG&amp;A"       Expression="A#SGA:S#{POV.Scenario}:T#{POV.Time}:F#YTD"          CategoryType="Decrease"   Color="#E74C3C" />
+            <Category Name="R&amp;D"        Expression="A#RnD:S#{POV.Scenario}:T#{POV.Time}:F#YTD"          CategoryType="Decrease"   Color="#E74C3C" />
+            <Category Name="Other OPEX"     Expression="A#OtherOPEX:S#{POV.Scenario}:T#{POV.Time}:F#YTD"    CategoryType="Decrease"   Color="#E74C3C" />
+            <Category Name="EBITDA"         Expression="A#EBITDA:S#{POV.Scenario}:T#{POV.Time}:F#YTD"       CategoryType="Subtotal"   Color="#E67E22" />
+            <Category Name="D&amp;A"        Expression="A#DepAmort:S#{POV.Scenario}:T#{POV.Time}:F#YTD"     CategoryType="Decrease"   Color="#E74C3C" />
+            <Category Name="Net Income"     Expression="A#NetIncome:S#{POV.Scenario}:T#{POV.Time}:F#YTD"    CategoryType="Total"      Color="#9B59B6" />
+          </WaterfallCategories>
+
+          <ConnectorLine Color="#8CA8CC" LineWidth="1" LineStyle="Dotted" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ─── ROW 3: GRIDS ──────────────────────────────────────────────── -->
+    <Row Index="3" Height="280" HeightUnit="Pixel">
+
+      <!-- Regional Performance Grid -->
+      <Panel Row="3" Column="0" ColumnSpan="7" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040"
+             Title="Regional Performance" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="RegionalPerformanceGrid"
+          DataAdapter="DDA_ExecutiveSummary"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="32"
+          FreezeColumns="1"
+          EnableSorting="True"
+          EnableFiltering="False">
+
+          <RowDimension Dimension="Entity" MemberFilter="E#Americas,E#EMEA,E#APAC" ShowHierarchy="False" />
+
+          <Columns>
+            <Column Header="Region"         Binding="Entity.Description"    Width="140" Alignment="Left"   FontWeight="Bold" />
+            <Column Header="Revenue ($M)"   Binding="A#Revenue:F#YTD"      Width="120" Alignment="Right"  Format="#,##0.0,,M" />
+            <Column Header="GM %"           Binding="A#GrossMarginPct:F#YTD" Width="80" Alignment="Center" Format="0.0%">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0.35" BackgroundColor="#27AE6020" ForeColor="#27AE60" />
+                <Rule Condition="Value >= 0.25" BackgroundColor="#F39C1220" ForeColor="#F39C12" />
+                <Rule Condition="Value &lt; 0.25"  BackgroundColor="#E74C3C20" ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="EBITDA %"       Binding="A#EBITDAPct:F#YTD"    Width="90"  Alignment="Center" Format="0.0%">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0.20" BackgroundColor="#27AE6020" ForeColor="#27AE60" />
+                <Rule Condition="Value >= 0.12" BackgroundColor="#F39C1220" ForeColor="#F39C12" />
+                <Rule Condition="Value &lt; 0.12"  BackgroundColor="#E74C3C20" ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Rev Var ($M)"   Binding="A#Revenue:F#YTD:S#Variance" Width="110" Alignment="Right" Format="+#,##0.0,,M;-#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Rev Var %"      Binding="A#Revenue:F#YTD:S#VariancePct" Width="90" Alignment="Center" Format="+0.0%;-0.0%">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+
+      <!-- Top 5 Variance Items -->
+      <Panel Row="3" Column="7" ColumnSpan="5" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040"
+             Title="Top 5 Budget Variance Items" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="Top5VarianceGrid"
+          DataAdapter="DDA_ExecutiveSummary"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="32"
+          TopN="5"
+          TopNSortColumn="VarianceAbs"
+          TopNSortDirection="Descending">
+
+          <RowDimension Dimension="Account" MemberFilter="A#TotalPL.Children" ShowHierarchy="False" />
+
+          <Columns>
+            <Column Header="Account"     Binding="Account.Description"        Width="160" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Actual"      Binding="A#:S#Actual:F#YTD"          Width="100" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="Budget"      Binding="A#:S#Budget:F#YTD"          Width="100" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="Variance"    Binding="A#:S#Variance:F#YTD"        Width="100" Alignment="Right" Format="+#,##0.0,,M;-#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       DRILL-THROUGH CONFIGURATIONS
+       ════════════════════════════════════════════════════════════════════ -->
+  <DrillThroughDefinitions>
+    <DrillThrough
+      Name="DrillToPLWaterfall"
+      TargetDashboard="DB_PLWaterfall"
+      TriggerType="DoubleClick"
+      SourceComponent="PLWaterfallChart"
+      PassPOV="True">
+      <ParameterMappings>
+        <Mapping Source="POV.Entity"   Target="POV.Entity" />
+        <Mapping Source="POV.Time"     Target="POV.Time" />
+        <Mapping Source="POV.Scenario" Target="POV.Scenario" />
+      </ParameterMappings>
+    </DrillThrough>
+
+    <DrillThrough
+      Name="DrillToPlantPerformance"
+      TargetDashboard="DB_PlantPerformance"
+      TriggerType="DoubleClick"
+      SourceComponent="RegionalPerformanceGrid"
+      PassPOV="True">
+      <ParameterMappings>
+        <Mapping Source="SelectedRow.Entity" Target="POV.Entity" />
+        <Mapping Source="POV.Time"           Target="POV.Time" />
+        <Mapping Source="POV.Scenario"       Target="POV.Scenario" />
+      </ParameterMappings>
+    </DrillThrough>
+  </DrillThroughDefinitions>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       VISUAL STYLING
+       ════════════════════════════════════════════════════════════════════ -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8"
+      ScrollBarColor="#2D4470"
+      ScrollBarThumbColor="#3A5A8C" />
+    <ColorPalette>
+      <Color Name="Primary"      Value="#3498DB" />
+      <Color Name="Secondary"    Value="#E67E22" />
+      <Color Name="Success"      Value="#27AE60" />
+      <Color Name="Danger"       Value="#E74C3C" />
+      <Color Name="Warning"      Value="#F39C12" />
+      <Color Name="Info"         Value="#1ABC9C" />
+      <Color Name="Muted"        Value="#95A5A6" />
+      <Color Name="Accent"       Value="#9B59B6" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

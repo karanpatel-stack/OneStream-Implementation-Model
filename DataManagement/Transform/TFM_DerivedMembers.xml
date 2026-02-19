@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Derived Members
+  Purpose: Calculate and assign derived dimension members during data transformation
+  Created: 2026-02-18
+
+  This transform populates OneStream dimension members that are not directly
+  sourced from the incoming data but are derived from context, business rules,
+  or conventions. Ensures all required cube dimensions have valid members.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>DerivedMembers</TransformName>
+      <TransformDescription>Calculates derived dimension members for OneStream cube dimensions that are not directly mapped from source data. Derives Scenario (from data source/filename), Flow (movement type based on data characteristics), Consolidation (always Local for source data), UD8 Version (Working for new loads), and default members for dimensions not present in the source system data. Ensures every record has complete dimension assignments before cube loading.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Calculation</TransformType>
+      <ExecutionOrder>800</ExecutionOrder>
+
+      <!-- ============================================================
+           DERIVED MEMBER RULES
+           ============================================================ -->
+      <DerivedMemberRules>
+
+        <!-- ====================== SCENARIO DERIVATION ====================== -->
+        <Rule name="DeriveScenario" targetField="OS_Scenario">
+          <Description>Derive the Scenario dimension member based on the data source, file naming convention, or explicit source field. Financial actuals from ERP systems map to "Actual"; budget template data maps to "Budget"; forecast data maps to "Forecast".</Description>
+          <Priority>1</Priority>
+          <Logic><![CDATA[
+            CASE
+              /* If explicitly provided in source data, use it */
+              WHEN SRC_Scenario IS NOT NULL AND LEN(LTRIM(RTRIM(SRC_Scenario))) > 0
+                THEN SRC_Scenario
+
+              /* Budget template files always load as Budget scenario */
+              WHEN @@StageName LIKE '%Budget%' OR @@SourceFileName LIKE '%Budget%'
+                THEN 'Budget'
+
+              /* Forecast template files */
+              WHEN @@StageName LIKE '%Forecast%' OR @@SourceFileName LIKE '%Forecast%'
+                THEN 'Forecast'
+
+              /* ERP extractions (SAP, Oracle, NetSuite) are Actuals */
+              WHEN @@StageName IN ('SAP_TrialBalance', 'Oracle_GL', 'NetSuite_GL')
+                THEN 'Actual'
+
+              /* Production and statistical data from MES */
+              WHEN @@StageName = 'MES_Production'
+                THEN 'Actual'
+
+              /* Workday headcount - actuals */
+              WHEN @@StageName = 'Workday_Headcount'
+                THEN 'Actual'
+
+              /* Default to Actual if cannot determine */
+              ELSE 'Actual'
+            END
+          ]]></Logic>
+          <ValidValues>Actual,Budget,Forecast,Plan</ValidValues>
+        </Rule>
+
+        <!-- ====================== FLOW DERIVATION ====================== -->
+        <Rule name="DeriveFlow" targetField="OS_Flow">
+          <Description>Derive the Flow dimension member based on the type of data movement. Actuals from source systems use F_Movement (periodic activity). Opening balances use F_OpeningBalance. Budget data uses F_BudgetInput. The Flow member controls how data is aggregated across time periods.</Description>
+          <Priority>2</Priority>
+          <Logic><![CDATA[
+            CASE
+              /* Balance sheet accounts use EndingBalance flow for point-in-time balances */
+              WHEN OS_Account LIKE 'A_BS_%' AND OS_Scenario = 'Actual'
+                THEN 'F_EndingBalance'
+
+              /* Income statement actuals use Movement flow for periodic activity */
+              WHEN (OS_Account LIKE 'A_Rev_%'
+                    OR OS_Account LIKE 'A_COGS_%'
+                    OR OS_Account LIKE 'A_OpEx_%')
+                   AND OS_Scenario = 'Actual'
+                THEN 'F_Movement'
+
+              /* Statistical data uses Movement */
+              WHEN OS_Account LIKE 'A_Stat_%'
+                THEN 'F_Movement'
+
+              /* Budget input flow */
+              WHEN OS_Scenario = 'Budget'
+                THEN 'F_BudgetInput'
+
+              /* Forecast input flow */
+              WHEN OS_Scenario = 'Forecast'
+                THEN 'F_ForecastInput'
+
+              /* Default: Movement for periodic data */
+              ELSE 'F_Movement'
+            END
+          ]]></Logic>
+          <ValidValues>F_Movement,F_EndingBalance,F_OpeningBalance,F_BudgetInput,F_ForecastInput,F_None</ValidValues>
+        </Rule>
+
+        <!-- ====================== CONSOLIDATION DERIVATION ====================== -->
+        <Rule name="DeriveConsolidation" targetField="OS_Consolidation">
+          <Description>Derive the Consolidation dimension member. Source data from individual entities always loads at the Local (C_Local) level. Consolidated and eliminated values are calculated by OneStream's consolidation engine, not loaded from source.</Description>
+          <Priority>3</Priority>
+          <Logic><![CDATA[
+            CASE
+              /* Elimination entries (if loaded directly) */
+              WHEN OS_Entity LIKE 'Elim_%'
+                THEN 'C_Elimination'
+
+              /* Adjustment entries */
+              WHEN SRC_JournalSource = 'CONSOLIDATION_ADJ'
+                THEN 'C_Adjustment'
+
+              /* All other source data loads at Local level */
+              ELSE 'C_Local'
+            END
+          ]]></Logic>
+          <ValidValues>C_Local,C_Elimination,C_Adjustment,C_Proportion,C_Translated</ValidValues>
+        </Rule>
+
+        <!-- ====================== UD8 VERSION DERIVATION ====================== -->
+        <Rule name="DeriveUD8Version" targetField="OS_UD8_Version">
+          <Description>Derive the UD8 Version dimension member. New data loads always target the Working version. Final/locked versions are only written during period-close processes. This supports OneStream's workflow-based version management.</Description>
+          <Priority>4</Priority>
+          <Logic><![CDATA[
+            CASE
+              /* If explicitly provided */
+              WHEN SRC_Version IS NOT NULL AND LEN(LTRIM(RTRIM(SRC_Version))) > 0
+                THEN SRC_Version
+
+              /* Budget cycles may specify version */
+              WHEN OS_Scenario = 'Budget' AND @@LoadParameter_BudgetVersion IS NOT NULL
+                THEN @@LoadParameter_BudgetVersion
+
+              /* Default: Working version for all new loads */
+              ELSE 'Working'
+            END
+          ]]></Logic>
+          <ValidValues>Working,Final,V1,V2,V3</ValidValues>
+        </Rule>
+
+        <!-- ====================== TIME / PERIOD DERIVATION ====================== -->
+        <Rule name="DeriveTimePeriod" targetField="OS_Time">
+          <Description>Derive the OneStream Time dimension member from source system fiscal year and period fields. Converts to OneStream's standard time format (YYYYMn).</Description>
+          <Priority>5</Priority>
+          <Logic><![CDATA[
+            CASE
+              /* If already in OneStream format */
+              WHEN SRC_Period LIKE '____M%' THEN SRC_Period
+
+              /* SAP: FiscalYear + Period (e.g., 2026 + 001 = 2026M1) */
+              WHEN SRC_SourceSystem = 'SAP'
+                THEN SRC_Year + 'M' + CAST(CAST(SRC_Period AS INT) AS VARCHAR)
+
+              /* Oracle: Period name like 'JAN-26' */
+              WHEN SRC_SourceSystem = 'Oracle'
+                THEN '20' + RIGHT(SRC_Period, 2) + 'M' +
+                     CASE LEFT(SRC_Period, 3)
+                       WHEN 'JAN' THEN '1'  WHEN 'FEB' THEN '2'  WHEN 'MAR' THEN '3'
+                       WHEN 'APR' THEN '4'  WHEN 'MAY' THEN '5'  WHEN 'JUN' THEN '6'
+                       WHEN 'JUL' THEN '7'  WHEN 'AUG' THEN '8'  WHEN 'SEP' THEN '9'
+                       WHEN 'OCT' THEN '10' WHEN 'NOV' THEN '11' WHEN 'DEC' THEN '12'
+                       ELSE '0'
+                     END
+
+              /* NetSuite: FiscalYear + FiscalMonth */
+              WHEN SRC_SourceSystem = 'NetSuite'
+                THEN CAST(SRC_FiscalYear AS VARCHAR) + 'M' + CAST(SRC_FiscalMonth AS VARCHAR)
+
+              /* MES/File-based: derive from date field */
+              WHEN SRC_ProductionDate IS NOT NULL
+                THEN CAST(YEAR(SRC_ProductionDate) AS VARCHAR) + 'M' + CAST(MONTH(SRC_ProductionDate) AS VARCHAR)
+
+              /* Workday: derive from effective date */
+              WHEN SRC_EffectiveDate IS NOT NULL
+                THEN CAST(YEAR(SRC_EffectiveDate) AS VARCHAR) + 'M' + CAST(MONTH(SRC_EffectiveDate) AS VARCHAR)
+
+              /* Fallback */
+              ELSE NULL
+            END
+          ]]></Logic>
+        </Rule>
+
+        <!-- ====================== DEFAULT DIMENSION MEMBERS ====================== -->
+        <Rule name="DefaultUD1Product" targetField="OS_UD1_Product">
+          <Description>Set default UD1 Product member when not mapped from source</Description>
+          <Priority>10</Priority>
+          <Logic><![CDATA[
+            CASE
+              WHEN OS_UD1_Product IS NOT NULL AND LEN(LTRIM(RTRIM(OS_UD1_Product))) > 0
+                THEN OS_UD1_Product
+              ELSE 'Prod_Unassigned'
+            END
+          ]]></Logic>
+        </Rule>
+
+        <Rule name="DefaultUD2CostCenter" targetField="OS_UD2_CostCenter">
+          <Description>Set default UD2 CostCenter member when not mapped from source</Description>
+          <Priority>11</Priority>
+          <Logic><![CDATA[
+            CASE
+              WHEN OS_UD2_CostCenter IS NOT NULL AND LEN(LTRIM(RTRIM(OS_UD2_CostCenter))) > 0
+                THEN OS_UD2_CostCenter
+              ELSE 'CC_Unassigned'
+            END
+          ]]></Logic>
+        </Rule>
+
+        <Rule name="DefaultUD3" targetField="OS_UD3">
+          <Description>UD3 is not actively used in initial implementation; set to None</Description>
+          <Priority>12</Priority>
+          <Logic><![CDATA[ 'UD3_None' ]]></Logic>
+        </Rule>
+
+        <Rule name="DefaultUD4" targetField="OS_UD4">
+          <Description>UD4 is not actively used in initial implementation; set to None</Description>
+          <Priority>13</Priority>
+          <Logic><![CDATA[ 'UD4_None' ]]></Logic>
+        </Rule>
+
+        <Rule name="DefaultUD5Intercompany" targetField="OS_UD5_Intercompany">
+          <Description>Derive UD5 Intercompany partner from source intercompany fields</Description>
+          <Priority>14</Priority>
+          <Logic><![CDATA[
+            CASE
+              WHEN SRC_Intercompany IS NOT NULL AND LEN(LTRIM(RTRIM(SRC_Intercompany))) > 0
+                THEN 'IC_' + SRC_Intercompany
+              ELSE 'IC_None'
+            END
+          ]]></Logic>
+        </Rule>
+
+        <Rule name="DefaultUD6" targetField="OS_UD6">
+          <Description>UD6 reserved; set to None</Description>
+          <Priority>15</Priority>
+          <Logic><![CDATA[ 'UD6_None' ]]></Logic>
+        </Rule>
+
+        <Rule name="DefaultUD7" targetField="OS_UD7">
+          <Description>UD7 reserved; set to None</Description>
+          <Priority>16</Priority>
+          <Logic><![CDATA[ 'UD7_None' ]]></Logic>
+        </Rule>
+
+        <!-- ====================== SOURCE SYSTEM TRACKING ====================== -->
+        <Rule name="DeriveSourceSystem" targetField="OS_SourceSystem">
+          <Description>Tag each record with its source system origin for audit and reconciliation</Description>
+          <Priority>20</Priority>
+          <Logic><![CDATA[
+            CASE
+              WHEN @@StageName LIKE 'SAP_%'       THEN 'SAP_S4HANA'
+              WHEN @@StageName LIKE 'Oracle_%'     THEN 'Oracle_EBS'
+              WHEN @@StageName LIKE 'NetSuite_%'   THEN 'NetSuite'
+              WHEN @@StageName LIKE 'Workday_%'    THEN 'Workday_HCM'
+              WHEN @@StageName LIKE 'MES_%'        THEN 'MES'
+              WHEN @@StageName LIKE 'Excel_%'      THEN 'Excel_Template'
+              ELSE 'Unknown'
+            END
+          ]]></Logic>
+        </Rule>
+
+      </DerivedMemberRules>
+
+      <!-- ============================================================
+           OUTPUT FIELD SUMMARY
+           Complete list of dimension fields populated by this transform.
+           ============================================================ -->
+      <OutputFields>
+        <Field name="OS_Scenario"          dataType="String" maxLength="20"  description="Scenario: Actual/Budget/Forecast/Plan" />
+        <Field name="OS_Time"              dataType="String" maxLength="10"  description="Time period: YYYYMn format" />
+        <Field name="OS_Flow"              dataType="String" maxLength="30"  description="Flow: Movement type" />
+        <Field name="OS_Consolidation"     dataType="String" maxLength="20"  description="Consolidation: Local/Elimination/Adjustment" />
+        <Field name="OS_UD1_Product"       dataType="String" maxLength="50"  description="UD1: Product" />
+        <Field name="OS_UD2_CostCenter"    dataType="String" maxLength="50"  description="UD2: Cost Center" />
+        <Field name="OS_UD3"               dataType="String" maxLength="50"  description="UD3: Reserved" />
+        <Field name="OS_UD4"               dataType="String" maxLength="50"  description="UD4: Reserved" />
+        <Field name="OS_UD5_Intercompany"  dataType="String" maxLength="50"  description="UD5: Intercompany Partner" />
+        <Field name="OS_UD6"               dataType="String" maxLength="50"  description="UD6: Reserved" />
+        <Field name="OS_UD7"               dataType="String" maxLength="50"  description="UD7: Reserved" />
+        <Field name="OS_UD8_Version"       dataType="String" maxLength="20"  description="UD8: Data Version" />
+        <Field name="OS_SourceSystem"      dataType="String" maxLength="20"  description="Source system tag for audit" />
+      </OutputFields>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

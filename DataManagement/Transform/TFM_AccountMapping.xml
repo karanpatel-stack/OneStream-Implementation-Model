@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Account Mapping
+  Purpose: Map source system GL accounts to OneStream Account dimension members
+  Created: 2026-02-18
+
+  This transform provides a centralized account mapping table that translates
+  account codes from SAP, Oracle EBS, and NetSuite into the unified OneStream
+  chart of accounts. Unmapped accounts are routed to a holding account for review.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>AccountMapping</TransformName>
+      <TransformDescription>Lookup-based account mapping that translates source system GL account codes (SAP RACCT, Oracle Segment2, NetSuite AccountNumber) to OneStream Account dimension members. Covers revenue, COGS, operating expense, balance sheet, and statistical accounts across all source systems. Unmapped accounts are assigned to UNMAPPED_ACCOUNT and flagged for analyst review.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Lookup</TransformType>
+      <ExecutionOrder>100</ExecutionOrder>
+
+      <!-- ============================================================
+           MAPPING CONFIGURATION
+           ============================================================ -->
+      <MappingConfig>
+        <SourceField>SRC_Account</SourceField>
+        <TargetField>OS_Account</TargetField>
+        <!-- Additional context field to differentiate same account codes across source systems -->
+        <ContextField>SRC_SourceSystem</ContextField>
+        <CaseSensitive>false</CaseSensitive>
+        <TrimWhitespace>true</TrimWhitespace>
+      </MappingConfig>
+
+      <!-- ============================================================
+           MAPPING TABLE
+           Organized by account category for maintainability.
+           ============================================================ -->
+      <MappingTable>
+
+        <!-- ====================== REVENUE ACCOUNTS ====================== -->
+        <MappingGroup name="Revenue" description="Revenue and sales accounts">
+          <!-- SAP Revenue Accounts -->
+          <Mapping sourceSystem="SAP" sourceAccount="0000800000" targetAccount="A_Rev_ProductSales"        description="SAP: Product Revenue - Domestic" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000800100" targetAccount="A_Rev_ProductSales_Export"  description="SAP: Product Revenue - Export" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000800200" targetAccount="A_Rev_ServiceRevenue"      description="SAP: Service Revenue" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000800300" targetAccount="A_Rev_SparePartsSales"     description="SAP: Spare Parts Revenue" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000800400" targetAccount="A_Rev_LicenseRevenue"      description="SAP: License/Royalty Revenue" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000800500" targetAccount="A_Rev_IntercompanySales"   description="SAP: Intercompany Sales" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000810000" targetAccount="A_Rev_Discounts"           description="SAP: Sales Discounts and Allowances" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000810100" targetAccount="A_Rev_Returns"             description="SAP: Sales Returns" />
+
+          <!-- Oracle EBS Revenue Accounts -->
+          <Mapping sourceSystem="Oracle" sourceAccount="40000" targetAccount="A_Rev_ProductSales"        description="Oracle: Product Sales Revenue" />
+          <Mapping sourceSystem="Oracle" sourceAccount="40100" targetAccount="A_Rev_ProductSales_Export"  description="Oracle: Export Sales Revenue" />
+          <Mapping sourceSystem="Oracle" sourceAccount="40200" targetAccount="A_Rev_ServiceRevenue"      description="Oracle: Service Revenue" />
+          <Mapping sourceSystem="Oracle" sourceAccount="40300" targetAccount="A_Rev_SparePartsSales"     description="Oracle: Spare Parts Sales" />
+          <Mapping sourceSystem="Oracle" sourceAccount="40500" targetAccount="A_Rev_IntercompanySales"   description="Oracle: IC Sales" />
+          <Mapping sourceSystem="Oracle" sourceAccount="41000" targetAccount="A_Rev_Discounts"           description="Oracle: Discounts" />
+          <Mapping sourceSystem="Oracle" sourceAccount="41100" targetAccount="A_Rev_Returns"             description="Oracle: Returns" />
+
+          <!-- NetSuite Revenue Accounts -->
+          <Mapping sourceSystem="NetSuite" sourceAccount="4000" targetAccount="A_Rev_ProductSales"        description="NS: Product Revenue" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="4010" targetAccount="A_Rev_ProductSales_Export"  description="NS: Export Revenue" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="4020" targetAccount="A_Rev_ServiceRevenue"      description="NS: Service Revenue" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="4050" targetAccount="A_Rev_IntercompanySales"   description="NS: IC Revenue" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="4100" targetAccount="A_Rev_Discounts"           description="NS: Discounts" />
+        </MappingGroup>
+
+        <!-- ====================== COGS ACCOUNTS ====================== -->
+        <MappingGroup name="COGS" description="Cost of Goods Sold accounts">
+          <Mapping sourceSystem="SAP" sourceAccount="0000400000" targetAccount="A_COGS_RawMaterials"       description="SAP: Raw Material Consumption" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000400100" targetAccount="A_COGS_DirectLabor"        description="SAP: Direct Labor" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000400200" targetAccount="A_COGS_MfgOverhead"        description="SAP: Manufacturing Overhead Applied" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000400300" targetAccount="A_COGS_Subcontracting"     description="SAP: Subcontracting Costs" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000400400" targetAccount="A_COGS_PackagingMaterials" description="SAP: Packaging Materials" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000400500" targetAccount="A_COGS_FreightIn"          description="SAP: Freight-In" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000410000" targetAccount="A_COGS_ProdVariance_Price" description="SAP: Purchase Price Variance" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000410100" targetAccount="A_COGS_ProdVariance_Qty"   description="SAP: Production Quantity Variance" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000410200" targetAccount="A_COGS_ProdVariance_Mix"   description="SAP: Production Mix Variance" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000410300" targetAccount="A_COGS_ScrapLoss"          description="SAP: Scrap/Spoilage Loss" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000410400" targetAccount="A_COGS_InventoryReserve"   description="SAP: Inventory Obsolescence Reserve" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000420000" targetAccount="A_COGS_Depreciation_Mfg"   description="SAP: Manufacturing Depreciation" />
+
+          <Mapping sourceSystem="Oracle" sourceAccount="50000" targetAccount="A_COGS_RawMaterials"       description="Oracle: Raw Materials" />
+          <Mapping sourceSystem="Oracle" sourceAccount="50100" targetAccount="A_COGS_DirectLabor"        description="Oracle: Direct Labor" />
+          <Mapping sourceSystem="Oracle" sourceAccount="50200" targetAccount="A_COGS_MfgOverhead"        description="Oracle: Mfg Overhead" />
+          <Mapping sourceSystem="Oracle" sourceAccount="50300" targetAccount="A_COGS_Subcontracting"     description="Oracle: Subcontracting" />
+          <Mapping sourceSystem="Oracle" sourceAccount="51000" targetAccount="A_COGS_ProdVariance_Price" description="Oracle: Price Variance" />
+          <Mapping sourceSystem="Oracle" sourceAccount="51100" targetAccount="A_COGS_ProdVariance_Qty"   description="Oracle: Qty Variance" />
+
+          <Mapping sourceSystem="NetSuite" sourceAccount="5000" targetAccount="A_COGS_RawMaterials"       description="NS: Materials Cost" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="5010" targetAccount="A_COGS_DirectLabor"        description="NS: Direct Labor" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="5020" targetAccount="A_COGS_MfgOverhead"        description="NS: Mfg Overhead" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="5100" targetAccount="A_COGS_ProdVariance_Price" description="NS: Variances" />
+        </MappingGroup>
+
+        <!-- ====================== OPEX ACCOUNTS ====================== -->
+        <MappingGroup name="OPEX" description="Operating expense accounts">
+          <Mapping sourceSystem="SAP" sourceAccount="0000600000" targetAccount="A_OpEx_Salaries"           description="SAP: Salaries and Wages" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000600100" targetAccount="A_OpEx_Benefits"           description="SAP: Employee Benefits" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000600200" targetAccount="A_OpEx_Bonus"              description="SAP: Bonus and Incentives" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000600300" targetAccount="A_OpEx_PayrollTax"         description="SAP: Payroll Taxes" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000610000" targetAccount="A_OpEx_Rent"               description="SAP: Rent and Occupancy" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000610100" targetAccount="A_OpEx_Utilities"          description="SAP: Utilities" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000620000" targetAccount="A_OpEx_Travel"             description="SAP: Travel and Entertainment" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000620100" targetAccount="A_OpEx_ProfFees"           description="SAP: Professional Fees" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000630000" targetAccount="A_OpEx_Depreciation"       description="SAP: Depreciation - Non-Mfg" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000630100" targetAccount="A_OpEx_Amortization"       description="SAP: Amortization" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000640000" targetAccount="A_OpEx_Insurance"          description="SAP: Insurance" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000650000" targetAccount="A_OpEx_RandD"              description="SAP: R&D Expense" />
+
+          <Mapping sourceSystem="Oracle" sourceAccount="60000" targetAccount="A_OpEx_Salaries"           description="Oracle: Salaries" />
+          <Mapping sourceSystem="Oracle" sourceAccount="60100" targetAccount="A_OpEx_Benefits"           description="Oracle: Benefits" />
+          <Mapping sourceSystem="Oracle" sourceAccount="61000" targetAccount="A_OpEx_Rent"               description="Oracle: Rent" />
+          <Mapping sourceSystem="Oracle" sourceAccount="62000" targetAccount="A_OpEx_Travel"             description="Oracle: Travel" />
+          <Mapping sourceSystem="Oracle" sourceAccount="63000" targetAccount="A_OpEx_Depreciation"       description="Oracle: Depreciation" />
+
+          <Mapping sourceSystem="NetSuite" sourceAccount="6000" targetAccount="A_OpEx_Salaries"           description="NS: Salaries" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="6010" targetAccount="A_OpEx_Benefits"           description="NS: Benefits" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="6100" targetAccount="A_OpEx_Rent"               description="NS: Rent" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="6200" targetAccount="A_OpEx_Travel"             description="NS: Travel" />
+          <Mapping sourceSystem="NetSuite" sourceAccount="6300" targetAccount="A_OpEx_Depreciation"       description="NS: Depreciation" />
+        </MappingGroup>
+
+        <!-- ====================== BALANCE SHEET ACCOUNTS ====================== -->
+        <MappingGroup name="BalanceSheet" description="Balance sheet accounts">
+          <Mapping sourceSystem="SAP" sourceAccount="0000100000" targetAccount="A_BS_Cash"                 description="SAP: Cash and Equivalents" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000110000" targetAccount="A_BS_AccountsReceivable"   description="SAP: Accounts Receivable" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000120000" targetAccount="A_BS_Inventory_RM"         description="SAP: Inventory - Raw Materials" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000120100" targetAccount="A_BS_Inventory_WIP"        description="SAP: Inventory - Work in Process" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000120200" targetAccount="A_BS_Inventory_FG"         description="SAP: Inventory - Finished Goods" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000130000" targetAccount="A_BS_PrepaidExpenses"      description="SAP: Prepaid Expenses" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000150000" targetAccount="A_BS_FixedAssets_Gross"    description="SAP: PP&E - Gross" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000155000" targetAccount="A_BS_AccumDepreciation"    description="SAP: Accumulated Depreciation" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000200000" targetAccount="A_BS_AccountsPayable"      description="SAP: Accounts Payable" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000210000" targetAccount="A_BS_AccruedLiabilities"   description="SAP: Accrued Liabilities" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000250000" targetAccount="A_BS_LongTermDebt"         description="SAP: Long-Term Debt" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000300000" targetAccount="A_BS_CommonStock"          description="SAP: Common Stock" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000310000" targetAccount="A_BS_RetainedEarnings"     description="SAP: Retained Earnings" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000320000" targetAccount="A_BS_CTA"                  description="SAP: Cumulative Translation Adjustment" />
+        </MappingGroup>
+
+        <!-- ====================== STATISTICAL ACCOUNTS ====================== -->
+        <MappingGroup name="Statistical" description="Statistical and non-financial accounts">
+          <Mapping sourceSystem="SAP" sourceAccount="0000900000" targetAccount="A_Stat_Headcount"          description="SAP: Headcount" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000900100" targetAccount="A_Stat_FTE"                description="SAP: Full-Time Equivalents" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000900200" targetAccount="A_Stat_ProductionVolume"   description="SAP: Production Volume (Units)" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000900300" targetAccount="A_Stat_MachineHours"       description="SAP: Machine Hours" />
+          <Mapping sourceSystem="SAP" sourceAccount="0000900400" targetAccount="A_Stat_ScrapRate"          description="SAP: Scrap Rate" />
+        </MappingGroup>
+
+      </MappingTable>
+
+      <!-- ============================================================
+           DEFAULT / UNMAPPED HANDLING
+           ============================================================ -->
+      <UnmappedHandling>
+        <!-- Default target account for unmapped source accounts -->
+        <DefaultAccount>UNMAPPED_ACCOUNT</DefaultAccount>
+        <!-- Action when unmapped account encountered -->
+        <OnUnmapped>
+          <Action>MapToDefault</Action>
+          <FlagForReview>true</FlagForReview>
+          <ReviewFlagColumn>OS_MappingFlag</ReviewFlagColumn>
+          <ReviewFlagValue>UNMAPPED</ReviewFlagValue>
+          <!-- Log unmapped accounts for mapping table maintenance -->
+          <LogToTable>DM_UnmappedAccounts</LogToTable>
+          <LogColumns>
+            <Column name="SourceSystem" from="SRC_SourceSystem" />
+            <Column name="SourceAccount" from="SRC_Account" />
+            <Column name="EncounteredDate" expression="GETDATE()" />
+            <Column name="StageName" expression="@@StageName" />
+            <Column name="RowCount" expression="@@UnmappedRowCount" />
+          </LogColumns>
+          <!-- Send notification to mapping administrators -->
+          <Notification>
+            <Enabled>true</Enabled>
+            <Recipients>dm_admin@company.com</Recipients>
+            <Subject>OneStream DM: Unmapped Account Detected</Subject>
+          </Notification>
+        </OnUnmapped>
+      </UnmappedHandling>
+
+      <!-- ============================================================
+           WILDCARD / RANGE MAPPINGS
+           For account ranges not individually mapped.
+           ============================================================ -->
+      <RangeMappings>
+        <Range sourceSystem="SAP" fromAccount="0000800000" toAccount="0000899999" defaultTarget="A_Rev_Other"    description="Unmapped SAP revenue accounts default to Other Revenue" />
+        <Range sourceSystem="SAP" fromAccount="0000400000" toAccount="0000499999" defaultTarget="A_COGS_Other"   description="Unmapped SAP COGS accounts default to Other COGS" />
+        <Range sourceSystem="SAP" fromAccount="0000600000" toAccount="0000699999" defaultTarget="A_OpEx_Other"   description="Unmapped SAP OPEX accounts default to Other OPEX" />
+        <Range sourceSystem="SAP" fromAccount="0000100000" toAccount="0000399999" defaultTarget="A_BS_Other"     description="Unmapped SAP BS accounts default to Other BS" />
+      </RangeMappings>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

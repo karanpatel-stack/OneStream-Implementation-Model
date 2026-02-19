@@ -1,0 +1,15 @@
+MemberName,Description,FlowType
+F_Total,Total Flow,Calculated
+F_None,No Flow Specified,Input
+F_Opening,Opening Balance,Balance
+F_Movement,Period Movement,Movement
+F_Closing,Closing Balance,Balance
+F_FXTranslation,Foreign Currency Translation Adjustment,Adjustment
+F_Elimination,Intercompany Elimination,Adjustment
+F_Reclassification,Reclassification Entry,Adjustment
+F_Acquisition,Acquisition Entry,Adjustment
+F_Disposal,Disposal Entry,Adjustment
+F_Revaluation,Revaluation Adjustment,Adjustment
+F_Impairment,Impairment Adjustment,Adjustment
+F_TopSideAdj,Top-Side Adjustment,Adjustment
+F_AuditAdj,Audit Adjustment,Adjustment

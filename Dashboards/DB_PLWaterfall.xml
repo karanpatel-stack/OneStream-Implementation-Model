@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_PLWaterfall"
+  Description="Profit and Loss Bridge / Waterfall Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#PriorYear" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                           DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants"       DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#TotalPL.Descendants"         DefaultMember="A#TotalPL" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"              DefaultMember="F#YTD" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_PLWaterfall"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="MainCube"
+      SuppressNoData="True"
+      SuppressZeros="True">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="5000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="3" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER WITH CONTROLS -->
+    <Row Index="0" Height="60" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="P&amp;L Waterfall"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF"
+          HorizontalAlignment="Left" VerticalAlignment="Center" />
+      </Panel>
+
+      <Panel Row="0" Column="4" ColumnSpan="8" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <!-- Scenario Comparison Toggle -->
+        <FilterComponent
+          Name="ScenarioComparisonToggle"
+          FilterType="ButtonGroup"
+          CustomValues="ActualVsBudget|Actual vs Budget,ActualVsPY|Actual vs PY"
+          DefaultValue="ActualVsBudget"
+          Label="Comparison"
+          LabelForeColor="#A0B4D0"
+          ButtonActiveColor="#3498DB" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4"
+          ButtonWidth="130" ButtonHeight="30"
+          OnChange="RefreshAll" />
+
+        <!-- Entity Filter -->
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#Americas,E#EMEA,E#APAC,E#Corporate"
+          DefaultMember="E#TopEntity"
+          Label="Entity"
+          LabelForeColor="#A0B4D0"
+          Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4" />
+
+        <!-- Period Toggle -->
+        <FilterComponent
+          Name="PeriodToggle"
+          FilterType="ButtonGroup"
+          CustomValues="Monthly|Monthly,Quarterly|Quarterly,Annual|Annual"
+          DefaultValue="Annual"
+          Label="Period"
+          LabelForeColor="#A0B4D0"
+          ButtonActiveColor="#3498DB" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4"
+          ButtonWidth="90" ButtonHeight="30"
+          OnChange="RefreshAll" />
+
+        <!-- Flow Toggle -->
+        <FilterComponent
+          Name="FlowToggle"
+          FilterType="ButtonGroup"
+          Dimension="Flow"
+          MemberFilter="F#Periodic,F#YTD"
+          DefaultMember="F#YTD"
+          Label="Flow"
+          ButtonActiveColor="#E67E22" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4"
+          ButtonWidth="80" ButtonHeight="30" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: MAIN WATERFALL CHART -->
+    <Row Index="1" Height="420" HeightUnit="Pixel">
+      <Panel Row="1" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True" ShadowColor="#00000040"
+             Title="Income Statement Waterfall" TitleFontSize="14" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="PLWaterfallChart"
+          ChartType="Waterfall"
+          DataAdapter="DDA_PLWaterfall"
+          AnimationEnabled="True" AnimationDuration="900"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M"
+          BarWidth="0.55">
+
+          <XAxis
+            LabelFontSize="10" LabelForeColor="#D0D8E8"
+            LabelRotation="-35"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Amount ($M)"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,,M"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <WaterfallCategories>
+            <Category Name="Revenue"
+                      Expression="A#Revenue:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Total"
+                      Color="#3498DB" />
+            <Category Name="COGS - Materials"
+                      Expression="A#COGSMaterials:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#E74C3C" />
+            <Category Name="COGS - Labor"
+                      Expression="A#COGSLabor:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#E74C3C" />
+            <Category Name="COGS - Overhead"
+                      Expression="A#COGSOverhead:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#E74C3C" />
+            <Category Name="Gross Profit"
+                      Expression="A#GrossProfit:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Subtotal"
+                      Color="#2ECC71" />
+            <Category Name="SG&amp;A"
+                      Expression="A#SGA:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#E67E22" />
+            <Category Name="R&amp;D"
+                      Expression="A#RnD:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#E67E22" />
+            <Category Name="Other OPEX"
+                      Expression="A#OtherOPEX:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#E67E22" />
+            <Category Name="EBITDA"
+                      Expression="A#EBITDA:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Subtotal"
+                      Color="#F39C12" />
+            <Category Name="D&amp;A"
+                      Expression="A#DepAmort:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#95A5A6" />
+            <Category Name="EBIT"
+                      Expression="A#EBIT:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Subtotal"
+                      Color="#1ABC9C" />
+            <Category Name="Interest Exp"
+                      Expression="A#InterestExpense:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#9B59B6" />
+            <Category Name="Tax Provision"
+                      Expression="A#IncomeTax:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease"
+                      Color="#9B59B6" />
+            <Category Name="Net Income"
+                      Expression="A#NetIncome:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Total"
+                      Color="#8E44AD" />
+          </WaterfallCategories>
+
+          <ConnectorLine Color="#8CA8CC" LineWidth="1" LineStyle="Dotted" />
+          <DataLabels Enabled="True" FontSize="9" ForeColor="#D0D8E8" Format="#,##0.0,,M" Position="Outside" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: DETAILED P&L TABLE -->
+    <Row Index="2" Height="320" HeightUnit="Pixel">
+      <Panel Row="2" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Income Statement Detail" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="PLDetailGrid"
+          DataAdapter="DDA_PLWaterfall"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="28"
+          EnableSorting="False"
+          FreezeColumns="1"
+          ShowHierarchy="True"
+          ExpandLevel="2">
+
+          <RowDimension Dimension="Account" MemberFilter="A#TotalPL.Descendants" ShowHierarchy="True" />
+
+          <Columns>
+            <Column Header="Account"        Binding="Account.Description"         Width="220" Alignment="Left" />
+            <Column Header="Actual"         Binding="S#Actual:F#{POV.Flow}"       Width="120" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="Budget"         Binding="S#Budget:F#{POV.Flow}"       Width="120" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="Var ($M)"       Binding="S#ActualVsBudgetVar:F#{POV.Flow}" Width="110" Alignment="Right" Format="+#,##0.0,,M;-#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Var %"          Binding="S#ActualVsBudgetPct:F#{POV.Flow}" Width="80"  Alignment="Center" Format="+0.0%;-0.0%">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Prior Year"     Binding="S#PriorYear:F#{POV.Flow}"    Width="120" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="vs PY ($M)"     Binding="S#ActualVsPYVar:F#{POV.Flow}" Width="110" Alignment="Right" Format="+#,##0.0,,M;-#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+
+          <RowStyles>
+            <RowStyle MemberFilter="A#Revenue,A#GrossProfit,A#EBITDA,A#EBIT,A#NetIncome"
+                      FontWeight="Bold" BackgroundColor="#243B6740" />
+          </RowStyles>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Revenue"     Value="#3498DB" />
+      <Color Name="COGS"        Value="#E74C3C" />
+      <Color Name="GrossProfit" Value="#2ECC71" />
+      <Color Name="OPEX"        Value="#E67E22" />
+      <Color Name="EBITDA"      Value="#F39C12" />
+      <Color Name="NetIncome"   Value="#8E44AD" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

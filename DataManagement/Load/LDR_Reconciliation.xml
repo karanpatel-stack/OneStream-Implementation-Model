@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Load Rule
+  Load: Reconciliation Data
+  Purpose: Load GL balances and sub-ledger detail for reconciliation
+  Target Cube: Reconciliation
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <LoadRule>
+
+      <!-- ============================================================
+           LOAD IDENTITY
+           ============================================================ -->
+      <LoadName>Reconciliation_Data</LoadName>
+      <LoadDescription>Loads source system GL balances and sub-ledger detail into the Reconciliation cube for data integrity verification. Enables reconciliation of OneStream consolidated data back to source ERP systems by maintaining parallel GL totals with source system references. Supports audit trail requirements by preserving original transaction references, journal IDs, and source system identifiers alongside OneStream dimension mappings.</LoadDescription>
+      <IsActive>true</IsActive>
+      <LoadType>CubeLoad</LoadType>
+      <TargetCube>Reconciliation</TargetCube>
+
+      <!-- ============================================================
+           SOURCE STAGES
+           ============================================================ -->
+      <SourceStages>
+        <Stage name="SAP_TrialBalance" priority="1" description="SAP GL balances for reconciliation" />
+        <Stage name="Oracle_GL" priority="2" description="Oracle GL balances for reconciliation" />
+        <Stage name="NetSuite_GL" priority="3" description="NetSuite GL balances for reconciliation" />
+      </SourceStages>
+
+      <!-- ============================================================
+           TRANSFORM PIPELINE
+           Uses the same mappings as Finance_Actuals for consistency,
+           plus additional audit and reconciliation transforms.
+           ============================================================ -->
+      <TransformPipeline>
+        <Transform name="CurrencyConversion"  order="1" description="Standardize currency codes" />
+        <Transform name="AccountMapping"       order="2" description="Map accounts (must match Finance cube mappings)" />
+        <Transform name="EntityMapping"        order="3" description="Map entities (must match Finance cube mappings)" />
+        <Transform name="DerivedMembers"        order="4" description="Derive standard dimension members" />
+        <Transform name="DataValidation"        order="5" description="Validate reconciliation data" />
+      </TransformPipeline>
+
+      <!-- ============================================================
+           DIMENSION MAPPINGS
+           Reconciliation cube uses additional dimensions for
+           source system tracking and audit reference.
+           ============================================================ -->
+      <DimensionMappings>
+        <Mapping dimension="Scenario"       sourceColumn="OS_Scenario"         defaultValue="Actual"        description="Actual data" />
+        <Mapping dimension="Time"           sourceColumn="OS_Time"             defaultValue=""              description="Period" />
+        <Mapping dimension="Entity"         sourceColumn="OS_Entity"           defaultValue=""              description="Entity" />
+        <Mapping dimension="Account"        sourceColumn="OS_Account"          defaultValue=""              description="OneStream Account" />
+        <Mapping dimension="Flow"           sourceColumn="OS_Flow"             defaultValue="F_Movement"    description="Movement type" />
+        <Mapping dimension="Consolidation"  sourceColumn="OS_Consolidation"    defaultValue="C_Local"       description="Local" />
+        <Mapping dimension="UD1"            sourceColumn="OS_UD1_Product"      defaultValue="Prod_Unassigned" description="Product" />
+        <Mapping dimension="UD2"            sourceColumn="OS_UD2_CostCenter"   defaultValue="CC_Unassigned" description="Cost Center" />
+        <Mapping dimension="UD3"            sourceColumn="OS_UD3"              defaultValue="UD3_None"      description="Reserved" />
+        <Mapping dimension="UD4"            sourceColumn="OS_UD4"              defaultValue="UD4_None"      description="Reserved" />
+        <Mapping dimension="UD5"            sourceColumn="OS_UD5_Intercompany" defaultValue="IC_None"       description="Intercompany" />
+        <Mapping dimension="UD6"            sourceColumn="OS_UD6"              defaultValue="UD6_None"      description="Reserved" />
+        <Mapping dimension="UD7"            sourceColumn="OS_UD7"              defaultValue="UD7_None"      description="Reserved" />
+        <Mapping dimension="UD8"            sourceColumn="OS_UD8_Version"      defaultValue="Working"       description="Working version" />
+      </DimensionMappings>
+
+      <!-- ============================================================
+           SOURCE SYSTEM REFERENCE DATA
+           Preserves original source system identifiers for audit trail.
+           ============================================================ -->
+      <AuditReference>
+        <Description>The Reconciliation cube stores additional reference data alongside the financial amounts to enable drill-through from OneStream consolidated data back to source system transactions. This supports SOX compliance and audit requirements.</Description>
+
+        <ReferenceFields>
+          <!-- Source system identification -->
+          <Field name="SourceSystem"         sourceColumn="OS_SourceSystem"    description="Source ERP system (SAP/Oracle/NetSuite)" />
+          <Field name="SourceEntity"         sourceColumn="SRC_Entity"         description="Original source company/subsidiary code" />
+          <Field name="SourceAccount"        sourceColumn="SRC_Account"        description="Original source GL account number" />
+          <Field name="SourceCostCenter"     sourceColumn="SRC_CostCenter"     description="Original cost center/department" />
+
+          <!-- Transaction-level references -->
+          <Field name="JournalHeaderID"      sourceColumn="SRC_HeaderID"       description="Oracle JE Header ID or SAP document number" />
+          <Field name="JournalLineNumber"    sourceColumn="SRC_LineNumber"     description="Journal line number" />
+          <Field name="TransactionID"        sourceColumn="SRC_TransactionID"  description="NetSuite Transaction ID" />
+
+          <!-- Original amounts before transformation -->
+          <Field name="OriginalDebit"        sourceColumn="SRC_DebitLC"        description="Original debit amount (local currency)" />
+          <Field name="OriginalCredit"       sourceColumn="SRC_CreditLC"       description="Original credit amount (local currency)" />
+          <Field name="OriginalCurrency"     sourceColumn="SRC_Currency"       description="Original currency code" />
+
+          <!-- Load tracking -->
+          <Field name="LoadRunID"            sourceColumn="@@LoadRunID"        description="OneStream load execution ID" />
+          <Field name="LoadTimestamp"        sourceColumn="@@LoadTimestamp"    description="When this record was loaded" />
+          <Field name="StageName"            sourceColumn="@@StageName"       description="Stage that provided this record" />
+        </ReferenceFields>
+      </AuditReference>
+
+      <!-- ============================================================
+           RECONCILIATION ACCOUNTS
+           The reconciliation cube includes specific accounts for
+           tracking source vs OneStream amounts.
+           ============================================================ -->
+      <ReconciliationAccounts>
+        <!-- Source System Balance: original amount from ERP -->
+        <Account name="A_Recon_SourceBalance" description="GL balance as reported by source ERP system" />
+        <!-- OneStream Balance: amount after mapping and transformation -->
+        <Account name="A_Recon_OSBalance" description="Amount loaded into OneStream Finance cube" />
+        <!-- Difference: calculated difference for investigation -->
+        <Account name="A_Recon_Difference" description="Difference between source and OneStream (should be zero)" />
+        <!-- Mapping Adjustments: amounts adjusted during transformation -->
+        <Account name="A_Recon_MappingAdj" description="Adjustments from account mapping and sign convention" />
+        <!-- Unmapped: amounts that could not be mapped -->
+        <Account name="A_Recon_Unmapped" description="Amounts from unmapped source accounts" />
+      </ReconciliationAccounts>
+
+      <!-- ============================================================
+           AMOUNT MAPPING
+           ============================================================ -->
+      <AmountMapping>
+        <!-- Load both the source amount and the transformed amount -->
+        <PrimaryAmount>
+          <AmountColumn>OS_Amount</AmountColumn>
+          <TargetAccount>A_Recon_OSBalance</TargetAccount>
+          <CurrencyColumn>OS_Currency</CurrencyColumn>
+        </PrimaryAmount>
+        <SecondaryAmount>
+          <AmountColumn>SRC_NetAmountLC</AmountColumn>
+          <TargetAccount>A_Recon_SourceBalance</TargetAccount>
+          <CurrencyColumn>SRC_Currency</CurrencyColumn>
+        </SecondaryAmount>
+        <DifferenceCalculation>
+          <TargetAccount>A_Recon_Difference</TargetAccount>
+          <Formula>OS_Amount - SRC_NetAmountLC</Formula>
+        </DifferenceCalculation>
+      </AmountMapping>
+
+      <!-- ============================================================
+           LOAD METHOD
+           ============================================================ -->
+      <LoadMethod>
+        <Type>Merge</Type>
+        <ConflictResolution>
+          <Strategy>LatestWins</Strategy>
+          <AggregateMultiple>true</AggregateMultiple>
+          <AggregationMethod>Sum</AggregationMethod>
+        </ConflictResolution>
+      </LoadMethod>
+
+      <!-- ============================================================
+           PRE-LOAD AND POST-LOAD ACTIONS
+           ============================================================ -->
+      <PreLoadActions>
+        <Action name="ClearReconData" order="1">
+          <Type>CubeClear</Type>
+          <ClearScope>
+            <Scenario>Actual</Scenario>
+            <Time>@@LoadPeriod</Time>
+            <Entity>@@LoadEntity</Entity>
+            <Account>A_Recon_*</Account>
+            <UD8>Working</UD8>
+          </ClearScope>
+        </Action>
+      </PreLoadActions>
+
+      <PostLoadActions>
+        <!-- Verify reconciliation: differences should be zero or within tolerance -->
+        <Action name="CheckReconciliation" order="1">
+          <Type>Validation</Type>
+          <Description>Verify source-to-target reconciliation differences are within tolerance</Description>
+          <SQL><![CDATA[
+            /* Check for material reconciliation differences by entity */
+            SELECT
+              OS_Entity,
+              OS_Time,
+              SUM(CASE WHEN OS_Stat_Account = 'A_Recon_SourceBalance' THEN OS_Amount ELSE 0 END) AS SourceTotal,
+              SUM(CASE WHEN OS_Stat_Account = 'A_Recon_OSBalance' THEN OS_Amount ELSE 0 END) AS OSTotal,
+              ABS(SUM(CASE WHEN OS_Stat_Account = 'A_Recon_SourceBalance' THEN OS_Amount ELSE 0 END)
+                - SUM(CASE WHEN OS_Stat_Account = 'A_Recon_OSBalance' THEN OS_Amount ELSE 0 END)) AS AbsDifference
+            FROM STG_Reconciliation_Final
+            GROUP BY OS_Entity, OS_Time
+            HAVING ABS(SUM(CASE WHEN OS_Stat_Account = 'A_Recon_SourceBalance' THEN OS_Amount ELSE 0 END)
+                     - SUM(CASE WHEN OS_Stat_Account = 'A_Recon_OSBalance' THEN OS_Amount ELSE 0 END)) > 1.00
+          ]]></SQL>
+          <ToleranceAmount>1.00</ToleranceAmount>
+          <OnMismatch>Warn</OnMismatch>
+          <Message>Reconciliation difference exceeds $1.00 tolerance for {OS_Entity}/{OS_Time}. Investigate mapping and sign convention transforms.</Message>
+        </Action>
+
+        <!-- Log reconciliation results -->
+        <Action name="UpdateLoadLog" order="2">
+          <Type>SQL</Type>
+          <SQL><![CDATA[
+            INSERT INTO DM_LoadLog (
+              LoadName, LoadDate, Entity, Period, Scenario,
+              LoadedRows, Status, Notes
+            )
+            VALUES (
+              'Reconciliation_Data', GETDATE(), @@LoadEntity, @@LoadPeriod, 'Actual',
+              @@LoadedRecordCount, 'Complete',
+              'Source Total: ' + CAST(@@SourceTotal AS VARCHAR) + ', OS Total: ' + CAST(@@OSTotal AS VARCHAR) + ', Diff: ' + CAST(@@DiffTotal AS VARCHAR)
+            )
+          ]]></SQL>
+        </Action>
+
+        <!-- Generate reconciliation report -->
+        <Action name="GenerateReconReport" order="3">
+          <Type>Report</Type>
+          <Description>Generate entity-level reconciliation summary report</Description>
+          <ReportName>Recon_Summary_{@@LoadEntity}_{@@LoadPeriod}</ReportName>
+          <OutputPath>\\fileserver\OneStream\DataExchange\Outbound\Reconciliation\</OutputPath>
+          <Format>Excel</Format>
+        </Action>
+      </PostLoadActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>10000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelLoading>false</EnableParallelLoading>
+        <LogDetailLevel>Full</LogDetailLevel>
+        <TrackDuration>true</TrackDuration>
+        <TrackRowCounts>true</TrackRowCounts>
+        <TrackAmountTotals>true</TrackAmountTotals>
+      </ExecutionSettings>
+
+      <ErrorHandling>
+        <OnLoadError>
+          <Action>LogAndContinue</Action>
+        </OnLoadError>
+        <MaxErrorRows>200</MaxErrorRows>
+        <ContinueOnWarning>true</ContinueOnWarning>
+      </ErrorHandling>
+
+    </LoadRule>
+  </DataManagement>
+</OneStreamXF>

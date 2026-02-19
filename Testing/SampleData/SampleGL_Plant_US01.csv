@@ -1,0 +1,101 @@
+PostingDate,DocumentNumber,GLAccount,CostCenter,ProfitCenter,Product,DebitAmount,CreditAmount,Currency,Description
+2025-01-02,5000100001,400000,CC_MidwestSales,PC_Industrial,SKU_HM_HydPress_500T,0.00,1250000.00,USD,Domestic industrial revenue - hydraulic press sales
+2025-01-02,5000100002,400000,CC_MidwestSales,PC_Industrial,SKU_HM_HydPress_1000T,0.00,875000.00,USD,Domestic industrial revenue - large hydraulic press
+2025-01-03,5000100003,400000,CC_NortheastSales,PC_Industrial,SKU_HM_CraneAssembly_25T,0.00,680000.00,USD,Domestic industrial revenue - crane assembly
+2025-01-05,5000100004,400100,CC_EMEASales,PC_Industrial,SKU_HM_IndustrialPump_L,0.00,420000.00,USD,Export revenue - industrial pumps to EMEA
+2025-01-05,5000100005,400100,CC_APACSales,PC_Industrial,SKU_HM_Compressor_HP,0.00,315000.00,USD,Export revenue - compressors to APAC
+2025-01-07,5000100006,400000,CC_WestSales,PC_Consumer,SKU_PT_DrillPress_Floor,0.00,385000.00,USD,Domestic consumer revenue - floor drill press
+2025-01-07,5000100007,400000,CC_SoutheastSales,PC_Consumer,SKU_PT_TableSaw_12,0.00,290000.00,USD,Domestic consumer revenue - table saws
+2025-01-08,5000100008,400100,CC_LatAmSales,PC_Consumer,SKU_PT_Welder_MIG,0.00,210000.00,USD,Export revenue - MIG welders to Latin America
+2025-01-10,5000100009,400000,CC_OEM_Accounts,PC_Specialty,SKU_AE_TurbineBlade_Ti,0.00,525000.00,USD,Domestic specialty revenue - aerospace turbine blades
+2025-01-10,5000100010,400000,CC_Strategic_Accounts,PC_Specialty,SKU_AE_LandingGear_Comp,0.00,410000.00,USD,Domestic specialty revenue - landing gear components
+2025-01-12,5000100011,400200,CC_MidwestSales,PC_Industrial,SKU_HM_HydPress_500T,0.00,230000.00,USD,Intercompany transfer sales to Plant_DE01_Munich
+2025-01-12,5000100012,400200,CC_APACSales,PC_Industrial,SKU_PR_BearingAssembly_A,0.00,175000.00,USD,Intercompany transfer sales to Plant_CN01_Shanghai
+2025-01-13,5000100013,400210,CC_MidwestSales,PC_Industrial,Total_Products,0.00,45000.00,USD,Intercompany service revenue - engineering support
+2025-01-15,5000100014,410000,CC_MidwestSales,PC_Industrial,Total_Products,62500.00,0.00,USD,Trade discounts - volume discount Q1 program
+2025-01-15,5000100015,410100,CC_NortheastSales,PC_Consumer,Total_Products,31250.00,0.00,USD,Sales returns - defective batch recall
+2025-01-15,5000100016,410200,CC_SoutheastSales,PC_Industrial,Total_Products,18750.00,0.00,USD,Customer rebates - annual rebate accrual
+2025-01-17,5000100017,500000,CC_CNC_Milling,PC_Industrial,SKU_HM_HydPress_500T,485000.00,0.00,USD,Raw materials consumed - steel alloys for hydraulic press
+2025-01-17,5000100018,500010,CC_CNC_Turning,PC_Industrial,SKU_HM_CraneAssembly_25T,325000.00,0.00,USD,Raw materials consumed - aluminum for crane assembly
+2025-01-17,5000100019,500020,CC_SubAssembly,PC_Consumer,SKU_PT_DrillPress_Floor,142000.00,0.00,USD,Raw materials consumed - polymers for consumer products
+2025-01-18,5000100020,500030,CC_ElectricalAssembly,PC_Industrial,SKU_AU_PLCController,98000.00,0.00,USD,Electronic components - PLC controller boards
+2025-01-18,5000100021,500040,CC_CNC_Grinding,PC_Industrial,SKU_HM_HydPress_500T,35000.00,0.00,USD,Chemicals and solvents - grinding coolant
+2025-01-20,5000100022,510000,CC_SubAssembly,PC_Industrial,SKU_HM_IndustrialPump_L,78000.00,0.00,USD,Purchased components - bearings for industrial pumps
+2025-01-20,5000100023,510010,CC_FinalAssembly,PC_Industrial,SKU_AU_RoboticArm_6Axis,125000.00,0.00,USD,Purchased components - servo motors for robotic arms
+2025-01-20,5000100024,510020,CC_ElectricalAssembly,PC_Industrial,SKU_AU_VisionSystem,67000.00,0.00,USD,Purchased components - sensors for vision systems
+2025-01-20,5000100025,510030,CC_FinalAssembly,PC_Consumer,SKU_PT_Welder_MIG,42000.00,0.00,USD,Purchased components - fasteners for welders
+2025-01-21,5000100026,520000,CC_PrimaryPack,PC_Industrial,Total_Products,28000.00,0.00,USD,Primary packaging materials
+2025-01-21,5000100027,520010,CC_FinalPack,PC_Industrial,Total_Products,19500.00,0.00,USD,Secondary packaging materials
+2025-01-21,5000100028,520020,CC_FinalPack,PC_Industrial,Total_Products,34500.00,0.00,USD,Shipping crates and pallets
+2025-01-22,5000100029,600000,CC_CNC_Milling,PC_Industrial,Total_Products,285000.00,0.00,USD,Production labor - CNC machining operations
+2025-01-22,5000100030,600010,CC_FinalAssembly,PC_Industrial,Total_Products,215000.00,0.00,USD,Production labor - final assembly operations
+2025-01-22,5000100031,600020,CC_Painting,PC_Industrial,Total_Products,95000.00,0.00,USD,Production labor - finishing and painting
+2025-01-22,5000100032,600030,CC_FinalQC,PC_Industrial,Total_Products,72000.00,0.00,USD,Production labor - quality inspection
+2025-01-23,5000100033,610000,CC_CNC_Milling,PC_Industrial,Total_Products,48000.00,0.00,USD,Scheduled overtime - machining department
+2025-01-23,5000100034,610010,CC_FinalAssembly,PC_Industrial,Total_Products,32000.00,0.00,USD,Unscheduled overtime - assembly rush order
+2025-01-25,5000100035,620000,CC_CNC_Milling,PC_Industrial,Total_Products,125000.00,0.00,USD,Factory depreciation - CNC machinery
+2025-01-25,5000100036,620010,CC_CNC_Milling,PC_Industrial,Total_Products,45000.00,0.00,USD,Factory building depreciation
+2025-01-25,5000100037,620020,CC_FinalAssembly,PC_Industrial,Total_Products,38000.00,0.00,USD,Factory equipment depreciation - assembly line
+2025-01-25,5000100038,630000,CC_CNC_Milling,PC_Industrial,Total_Products,52000.00,0.00,USD,Factory electricity
+2025-01-25,5000100039,630010,CC_HeatTreat,PC_Industrial,Total_Products,28000.00,0.00,USD,Factory natural gas - heat treatment furnaces
+2025-01-25,5000100040,630020,CC_CNC_Milling,PC_Industrial,Total_Products,8500.00,0.00,USD,Factory water and sewage
+2025-01-26,5000100041,640000,CC_PreventiveMaint,PC_Industrial,Total_Products,42000.00,0.00,USD,Preventive maintenance - scheduled overhaul
+2025-01-26,5000100042,640010,CC_CorrectiveMaint,PC_Industrial,Total_Products,18500.00,0.00,USD,Corrective maintenance - unplanned repair
+2025-01-26,5000100043,640020,CC_ToolRoom,PC_Industrial,Total_Products,15000.00,0.00,USD,Spare parts consumed
+2025-01-27,5000100044,650000,CC_CNC_Milling,PC_Industrial,Total_Products,85000.00,0.00,USD,Indirect labor - production supervisors
+2025-01-27,5000100045,650010,CC_InboundDock,PC_Industrial,Total_Products,35000.00,0.00,USD,Indirect labor - material handlers
+2025-01-27,5000100046,650020,CC_PreventiveMaint,PC_Industrial,Total_Products,45000.00,0.00,USD,Indirect labor - maintenance staff
+2025-01-27,5000100047,650030,CC_FGStorage,PC_Industrial,Total_Products,32000.00,0.00,USD,Indirect labor - warehouse workers
+2025-01-28,5000100048,660000,CC_CNC_Milling,PC_Industrial,Total_Products,22000.00,0.00,USD,Factory insurance
+2025-01-28,5000100049,660010,CC_CNC_Milling,PC_Industrial,Total_Products,15000.00,0.00,USD,Factory property tax
+2025-01-28,5000100050,660020,CC_CNC_Milling,PC_Industrial,Total_Products,8500.00,0.00,USD,Factory supplies
+2025-01-28,5000100051,660030,CC_ToolRoom,PC_Industrial,Total_Products,12000.00,0.00,USD,Tooling expense
+2025-01-28,5000100052,670000,CC_CNC_Milling,PC_Industrial,Total_Products,15500.00,0.00,USD,Material price variance - steel
+2025-01-28,5000100053,670010,CC_CNC_Milling,PC_Industrial,Total_Products,8200.00,0.00,USD,Material usage variance
+2025-01-28,5000100054,670020,CC_FinalAssembly,PC_Industrial,Total_Products,-12000.00,0.00,USD,Labor efficiency variance (favorable)
+2025-01-28,5000100055,670030,CC_CNC_Milling,PC_Industrial,Total_Products,22000.00,0.00,USD,Production volume variance
+2025-01-29,5000100056,700000,CC_Accounting,PC_Admin,Total_Products,145000.00,0.00,USD,SGA salaries - finance and admin staff
+2025-01-29,5000100057,700010,CC_CompBenefits,PC_Admin,Total_Products,48000.00,0.00,USD,SGA employee benefits
+2025-01-29,5000100058,700020,CC_CEO_Office,PC_Admin,Total_Products,25000.00,0.00,USD,Office rent and leases
+2025-01-29,5000100059,700030,CC_MidwestSales,PC_Admin,Total_Products,18500.00,0.00,USD,Travel and entertainment
+2025-01-29,5000100060,700040,CC_Corporate_Legal,PC_Admin,Total_Products,35000.00,0.00,USD,Professional services - legal and consulting
+2025-01-29,5000100061,700050,CC_Accounting,PC_Admin,Total_Products,4500.00,0.00,USD,Office supplies
+2025-01-29,5000100062,700060,CC_Network,PC_Admin,Total_Products,12000.00,0.00,USD,Telecommunications
+2025-01-29,5000100063,700070,CC_Accounting,PC_Admin,Total_Products,8000.00,0.00,USD,Bad debt expense provision
+2025-01-30,5000100064,710000,CC_MechanicalDesign,PC_RD,Total_Products,125000.00,0.00,USD,R&D salaries - mechanical design team
+2025-01-30,5000100065,710010,CC_ProtoLab,PC_RD,Total_Products,42000.00,0.00,USD,R&D materials and prototypes
+2025-01-30,5000100066,710020,CC_TestLab,PC_RD,Total_Products,28000.00,0.00,USD,Testing and certification
+2025-01-30,5000100067,710030,CC_Corporate_Legal,PC_RD,Total_Products,15000.00,0.00,USD,Patent and IP costs
+2025-01-30,5000100068,710040,CC_MechanicalDesign,PC_RD,Total_Products,35000.00,0.00,USD,Contract research
+2025-01-30,5000100069,720000,CC_MidwestSales,PC_Sales,Total_Products,45000.00,0.00,USD,Advertising - trade publications
+2025-01-30,5000100070,720010,CC_MidwestSales,PC_Sales,Total_Products,28000.00,0.00,USD,Trade shows - IMTS booth rental
+2025-01-30,5000100071,720020,CC_MidwestSales,PC_Sales,Total_Products,15000.00,0.00,USD,Digital marketing - online campaigns
+2025-01-30,5000100072,730000,CC_ERP,PC_Admin,Total_Products,18000.00,0.00,USD,Corporate IT allocation
+2025-01-30,5000100073,730010,CC_CompBenefits,PC_Admin,Total_Products,12000.00,0.00,USD,Corporate HR allocation
+2025-01-30,5000100074,730020,CC_FPA,PC_Admin,Total_Products,15000.00,0.00,USD,Corporate finance allocation
+2025-01-31,5000100075,800000,CC_Accounting,PC_Admin,Total_Products,35000.00,0.00,USD,Non-manufacturing depreciation - office equipment
+2025-01-31,5000100076,800010,CC_Accounting,PC_Admin,Total_Products,22000.00,0.00,USD,Amortization of intangibles - software
+2025-01-31,5000100077,810000,CC_Treasury,PC_Admin,Total_Products,45000.00,0.00,USD,Interest on long-term debt
+2025-01-31,5000100078,810010,CC_Treasury,PC_Admin,Total_Products,8500.00,0.00,USD,Interest on short-term borrowings
+2025-01-31,5000100079,820000,CC_Accounting,PC_Admin,Total_Products,0.00,12000.00,USD,Gain on asset disposal - old CNC machine
+2025-01-31,5000100080,820010,CC_Treasury,PC_Admin,Total_Products,0.00,3500.00,USD,Foreign exchange gain - EUR receivable
+2025-01-31,5000100081,820020,CC_Treasury,PC_Admin,Total_Products,0.00,8000.00,USD,Investment income - money market
+2025-01-31,5000100082,830000,CC_Tax,PC_Admin,Total_Products,85000.00,0.00,USD,Current federal income tax
+2025-01-31,5000100083,830010,CC_Tax,PC_Admin,Total_Products,22000.00,0.00,USD,Current state income tax
+2025-01-31,5000100084,830020,CC_Tax,PC_Admin,Total_Products,18000.00,0.00,USD,Deferred tax expense
+2025-01-02,5000100085,110000,CC_Treasury,PC_Admin,Total_Products,4850000.00,0.00,USD,Cash receipts - customer payments
+2025-01-02,5000100086,110000,CC_Treasury,PC_Admin,Total_Products,0.00,2150000.00,USD,Cash disbursements - vendor payments
+2025-01-05,5000100087,130000,CC_Accounting,PC_Admin,Total_Products,5810000.00,0.00,USD,Trade receivables - new invoices
+2025-01-05,5000100088,130000,CC_Accounting,PC_Admin,Total_Products,0.00,4850000.00,USD,Trade receivables - customer payments applied
+2025-01-08,5000100089,130100,CC_Accounting,PC_Admin,Total_Products,405000.00,0.00,USD,Intercompany receivable - Plant_DE01_Munich
+2025-01-08,5000100090,130200,CC_Accounting,PC_Admin,Total_Products,0.00,12500.00,USD,Allowance for doubtful accounts - monthly provision
+2025-01-10,5000100091,140000,CC_RawMatStorage,PC_Industrial,Total_Products,525000.00,0.00,USD,Raw materials inventory received
+2025-01-10,5000100092,140000,CC_RawMatStorage,PC_Industrial,Total_Products,0.00,485000.00,USD,Raw materials issued to production
+2025-01-12,5000100093,140100,CC_WIPStorage,PC_Industrial,Total_Products,485000.00,0.00,USD,WIP inventory - machining stage
+2025-01-15,5000100094,140100,CC_WIPStorage,PC_Industrial,Total_Products,0.00,420000.00,USD,WIP completed - moved to finished goods
+2025-01-15,5000100095,140200,CC_FGStorage,PC_Industrial,Total_Products,420000.00,0.00,USD,Finished goods inventory - completed units
+2025-01-18,5000100096,140200,CC_FGStorage,PC_Industrial,Total_Products,0.00,380000.00,USD,Finished goods shipped to customers
+2025-01-20,5000100097,150000,CC_Accounting,PC_Admin,Total_Products,15000.00,0.00,USD,Prepaid insurance - monthly amortization debit
+2025-01-20,5000100098,150000,CC_Accounting,PC_Admin,Total_Products,0.00,15000.00,USD,Prepaid insurance - monthly amortization credit
+2025-01-25,5000100099,160000,CC_CNC_Milling,PC_Industrial,Total_Products,350000.00,0.00,USD,CAPEX - new CNC 5-axis machining center
+2025-01-25,5000100100,160000,CC_FinalAssembly,PC_Industrial,Total_Products,125000.00,0.00,USD,CAPEX - automated assembly cell upgrade

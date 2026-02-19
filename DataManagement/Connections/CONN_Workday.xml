@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Connection Definition
+  Connection: Workday HCM (Report-as-a-Service API)
+  Purpose: Workday human capital data extraction for headcount planning and compensation analysis
+  Environment: Production
+  Created: 2026-02-18
+
+  IMPORTANT: Replace placeholder OAuth2 credentials with actual values
+  from Workday API Client registration. Store in OneStream Credential Vault.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <Connection>
+
+      <!-- ============================================================
+           CONNECTION IDENTITY
+           ============================================================ -->
+      <ConnectionName>Workday_HCM</ConnectionName>
+      <ConnectionDescription>Workday HCM REST API connection using Report-as-a-Service (RaaS) for extracting headcount, compensation, benefits, and workforce planning data. Connects to Workday tenant via OAuth2 client credentials flow to retrieve custom report outputs in JSON/CSV format.</ConnectionDescription>
+      <ConnectionType>REST_API</ConnectionType>
+      <IsActive>true</IsActive>
+      <Category>HCM</Category>
+      <SourceSystem>Workday_HCM</SourceSystem>
+
+      <!-- ============================================================
+           API BASE CONFIGURATION
+           ============================================================ -->
+      <APIConfiguration>
+        <!-- Workday REST API base URL (WD5 = production data center) -->
+        <BaseURL>https://wd5-services.workday.com/ccx/service/tenant/</BaseURL>
+        <!-- Workday tenant name -->
+        <TenantName>%%WORKDAY_TENANT%%</TenantName>
+        <!-- API version -->
+        <APIVersion>v40.0</APIVersion>
+        <!-- Data center region -->
+        <DataCenter>WD5</DataCenter>
+
+        <!-- Workday RaaS (Report-as-a-Service) base URL -->
+        <RaaSBaseURL>https://wd5-services.workday.com/ccx/service/customreport2/%%WORKDAY_TENANT%%/</RaaSBaseURL>
+
+        <!-- Common Headers sent with every request -->
+        <DefaultHeaders>
+          <Header name="Content-Type">application/json</Header>
+          <Header name="Accept">application/json</Header>
+          <Header name="X-Workday-Client">OneStream_XF_DataManagement</Header>
+        </DefaultHeaders>
+      </APIConfiguration>
+
+      <!-- ============================================================
+           AUTHENTICATION - OAuth2 Client Credentials
+           ============================================================ -->
+      <Authentication>
+        <AuthenticationType>OAuth2</AuthenticationType>
+        <CredentialVaultKey>VAULT_WORKDAY_OAUTH2</CredentialVaultKey>
+
+        <OAuth2Configuration>
+          <!-- OAuth2 Token Endpoint -->
+          <TokenEndpoint>https://wd5-services.workday.com/ccx/oauth2/%%WORKDAY_TENANT%%/token</TokenEndpoint>
+          <!-- Grant Type: client_credentials for server-to-server integration -->
+          <GrantType>client_credentials</GrantType>
+          <!-- Client credentials from Workday API Client registration -->
+          <ClientId>%%CREDENTIAL_VAULT_CLIENT_ID%%</ClientId>
+          <ClientSecret>%%CREDENTIAL_VAULT_CLIENT_SECRET%%</ClientSecret>
+          <!-- Refresh token (if using authorization_code flow as fallback) -->
+          <RefreshToken>%%CREDENTIAL_VAULT_REFRESH_TOKEN%%</RefreshToken>
+          <!-- Scopes required for HCM data access -->
+          <Scopes>
+            <Scope>wd:svc:reporting</Scope>
+            <Scope>wd:svc:human_resources</Scope>
+          </Scopes>
+          <!-- Token cache settings -->
+          <CacheAccessToken>true</CacheAccessToken>
+          <TokenRefreshBufferSeconds>300</TokenRefreshBufferSeconds>
+        </OAuth2Configuration>
+
+        <!-- Workday Integration System User (ISU) details -->
+        <IntegrationSystemUser>
+          <ISUName>ISU_OneStream_ETL</ISUName>
+          <SecurityGroups>
+            <Group>OneStream_Integration_Security</Group>
+            <Group>Custom_Report_Access</Group>
+          </SecurityGroups>
+          <!-- ISU requires access to these Workday domains:
+               - Worker Data: Headcount, Employment, Compensation
+               - Organization Data: Cost Centers, Supervisory Orgs
+               - Custom Reports: all RaaS reports used by OneStream
+          -->
+        </IntegrationSystemUser>
+      </Authentication>
+
+      <!-- ============================================================
+           API ENDPOINTS
+           Workday RaaS report endpoints for OneStream data extraction.
+           Each endpoint corresponds to a custom report in Workday.
+           ============================================================ -->
+      <Endpoints>
+
+        <!-- Headcount Report: active worker headcount by cost center -->
+        <Endpoint name="Headcount">
+          <URL>https://wd5-services.workday.com/ccx/service/customreport2/%%WORKDAY_TENANT%%/ISU_OneStream_ETL/CR_OS_Headcount?format=json</URL>
+          <Method>GET</Method>
+          <Description>Active headcount with FTE, cost center, position, and hire/termination dates</Description>
+          <Parameters>
+            <Parameter name="Effective_Date" type="date" required="true">Report effective date (YYYY-MM-DD)</Parameter>
+            <Parameter name="Cost_Center" type="string" required="false">Filter by cost center (optional)</Parameter>
+            <Parameter name="Include_Terminated" type="boolean" required="false">Include recently terminated workers</Parameter>
+          </Parameters>
+          <ResponseFormat>JSON</ResponseFormat>
+          <PaginationEnabled>true</PaginationEnabled>
+          <PageSize>500</PageSize>
+        </Endpoint>
+
+        <!-- Compensation Report: base pay, bonus targets, benefits -->
+        <Endpoint name="Compensation">
+          <URL>https://wd5-services.workday.com/ccx/service/customreport2/%%WORKDAY_TENANT%%/ISU_OneStream_ETL/CR_OS_Compensation?format=json</URL>
+          <Method>GET</Method>
+          <Description>Compensation details including base pay, bonus target, and benefits cost per worker</Description>
+          <Parameters>
+            <Parameter name="Effective_Date" type="date" required="true">Compensation effective date</Parameter>
+            <Parameter name="Pay_Group" type="string" required="false">Filter by pay group</Parameter>
+          </Parameters>
+          <ResponseFormat>JSON</ResponseFormat>
+          <PaginationEnabled>true</PaginationEnabled>
+          <PageSize>500</PageSize>
+        </Endpoint>
+
+        <!-- Organization Hierarchy: cost center and department hierarchy -->
+        <Endpoint name="OrgHierarchy">
+          <URL>https://wd5-services.workday.com/ccx/service/customreport2/%%WORKDAY_TENANT%%/ISU_OneStream_ETL/CR_OS_OrgHierarchy?format=json</URL>
+          <Method>GET</Method>
+          <Description>Organizational hierarchy with cost centers, departments, and supervisory orgs</Description>
+          <Parameters>
+            <Parameter name="Effective_Date" type="date" required="true">Hierarchy effective date</Parameter>
+          </Parameters>
+          <ResponseFormat>JSON</ResponseFormat>
+          <PaginationEnabled>false</PaginationEnabled>
+        </Endpoint>
+
+        <!-- Position Budget: budgeted positions and planned headcount -->
+        <Endpoint name="PositionBudget">
+          <URL>https://wd5-services.workday.com/ccx/service/customreport2/%%WORKDAY_TENANT%%/ISU_OneStream_ETL/CR_OS_PositionBudget?format=json</URL>
+          <Method>GET</Method>
+          <Description>Budgeted positions, planned fills, and vacancy tracking</Description>
+          <Parameters>
+            <Parameter name="Budget_Year" type="integer" required="true">Budget fiscal year</Parameter>
+          </Parameters>
+          <ResponseFormat>JSON</ResponseFormat>
+          <PaginationEnabled>false</PaginationEnabled>
+        </Endpoint>
+
+      </Endpoints>
+
+      <!-- ============================================================
+           TIMEOUT AND PERFORMANCE SETTINGS
+           ============================================================ -->
+      <TimeoutSettings>
+        <ConnectionTimeout>30</ConnectionTimeout>
+        <!-- API calls can take longer for large datasets -->
+        <CommandTimeout>300</CommandTimeout>
+        <!-- HTTP request timeout -->
+        <HttpRequestTimeout>120</HttpRequestTimeout>
+        <!-- Enable HTTP keep-alive for multiple sequential requests -->
+        <KeepAlive>true</KeepAlive>
+        <MaxRedirects>3</MaxRedirects>
+      </TimeoutSettings>
+
+      <!-- ============================================================
+           RATE LIMITING
+           Workday API has rate limits that must be respected.
+           ============================================================ -->
+      <RateLimiting>
+        <!-- Maximum requests per minute to avoid Workday throttling -->
+        <MaxRequestsPerMinute>30</MaxRequestsPerMinute>
+        <!-- Delay between consecutive API calls in milliseconds -->
+        <InterRequestDelayMs>2000</InterRequestDelayMs>
+        <!-- Back off when receiving 429 Too Many Requests -->
+        <BackoffOnThrottle>true</BackoffOnThrottle>
+        <ThrottleBackoffSeconds>60</ThrottleBackoffSeconds>
+      </RateLimiting>
+
+      <!-- ============================================================
+           RETRY AND RESILIENCE
+           ============================================================ -->
+      <RetryPolicy>
+        <MaxRetries>3</MaxRetries>
+        <RetryIntervalSeconds>30</RetryIntervalSeconds>
+        <ExponentialBackoff>true</ExponentialBackoff>
+        <RetryOnHttpStatusCodes>
+          <StatusCode>408</StatusCode>  <!-- Request Timeout -->
+          <StatusCode>429</StatusCode>  <!-- Too Many Requests -->
+          <StatusCode>500</StatusCode>  <!-- Internal Server Error -->
+          <StatusCode>502</StatusCode>  <!-- Bad Gateway -->
+          <StatusCode>503</StatusCode>  <!-- Service Unavailable -->
+          <StatusCode>504</StatusCode>  <!-- Gateway Timeout -->
+        </RetryOnHttpStatusCodes>
+      </RetryPolicy>
+
+      <!-- ============================================================
+           TEST / HEALTH CHECK
+           ============================================================ -->
+      <TestQuery>
+        <!-- Simple API call to validate authentication and connectivity -->
+        <URL>https://wd5-services.workday.com/ccx/service/customreport2/%%WORKDAY_TENANT%%/ISU_OneStream_ETL/CR_OS_Headcount?format=json&amp;Effective_Date=2026-01-01&amp;count=1</URL>
+        <Method>GET</Method>
+        <ExpectedHttpStatus>200</ExpectedHttpStatus>
+        <ExpectedResponseContains>Report_Entry</ExpectedResponseContains>
+        <TimeoutSeconds>30</TimeoutSeconds>
+      </TestQuery>
+
+      <!-- ============================================================
+           SCHEDULING AND MAINTENANCE
+           ============================================================ -->
+      <MaintenanceWindow>
+        <!-- Workday weekly maintenance: Saturdays -->
+        <DayOfWeek>Saturday</DayOfWeek>
+        <StartTimeUTC>06:00</StartTimeUTC>
+        <EndTimeUTC>14:00</EndTimeUTC>
+        <BlockLoadsDuringMaintenance>true</BlockLoadsDuringMaintenance>
+      </MaintenanceWindow>
+
+      <!-- ============================================================
+           LOGGING AND AUDIT
+           ============================================================ -->
+      <Logging>
+        <LogLevel>Info</LogLevel>
+        <LogConnectionEvents>true</LogConnectionEvents>
+        <LogAPIRequests>true</LogAPIRequests>
+        <LogResponseBodies>false</LogResponseBodies>
+        <LogSlowRequestThresholdSeconds>60</LogSlowRequestThresholdSeconds>
+        <MaskSensitiveData>true</MaskSensitiveData>
+        <!-- Mask PII fields in logs (worker names, SSN, etc.) -->
+        <PIIMaskingEnabled>true</PIIMaskingEnabled>
+      </Logging>
+
+    </Connection>
+  </DataManagement>
+</OneStreamXF>

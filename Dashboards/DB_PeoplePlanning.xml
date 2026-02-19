@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_PeoplePlanning"
+  Description="Headcount and Compensation Planning Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#Forecast" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                          DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants"      DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#PeopleAccounts.Descendants" DefaultMember="A#TotalHeadcount" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"             DefaultMember="F#Periodic" />
+    <POVBinding Dimension="UD1"       MemberFilter="UD1#Departments.Base"         DefaultMember="UD1#AllDepartments" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_PeoplePlanning"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="PeopleCube"
+      SuppressNoData="True"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="IncludeEmployeeDetails"   Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="People Planning"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="DepartmentFilter"
+          FilterType="DropDown"
+          Dimension="UD1"
+          MemberFilter="UD1#AllDepartments,UD1#Departments.Base"
+          DefaultMember="UD1#AllDepartments"
+          Label="Department" Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity.Descendants"
+          DefaultMember="E#TopEntity"
+          Label="Entity" Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="ScenarioToggle"
+          FilterType="ButtonGroup"
+          Dimension="Scenario"
+          MemberFilter="S#Actual,S#Budget,S#Forecast"
+          DefaultMember="S#Actual"
+          Label="Scenario"
+          ButtonActiveColor="#3498DB" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: HEADCOUNT BY DEPARTMENT + HEADCOUNT TREND -->
+    <Row Index="1" Height="300" HeightUnit="Pixel">
+
+      <!-- Headcount by Department Bar Chart -->
+      <Panel Row="1" Column="0" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Headcount by Department" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="HeadcountByDeptChart"
+          ChartType="Bar"
+          DataAdapter="DDA_PeoplePlanning"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0"
+          BarWidth="0.6">
+
+          <XAxis
+            DimensionBinding="UD1"
+            MemberFilter="UD1#Departments.Base"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelRotation="-30"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Headcount (FTEs)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Actual"
+                  Expression="A#TotalHeadcount:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB" />
+          <Series Name="Planned"
+                  Expression="A#TotalHeadcount:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                  Color="#E67E2280" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Headcount Trend (Actual vs Planned) -->
+      <Panel Row="1" Column="6" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Headcount Trend (Actual vs Planned)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="HeadcountTrendChart"
+          ChartType="Line"
+          DataAdapter="DDA_PeoplePlanning"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="FTEs"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Actual HC"
+                  Expression="A#TotalHeadcount:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#3498DB" LineWidth="3" LineStyle="Solid"
+                  MarkerType="Circle" MarkerSize="6" />
+          <Series Name="Planned HC"
+                  Expression="A#TotalHeadcount:S#Budget:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#E67E22" LineWidth="2" LineStyle="Dashed"
+                  MarkerType="Diamond" MarkerSize="5" />
+          <Series Name="Forecast HC"
+                  Expression="A#TotalHeadcount:S#Forecast:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#2ECC71" LineWidth="2" LineStyle="Dotted"
+                  MarkerType="Triangle" MarkerSize="5" />
+
+          <AreaFill SeriesName="Actual HC" FillColor="#3498DB10" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: COMPENSATION PIE + COST PER FTE -->
+    <Row Index="2" Height="280" HeightUnit="Pixel">
+
+      <!-- Compensation Breakdown Pie -->
+      <Panel Row="2" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Compensation Breakdown" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CompBreakdownPie"
+          ChartType="Pie"
+          DataAdapter="DDA_PeoplePlanning"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Right"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0,K"
+          ShowPercentLabels="True" PercentLabelFontSize="10" PercentLabelForeColor="#FFFFFF">
+
+          <Slices>
+            <Slice Name="Base Salary"
+                   Expression="A#BaseSalary:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:UD1#{POV.UD1}:F#YTD"
+                   Color="#3498DB" />
+            <Slice Name="Benefits"
+                   Expression="A#Benefits:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:UD1#{POV.UD1}:F#YTD"
+                   Color="#2ECC71" />
+            <Slice Name="Bonus / Incentive"
+                   Expression="A#BonusIncentive:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:UD1#{POV.UD1}:F#YTD"
+                   Color="#E67E22" />
+            <Slice Name="Payroll Taxes"
+                   Expression="A#PayrollTaxes:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:UD1#{POV.UD1}:F#YTD"
+                   Color="#9B59B6" />
+            <Slice Name="Other Comp"
+                   Expression="A#OtherComp:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:UD1#{POV.UD1}:F#YTD"
+                   Color="#95A5A6" />
+          </Slices>
+        </ChartComponent>
+      </Panel>
+
+      <!-- Cost per FTE by Entity -->
+      <Panel Row="2" Column="4" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Cost per FTE by Entity" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CostPerFTEChart"
+          ChartType="HorizontalBar"
+          DataAdapter="DDA_PeoplePlanning"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="False"
+          TooltipEnabled="True" TooltipFormat="$#,##0"
+          BarWidth="0.5">
+
+          <XAxis
+            Title="Annual Cost per FTE ($)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="$#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="Entity"
+            MemberFilter="E#TopEntity.Children"
+            LabelFontSize="10" LabelForeColor="#D0D8E8" />
+
+          <Series Name="Cost per FTE"
+                  Expression="A#CostPerFTE:S#{POV.Scenario}:T#{POV.Time}:F#Periodic"
+                  Color="#3498DB" />
+
+          <ReferenceLine Name="Company Average"
+                         ValueExpression="A#CostPerFTE:S#{POV.Scenario}:T#{POV.Time}:E#TopEntity:F#Periodic"
+                         Color="#E67E22" LineWidth="2" LineStyle="Dashed"
+                         Label="Company Avg" LabelFontSize="9" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Open Positions Tracker -->
+      <Panel Row="2" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Open Positions Tracker" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="OpenPositionsGrid"
+          DataAdapter="DDA_PeoplePlanning"
+          DataFilter="PositionStatus == 'Open'"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="10" HeaderFontWeight="Bold"
+          CellFontSize="10" CellForeColor="#D0D8E8"
+          CellPadding="5"
+          RowHeight="28"
+          EnableSorting="True"
+          MaxVisibleRows="8">
+
+          <Columns>
+            <Column Header="Department"    Binding="UD1.Description"       Width="120" Alignment="Left" />
+            <Column Header="Open Roles"    Binding="A#OpenPositions"       Width="80"  Alignment="Center" FontWeight="Bold">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 10" ForeColor="#E74C3C" FontWeight="Bold" />
+                <Rule Condition="Value >= 5"  ForeColor="#F39C12" />
+                <Rule Condition="Value >= 0"  ForeColor="#27AE60" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Avg Days Open" Binding="A#AvgDaysOpen"        Width="100" Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 60" ForeColor="#E74C3C" />
+                <Rule Condition="Value >= 30" ForeColor="#F39C12" />
+                <Rule Condition="Value &lt; 30"  ForeColor="#27AE60" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Est. Fill Date" Binding="A#EstimatedFillDate" Width="100" Alignment="Center" Format="MM/dd/yyyy" />
+          </Columns>
+        </GridComponent>
+
+        <!-- Summary Stats at bottom -->
+        <SummaryBar Position="Bottom" BackgroundColor="#243B67" Height="36" Padding="8">
+          <SummaryItem Label="Total Open:" Value="A#TotalOpenPositions" Format="#,##0" ForeColor="#E67E22" FontWeight="Bold" />
+          <SummaryItem Label="Fill Rate:" Value="A#FillRate" Format="0.0%" ForeColor="#3498DB" FontWeight="Bold" />
+        </SummaryBar>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: DETAILED COMP GRID -->
+    <Row Index="3" Height="250" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Compensation Detail by Department" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="CompDetailGrid"
+          DataAdapter="DDA_PeoplePlanning"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="30"
+          EnableSorting="True"
+          ShowTotalRow="True"
+          TotalRowBackgroundColor="#243B67" TotalRowFontWeight="Bold">
+
+          <RowDimension Dimension="UD1" MemberFilter="UD1#Departments.Base" ShowHierarchy="False" />
+
+          <Columns>
+            <Column Header="Department"     Binding="UD1.Description"                    Width="160" Alignment="Left" FontWeight="Bold" />
+            <Column Header="HC (FTEs)"      Binding="A#TotalHeadcount:F#Periodic"        Width="80"  Alignment="Center" Format="#,##0" />
+            <Column Header="Base Salary"    Binding="A#BaseSalary:F#YTD"                 Width="110" Alignment="Right" Format="#,##0,K" />
+            <Column Header="Benefits"       Binding="A#Benefits:F#YTD"                   Width="100" Alignment="Right" Format="#,##0,K" />
+            <Column Header="Bonus"          Binding="A#BonusIncentive:F#YTD"             Width="100" Alignment="Right" Format="#,##0,K" />
+            <Column Header="Taxes"          Binding="A#PayrollTaxes:F#YTD"               Width="100" Alignment="Right" Format="#,##0,K" />
+            <Column Header="Total Comp"     Binding="A#TotalCompensation:F#YTD"          Width="110" Alignment="Right" Format="#,##0,K" FontWeight="Bold" />
+            <Column Header="vs Budget"      Binding="Calculated.CompVariance"            Width="100" Alignment="Right" Format="+#,##0,K;-#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value &lt;= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value > 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Cost/FTE"       Binding="A#CostPerFTE:F#Periodic"            Width="100" Alignment="Right" Format="$#,##0" />
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="BaseSalary"    Value="#3498DB" />
+      <Color Name="Benefits"      Value="#2ECC71" />
+      <Color Name="Bonus"         Value="#E67E22" />
+      <Color Name="Taxes"         Value="#9B59B6" />
+      <Color Name="Actual"        Value="#3498DB" />
+      <Color Name="Planned"       Value="#E67E22" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

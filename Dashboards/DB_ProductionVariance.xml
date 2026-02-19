@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_ProductionVariance"
+  Description="Production Variance Analysis Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#Standard" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                          DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#Plants.Base"                DefaultMember="E#AllPlants" />
+    <POVBinding Dimension="Account"   MemberFilter="A#Variances.Base"             DefaultMember="A#TotalVariance" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"             DefaultMember="F#YTD" />
+    <POVBinding Dimension="UD1"       MemberFilter="UD1#ProductLines.Base"        DefaultMember="UD1#AllProducts" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_ProductionVariance"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="OperationsCube"
+      SuppressNoData="True"
+      SuppressZeros="True">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Production Variance Analysis"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF"
+          HorizontalAlignment="Left" VerticalAlignment="Center" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="PlantFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#AllPlants,E#Plants.Base"
+          DefaultMember="E#AllPlants"
+          Label="Plant"
+          Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="ProductFilter"
+          FilterType="DropDown"
+          Dimension="UD1"
+          MemberFilter="UD1#AllProducts,UD1#ProductLines.Base"
+          DefaultMember="UD1#AllProducts"
+          Label="Product Line"
+          Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="FlowToggle"
+          FilterType="ButtonGroup"
+          Dimension="Flow"
+          MemberFilter="F#Periodic,F#YTD"
+          DefaultMember="F#YTD"
+          Label="View"
+          ButtonActiveColor="#3498DB" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: VARIANCE WATERFALL -->
+    <Row Index="1" Height="340" HeightUnit="Pixel">
+      <Panel Row="1" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Production Variance Waterfall" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="VarianceWaterfallChart"
+          ChartType="Waterfall"
+          DataAdapter="DDA_ProductionVariance"
+          AnimationEnabled="True" AnimationDuration="800"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0,K">
+
+          <XAxis
+            LabelFontSize="10" LabelForeColor="#D0D8E8"
+            LabelRotation="-30"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Variance ($K)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,K"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <WaterfallCategories>
+            <Category Name="Standard Cost"
+                      Expression="A#StandardCost:S#Standard:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Total" Color="#3498DB" />
+            <Category Name="Material Price"
+                      Expression="A#MaterialPriceVariance:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#27AE60" UnfavorableColor="#E74C3C" />
+            <Category Name="Material Usage"
+                      Expression="A#MaterialUsageVariance:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#27AE60" UnfavorableColor="#E74C3C" />
+            <Category Name="Labor Rate"
+                      Expression="A#LaborRateVariance:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#27AE60" UnfavorableColor="#E74C3C" />
+            <Category Name="Labor Efficiency"
+                      Expression="A#LaborEfficiencyVariance:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#27AE60" UnfavorableColor="#E74C3C" />
+            <Category Name="OH Spending"
+                      Expression="A#OHSpendingVariance:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#27AE60" UnfavorableColor="#E74C3C" />
+            <Category Name="OH Volume"
+                      Expression="A#OHVolumeVariance:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#27AE60" UnfavorableColor="#E74C3C" />
+            <Category Name="Actual Cost"
+                      Expression="A#ActualCost:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Total" Color="#E67E22" />
+          </WaterfallCategories>
+
+          <ConnectorLine Color="#8CA8CC" LineWidth="1" LineStyle="Dotted" />
+          <DataLabels Enabled="True" FontSize="9" ForeColor="#D0D8E8" Format="#,##0,K" Position="Outside" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: VARIANCE BY PLANT GRID -->
+    <Row Index="2" Height="280" HeightUnit="Pixel">
+      <Panel Row="2" Column="0" ColumnSpan="8" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Variance by Plant" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="VarianceByPlantGrid"
+          DataAdapter="DDA_ProductionVariance"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="10" HeaderFontWeight="Bold"
+          CellFontSize="10" CellForeColor="#D0D8E8"
+          CellPadding="5"
+          RowHeight="30"
+          EnableSorting="True"
+          FreezeColumns="1"
+          ShowTotalRow="True"
+          TotalRowBackgroundColor="#243B67" TotalRowFontWeight="Bold">
+
+          <RowDimension Dimension="Entity" MemberFilter="E#Plants.Base" ShowHierarchy="False" />
+
+          <Columns>
+            <Column Header="Plant"            Binding="Entity.Description"                Width="140" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Mat'l Price"      Binding="A#MaterialPriceVariance:F#{POV.Flow}" Width="105" Alignment="Right" Format="#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Mat'l Usage"      Binding="A#MaterialUsageVariance:F#{POV.Flow}" Width="105" Alignment="Right" Format="#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Labor Rate"       Binding="A#LaborRateVariance:F#{POV.Flow}"    Width="100" Alignment="Right" Format="#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Labor Eff."       Binding="A#LaborEfficiencyVariance:F#{POV.Flow}" Width="100" Alignment="Right" Format="#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="OH Spend"         Binding="A#OHSpendingVariance:F#{POV.Flow}"   Width="100" Alignment="Right" Format="#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="OH Volume"        Binding="A#OHVolumeVariance:F#{POV.Flow}"     Width="100" Alignment="Right" Format="#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Total Var"        Binding="A#TotalVariance:F#{POV.Flow}"        Width="110" Alignment="Right" Format="#,##0,K" FontWeight="Bold">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" BackgroundColor="#27AE6015" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" BackgroundColor="#E74C3C15" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+
+      <!-- Variance Trend over 6 Months -->
+      <Panel Row="2" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Total Variance Trend (6 Months)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="VarianceTrendChart"
+          ChartType="Bar"
+          DataAdapter="DDA_ProductionVariance"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="False"
+          TooltipEnabled="True" TooltipFormat="#,##0,K">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingSixMonths"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Total Variance ($K)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,K"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Total Variance"
+                  Expression="A#TotalVariance:S#Actual:E#{POV.Entity}:F#Periodic"
+                  ColorExpression="Value >= 0 ? '#27AE60' : '#E74C3C'"
+                  BarWidth="0.6" />
+
+          <ReferenceLine Name="Zero" Value="0"
+                         Color="#8CA8CC" LineWidth="1" LineStyle="Solid" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: DRILL-DOWN TO PRODUCT LEVEL -->
+    <Row Index="3" Height="250" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Variance by Product (Drill-Down)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="VarianceByProductGrid"
+          DataAdapter="DDA_ProductionVariance"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="10" HeaderFontWeight="Bold"
+          CellFontSize="10" CellForeColor="#D0D8E8"
+          CellPadding="5"
+          RowHeight="28"
+          EnableSorting="True"
+          EnableFiltering="True"
+          ShowHierarchy="True"
+          ExpandLevel="1"
+          ShowTotalRow="True"
+          DrillDownEnabled="True">
+
+          <RowDimension Dimension="UD1" MemberFilter="UD1#ProductLines.Descendants" ShowHierarchy="True" />
+
+          <Columns>
+            <Column Header="Product"          Binding="UD1.Description"                    Width="200" Alignment="Left" />
+            <Column Header="Units Produced"   Binding="A#UnitsProduced:F#{POV.Flow}"       Width="110" Alignment="Right" Format="#,##0" />
+            <Column Header="Std Cost"         Binding="A#StandardCost:S#Standard:F#{POV.Flow}" Width="100" Alignment="Right" Format="#,##0,K" />
+            <Column Header="Actual Cost"      Binding="A#ActualCost:S#Actual:F#{POV.Flow}"     Width="100" Alignment="Right" Format="#,##0,K" />
+            <Column Header="Total Var"        Binding="A#TotalVariance:F#{POV.Flow}"       Width="100" Alignment="Right" Format="#,##0,K">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Var %"            Binding="A#TotalVariancePct:F#{POV.Flow}"    Width="80"  Alignment="Center" Format="+0.0%;-0.0%">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- DRILL-THROUGH -->
+  <DrillThroughDefinitions>
+    <DrillThrough
+      Name="DrillToPlantDetail"
+      TargetDashboard="DB_PlantPerformance"
+      TriggerType="DoubleClick"
+      SourceComponent="VarianceByPlantGrid"
+      PassPOV="True">
+      <ParameterMappings>
+        <Mapping Source="SelectedRow.Entity" Target="POV.Entity" />
+        <Mapping Source="POV.Time"           Target="POV.Time" />
+      </ParameterMappings>
+    </DrillThrough>
+  </DrillThroughDefinitions>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Favorable"   Value="#27AE60" />
+      <Color Name="Unfavorable" Value="#E74C3C" />
+      <Color Name="Neutral"     Value="#F39C12" />
+      <Color Name="Standard"    Value="#3498DB" />
+      <Color Name="Actual"      Value="#E67E22" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

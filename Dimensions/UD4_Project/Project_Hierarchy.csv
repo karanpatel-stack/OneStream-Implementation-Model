@@ -1,0 +1,38 @@
+MemberName,ParentName,Description,ProjectType,StartDate,EndDate,Budget
+Total_Projects,,Total Projects,Rollup,,,0
+No_Project,Total_Projects,No Project Assigned,None,,,0
+CAPEX_Expansion,Total_Projects,Capital Expansion Projects,Rollup,,,0
+PRJ_NewPlant_Mexico,CAPEX_Expansion,New Manufacturing Plant - Monterrey Phase 2,GreenField,2024-06-01,2026-12-31,45000000
+PRJ_Line5_Detroit,CAPEX_Expansion,Production Line 5 - Detroit Heavy Machinery,Expansion,2024-03-01,2025-06-30,18500000
+PRJ_Warehouse_Shanghai,CAPEX_Expansion,New Distribution Warehouse - Shanghai,GreenField,2024-09-01,2025-12-31,12000000
+PRJ_PlantExpansion_Munich,CAPEX_Expansion,Munich Plant Wing B Expansion,Expansion,2025-01-01,2026-06-30,22000000
+PRJ_AssemblyHall_Charlotte,CAPEX_Expansion,Charlotte Assembly Hall Addition,Expansion,2025-04-01,2026-03-31,8500000
+PRJ_TestCenter_Osaka,CAPEX_Expansion,Osaka Advanced Testing Center,GreenField,2025-07-01,2027-03-31,15000000
+CAPEX_Maintenance,Total_Projects,Capital Maintenance Projects,Rollup,,,0
+PRJ_AnnualMaint_2024,CAPEX_Maintenance,Annual Maintenance Capital 2024,Maintenance,2024-01-01,2024-12-31,6500000
+PRJ_AnnualMaint_2025,CAPEX_Maintenance,Annual Maintenance Capital 2025,Maintenance,2025-01-01,2025-12-31,7200000
+PRJ_AnnualMaint_2026,CAPEX_Maintenance,Annual Maintenance Capital 2026,Maintenance,2026-01-01,2026-12-31,7800000
+PRJ_AnnualMaint_2027,CAPEX_Maintenance,Annual Maintenance Capital 2027,Maintenance,2027-01-01,2027-12-31,8200000
+PRJ_RoofReplacement_Detroit,CAPEX_Maintenance,Roof Replacement - Detroit Plant,Maintenance,2024-04-01,2024-09-30,2200000
+PRJ_HVACUpgrade_Houston,CAPEX_Maintenance,HVAC System Upgrade - Houston,Maintenance,2025-01-01,2025-06-30,1800000
+PRJ_ElectricalUpgrade_Birmingham,CAPEX_Maintenance,Electrical Infrastructure Upgrade - Birmingham,Maintenance,2025-03-01,2025-12-31,3100000
+CAPEX_Automation,Total_Projects,Capital Automation Projects,Rollup,,,0
+PRJ_RoboticLine_Munich,CAPEX_Automation,Robotic Assembly Line - Munich Plant,Automation,2024-07-01,2025-12-31,14000000
+PRJ_AIQuality_All,CAPEX_Automation,AI-Powered Quality Inspection - All Plants,Automation,2024-10-01,2026-06-30,8500000
+PRJ_AutoWarehouse_Shanghai,CAPEX_Automation,Automated Warehouse System - Shanghai,Automation,2025-01-01,2026-03-31,6200000
+PRJ_SmartMfg_Detroit,CAPEX_Automation,Smart Manufacturing IoT Platform - Detroit,Automation,2025-06-01,2027-06-30,9800000
+PRJ_AGV_Stuttgart,CAPEX_Automation,AGV Fleet Deployment - Stuttgart,Automation,2025-03-01,2025-12-31,3500000
+PRJ_DigitalTwin_All,CAPEX_Automation,Digital Twin Platform - All Major Plants,Automation,2026-01-01,2027-12-31,11000000
+CAPEX_IT,Total_Projects,IT Capital Projects,Rollup,,,0
+PRJ_ERP_Upgrade,CAPEX_IT,SAP S/4HANA Migration Phase 2,IT,2024-01-01,2025-12-31,12500000
+PRJ_MES_Rollout,CAPEX_IT,MES System Global Rollout,IT,2024-06-01,2026-12-31,7800000
+PRJ_CyberSec_Enhancement,CAPEX_IT,Cybersecurity Enhancement Program,IT,2025-01-01,2025-12-31,3200000
+PRJ_DataLake,CAPEX_IT,Enterprise Data Lake and Analytics,IT,2025-04-01,2026-09-30,5500000
+RD_Projects,Total_Projects,Research and Development Projects,Rollup,,,0
+PRJ_NextGenProduct,RD_Projects,Next Generation Product Platform,Research,2024-01-01,2026-06-30,15000000
+PRJ_MaterialsResearch,RD_Projects,Advanced Materials Research Program,Research,2024-03-01,2027-12-31,8000000
+PRJ_ProcessOptimization,RD_Projects,Manufacturing Process Optimization Initiative,ProcessImprovement,2024-06-01,2025-12-31,4500000
+PRJ_ElectricDrive,RD_Projects,Electric Drive System Development,Research,2025-01-01,2027-06-30,12000000
+PRJ_AdditiveManufacturing,RD_Projects,Additive Manufacturing Technology Adoption,Research,2025-06-01,2027-12-31,6800000
+PRJ_SustainableMfg,RD_Projects,Sustainable Manufacturing Initiative,ProcessImprovement,2024-09-01,2026-12-31,5200000
+PRJ_LightweightAlloys,RD_Projects,Lightweight Alloy Development,Research,2025-01-01,2027-06-30,4200000

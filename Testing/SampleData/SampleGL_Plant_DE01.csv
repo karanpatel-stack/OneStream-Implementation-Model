@@ -1,0 +1,92 @@
+PostingDate,DocumentNumber,GLAccount,CostCenter,ProfitCenter,Product,DebitAmount,CreditAmount,Currency,Description
+2025-01-02,6000200001,400000,CC_EMEASales,PC_Industrial,SKU_PR_BearingAssembly_A,0.00,820000.00,EUR,Domestic revenue - precision bearing assemblies
+2025-01-02,6000200002,400000,CC_EMEASales,PC_Industrial,SKU_PR_GearSet_Standard,0.00,645000.00,EUR,Domestic revenue - standard gear sets
+2025-01-03,6000200003,400000,CC_EMEASales,PC_Industrial,SKU_PR_GearSet_Custom,0.00,480000.00,EUR,Domestic revenue - custom gear sets
+2025-01-03,6000200004,400100,CC_MidwestSales,PC_Industrial,SKU_HM_HydPress_500T,0.00,375000.00,EUR,Export revenue - hydraulic press components to Americas
+2025-01-05,6000200005,400100,CC_APACSales,PC_Industrial,SKU_PR_Shaft_Hardened,0.00,290000.00,EUR,Export revenue - hardened shafts to APAC
+2025-01-05,6000200006,400000,CC_EMEASales,PC_Specialty,SKU_AE_ActuatorAssembly,0.00,410000.00,EUR,Domestic specialty revenue - hydraulic actuators
+2025-01-07,6000200007,400000,CC_EMEASales,PC_Industrial,SKU_AU_ServoMotor_L,0.00,235000.00,EUR,Domestic revenue - large servo motors
+2025-01-07,6000200008,400100,CC_EMEASales,PC_Industrial,SKU_PR_Coupling_Flex,0.00,185000.00,EUR,Export revenue - flexible couplings to UK
+2025-01-08,6000200009,400200,CC_MidwestSales,PC_Industrial,SKU_PR_BearingAssembly_B,0.00,195000.00,EUR,IC transfer sales to Plant_US01_Detroit
+2025-01-08,6000200010,400200,CC_APACSales,PC_Industrial,SKU_PR_GearSet_Standard,0.00,165000.00,EUR,IC transfer sales to Plant_CN01_Shanghai
+2025-01-10,6000200011,400200,CC_EMEASales,PC_Industrial,SKU_PR_LinearGuide,0.00,110000.00,EUR,IC transfer sales to Plant_FR01_Lyon
+2025-01-10,6000200012,400200,CC_APACSales,PC_Industrial,SKU_AU_ServoMotor_M,0.00,88000.00,EUR,IC transfer sales to Plant_JP01_Osaka
+2025-01-12,6000200013,400210,CC_EMEASales,PC_Industrial,Total_Products,0.00,35000.00,EUR,IC service revenue - engineering support to US01
+2025-01-12,6000200014,400220,CC_EMEASales,PC_Industrial,Total_Products,0.00,22000.00,EUR,IC royalty income from Plant_CN01_Shanghai
+2025-01-15,6000200015,410000,CC_EMEASales,PC_Industrial,Total_Products,42000.00,0.00,EUR,Trade discounts - European distributor program
+2025-01-15,6000200016,410100,CC_EMEASales,PC_Industrial,Total_Products,18500.00,0.00,EUR,Sales returns - warranty returns
+2025-01-15,6000200017,410200,CC_EMEASales,PC_Industrial,Total_Products,12000.00,0.00,EUR,Customer rebates - OEM volume rebate
+2025-01-17,6000200018,500000,CC_CNC_Milling,PC_Industrial,SKU_PR_BearingAssembly_A,285000.00,0.00,EUR,Raw materials - specialty steel for bearings
+2025-01-17,6000200019,500010,CC_CNC_Turning,PC_Industrial,SKU_PR_GearSet_Standard,195000.00,0.00,EUR,Raw materials - alloy steel for gears
+2025-01-17,6000200020,500020,CC_CNC_Grinding,PC_Industrial,SKU_PR_Shaft_Hardened,142000.00,0.00,EUR,Raw materials - hardened steel bar stock
+2025-01-18,6000200021,500030,CC_ElectricalAssembly,PC_Industrial,SKU_AU_ServoMotor_L,78000.00,0.00,EUR,Electronic components - motor controllers
+2025-01-18,6000200022,500040,CC_CNC_Grinding,PC_Industrial,Total_Products,24000.00,0.00,EUR,Chemicals - precision grinding compounds
+2025-01-20,6000200023,510000,CC_SubAssembly,PC_Industrial,SKU_PR_BearingAssembly_A,52000.00,0.00,EUR,Purchased components - ceramic balls for bearings
+2025-01-20,6000200024,510010,CC_FinalAssembly,PC_Industrial,SKU_AU_ServoMotor_L,68000.00,0.00,EUR,Purchased components - rare earth magnets
+2025-01-20,6000200025,510020,CC_ElectricalAssembly,PC_Industrial,SKU_AU_VisionSystem,45000.00,0.00,EUR,Purchased components - optical sensors
+2025-01-21,6000200026,520000,CC_PrimaryPack,PC_Industrial,Total_Products,18000.00,0.00,EUR,Primary packaging - precision component trays
+2025-01-21,6000200027,520010,CC_FinalPack,PC_Industrial,Total_Products,12500.00,0.00,EUR,Secondary packaging materials
+2025-01-21,6000200028,520020,CC_FinalPack,PC_Industrial,Total_Products,22000.00,0.00,EUR,Shipping crates - export packaging
+2025-01-22,6000200029,600000,CC_CNC_Milling,PC_Industrial,Total_Products,195000.00,0.00,EUR,Production labor - CNC machining (German skilled workers)
+2025-01-22,6000200030,600010,CC_FinalAssembly,PC_Industrial,Total_Products,155000.00,0.00,EUR,Production labor - precision assembly
+2025-01-22,6000200031,600020,CC_HeatTreat,PC_Industrial,Total_Products,72000.00,0.00,EUR,Production labor - heat treatment operations
+2025-01-22,6000200032,600030,CC_Metrology,PC_Industrial,Total_Products,58000.00,0.00,EUR,Production labor - metrology and quality inspection
+2025-01-23,6000200033,610000,CC_CNC_Milling,PC_Industrial,Total_Products,35000.00,0.00,EUR,Scheduled overtime - high demand period
+2025-01-23,6000200034,610010,CC_FinalAssembly,PC_Industrial,Total_Products,22000.00,0.00,EUR,Unscheduled overtime - urgent customer order
+2025-01-25,6000200035,620000,CC_CNC_Milling,PC_Industrial,Total_Products,95000.00,0.00,EUR,Factory depreciation - German CNC centers
+2025-01-25,6000200036,620010,CC_CNC_Milling,PC_Industrial,Total_Products,38000.00,0.00,EUR,Factory building depreciation
+2025-01-25,6000200037,620020,CC_FinalAssembly,PC_Industrial,Total_Products,28000.00,0.00,EUR,Equipment depreciation - assembly
+2025-01-25,6000200038,630000,CC_CNC_Milling,PC_Industrial,Total_Products,42000.00,0.00,EUR,Factory electricity
+2025-01-25,6000200039,630010,CC_HeatTreat,PC_Industrial,Total_Products,35000.00,0.00,EUR,Factory natural gas - furnaces
+2025-01-25,6000200040,630020,CC_CNC_Milling,PC_Industrial,Total_Products,6500.00,0.00,EUR,Factory water
+2025-01-26,6000200041,640000,CC_PreventiveMaint,PC_Industrial,Total_Products,38000.00,0.00,EUR,Preventive maintenance
+2025-01-26,6000200042,640010,CC_CorrectiveMaint,PC_Industrial,Total_Products,12000.00,0.00,EUR,Corrective maintenance
+2025-01-26,6000200043,640020,CC_ToolRoom,PC_Industrial,Total_Products,9500.00,0.00,EUR,Spare parts
+2025-01-27,6000200044,650000,CC_CNC_Milling,PC_Industrial,Total_Products,72000.00,0.00,EUR,Indirect labor - Meister (production supervisors)
+2025-01-27,6000200045,650010,CC_InboundDock,PC_Industrial,Total_Products,28000.00,0.00,EUR,Indirect labor - material handlers
+2025-01-27,6000200046,650020,CC_PreventiveMaint,PC_Industrial,Total_Products,35000.00,0.00,EUR,Indirect labor - maintenance technicians
+2025-01-27,6000200047,650030,CC_FGStorage,PC_Industrial,Total_Products,24000.00,0.00,EUR,Indirect labor - warehouse operations
+2025-01-28,6000200048,660000,CC_CNC_Milling,PC_Industrial,Total_Products,18000.00,0.00,EUR,Factory insurance (Betriebsversicherung)
+2025-01-28,6000200049,660010,CC_CNC_Milling,PC_Industrial,Total_Products,12000.00,0.00,EUR,Factory property tax (Grundsteuer)
+2025-01-28,6000200050,660020,CC_CNC_Milling,PC_Industrial,Total_Products,6500.00,0.00,EUR,Factory supplies
+2025-01-28,6000200051,660030,CC_ToolRoom,PC_Industrial,Total_Products,8500.00,0.00,EUR,Tooling expense
+2025-01-28,6000200052,670000,CC_CNC_Milling,PC_Industrial,Total_Products,11000.00,0.00,EUR,Material price variance - specialty steel
+2025-01-28,6000200053,670010,CC_CNC_Milling,PC_Industrial,Total_Products,5800.00,0.00,EUR,Material usage variance
+2025-01-28,6000200054,670020,CC_FinalAssembly,PC_Industrial,Total_Products,-8500.00,0.00,EUR,Labor efficiency variance (favorable)
+2025-01-28,6000200055,670030,CC_CNC_Milling,PC_Industrial,Total_Products,14000.00,0.00,EUR,Production volume variance
+2025-01-29,6000200056,700000,CC_Accounting,PC_Admin,Total_Products,115000.00,0.00,EUR,SGA salaries - admin and finance
+2025-01-29,6000200057,700010,CC_CompBenefits,PC_Admin,Total_Products,48000.00,0.00,EUR,SGA benefits (Sozialabgaben)
+2025-01-29,6000200058,700020,CC_CEO_Office,PC_Admin,Total_Products,22000.00,0.00,EUR,Office rent (Bueromiete)
+2025-01-29,6000200059,700030,CC_EMEASales,PC_Admin,Total_Products,15000.00,0.00,EUR,Travel and entertainment
+2025-01-29,6000200060,700040,CC_Corporate_Legal,PC_Admin,Total_Products,28000.00,0.00,EUR,Professional services - Wirtschaftspruefer
+2025-01-30,6000200061,710000,CC_MechanicalDesign,PC_RD,Total_Products,98000.00,0.00,EUR,R&D salaries - precision engineering team
+2025-01-30,6000200062,710010,CC_ProtoLab,PC_RD,Total_Products,35000.00,0.00,EUR,R&D materials and prototypes
+2025-01-30,6000200063,710020,CC_Certification,PC_RD,Total_Products,22000.00,0.00,EUR,DIN/ISO testing and certification
+2025-01-30,6000200064,720000,CC_EMEASales,PC_Sales,Total_Products,32000.00,0.00,EUR,Advertising - European trade publications
+2025-01-30,6000200065,720010,CC_EMEASales,PC_Sales,Total_Products,45000.00,0.00,EUR,Trade shows - Hannover Messe booth
+2025-01-31,6000200066,800000,CC_Accounting,PC_Admin,Total_Products,25000.00,0.00,EUR,Non-manufacturing depreciation
+2025-01-31,6000200067,800010,CC_Accounting,PC_Admin,Total_Products,18000.00,0.00,EUR,Amortization of intangibles
+2025-01-31,6000200068,810000,CC_Treasury,PC_Admin,Total_Products,32000.00,0.00,EUR,Interest on long-term debt (Schuldscheindarlehen)
+2025-01-31,6000200069,810010,CC_Treasury,PC_Admin,Total_Products,5500.00,0.00,EUR,Interest on revolving credit facility
+2025-01-31,6000200070,820000,CC_Accounting,PC_Admin,Total_Products,0.00,8500.00,EUR,Gain on equipment disposal
+2025-01-31,6000200071,820010,CC_Treasury,PC_Admin,Total_Products,4200.00,0.00,EUR,FX loss on USD receivable
+2025-01-31,6000200072,830000,CC_Tax,PC_Admin,Total_Products,62000.00,0.00,EUR,Koerperschaftsteuer (corporate income tax)
+2025-01-31,6000200073,830010,CC_Tax,PC_Admin,Total_Products,55000.00,0.00,EUR,Gewerbesteuer (trade tax)
+2025-01-31,6000200074,830020,CC_Tax,PC_Admin,Total_Products,12000.00,0.00,EUR,Deferred tax expense
+2025-01-02,6000200075,110000,CC_Treasury,PC_Admin,Total_Products,3200000.00,0.00,EUR,Cash receipts from customers
+2025-01-02,6000200076,110000,CC_Treasury,PC_Admin,Total_Products,0.00,1850000.00,EUR,Cash disbursements to vendors
+2025-01-05,6000200077,130000,CC_Accounting,PC_Admin,Total_Products,4055000.00,0.00,EUR,Trade receivables - new invoices
+2025-01-05,6000200078,130000,CC_Accounting,PC_Admin,Total_Products,0.00,3200000.00,EUR,Trade receivables - customer payments received
+2025-01-08,6000200079,130100,CC_Accounting,PC_Admin,Total_Products,558000.00,0.00,EUR,IC receivable from Plant_CN01_Shanghai
+2025-01-08,6000200080,130100,CC_Accounting,PC_Admin,Total_Products,88000.00,0.00,EUR,IC receivable from Plant_JP01_Osaka
+2025-01-10,6000200081,200100,CC_Accounting,PC_Admin,Total_Products,0.00,195000.00,EUR,IC payable to Plant_US01_Detroit (component purchase)
+2025-01-12,6000200082,140000,CC_RawMatStorage,PC_Industrial,Total_Products,380000.00,0.00,EUR,Raw materials inventory - steel and alloys received
+2025-01-12,6000200083,140000,CC_RawMatStorage,PC_Industrial,Total_Products,0.00,346000.00,EUR,Raw materials issued to production
+2025-01-15,6000200084,140100,CC_WIPStorage,PC_Industrial,Total_Products,346000.00,0.00,EUR,WIP inventory - precision machining
+2025-01-18,6000200085,140100,CC_WIPStorage,PC_Industrial,Total_Products,0.00,310000.00,EUR,WIP completed - to finished goods
+2025-01-18,6000200086,140200,CC_FGStorage,PC_Industrial,Total_Products,310000.00,0.00,EUR,Finished goods - completed components
+2025-01-20,6000200087,140200,CC_FGStorage,PC_Industrial,Total_Products,0.00,285000.00,EUR,Finished goods shipped
+2025-01-22,6000200088,150000,CC_Accounting,PC_Admin,Total_Products,12000.00,0.00,EUR,Prepaid maintenance contracts
+2025-01-22,6000200089,150000,CC_Accounting,PC_Admin,Total_Products,0.00,12000.00,EUR,Prepaid maintenance - monthly amortization
+2025-01-25,6000200090,160000,CC_CNC_Milling,PC_Industrial,Total_Products,280000.00,0.00,EUR,CAPEX - Swiss-type CNC turning center
+2025-01-25,6000200091,160010,CC_Metrology,PC_Industrial,Total_Products,95000.00,0.00,EUR,CAPEX - coordinate measuring machine

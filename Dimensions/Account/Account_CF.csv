@@ -1,0 +1,71 @@
+MemberName,ParentName,Description,AccountType
+TotalCashFlow,,Total Cash Flow,Asset
+OperatingActivities,TotalCashFlow,Cash Flow from Operating Activities,Asset
+CF_NetIncome,OperatingActivities,Net Income,Asset
+AdjustmentsNonCash,OperatingActivities,Adjustments for Non-Cash Items,Asset
+CF_Depreciation,AdjustmentsNonCash,Depreciation,Asset
+CF_Amortization,AdjustmentsNonCash,Amortization of Intangibles,Asset
+CF_DeferredTax,AdjustmentsNonCash,Deferred Tax Expense,Asset
+CF_StockComp,AdjustmentsNonCash,Stock-Based Compensation,Asset
+CF_GainLossDisposal,AdjustmentsNonCash,Gain/Loss on Disposal of Assets,Asset
+CF_ImpairmentCharges,AdjustmentsNonCash,Impairment Charges,Asset
+CF_AmortDebtDiscount,AdjustmentsNonCash,Amortization of Debt Issuance Costs,Asset
+CF_BadDebtProvision,AdjustmentsNonCash,Provision for Bad Debts,Asset
+CF_InventoryWritedown,AdjustmentsNonCash,Inventory Write-Down,Asset
+WorkingCapitalChanges,OperatingActivities,Changes in Working Capital,Asset
+CF_ChangeAR,WorkingCapitalChanges,Change in Accounts Receivable,Asset
+CF_ChangeInventory,WorkingCapitalChanges,Change in Inventory,Asset
+CF_ChangeInventory_RM,CF_ChangeInventory,Change in Raw Materials Inventory,Asset
+CF_ChangeInventory_WIP,CF_ChangeInventory,Change in WIP Inventory,Asset
+CF_ChangeInventory_FG,CF_ChangeInventory,Change in Finished Goods Inventory,Asset
+CF_ChangePrepaid,WorkingCapitalChanges,Change in Prepaid Expenses,Asset
+CF_ChangeAP,WorkingCapitalChanges,Change in Accounts Payable,Asset
+CF_ChangeAccrued,WorkingCapitalChanges,Change in Accrued Liabilities,Asset
+CF_ChangeAccrPayroll,CF_ChangeAccrued,Change in Accrued Payroll,Asset
+CF_ChangeAccrTax,CF_ChangeAccrued,Change in Accrued Taxes,Asset
+CF_ChangeAccrOther,CF_ChangeAccrued,Change in Other Accrued Liabilities,Asset
+CF_ChangeDeferredRev,WorkingCapitalChanges,Change in Deferred Revenue,Asset
+CF_ChangeOtherWC,WorkingCapitalChanges,Change in Other Working Capital,Asset
+NetCashOperating,OperatingActivities,Net Cash from Operating Activities (Calculated),Asset
+InvestingActivities,TotalCashFlow,Cash Flow from Investing Activities,Asset
+CAPEX,InvestingActivities,Capital Expenditures,Asset
+CAPEX_Land,CAPEX,Purchase of Land,Asset
+CAPEX_Building,CAPEX,Purchase/Construction of Buildings,Asset
+CAPEX_Machinery,CAPEX,Purchase of Machinery and Equipment,Asset
+CAPEX_Equipment,CAPEX,Purchase of Other Equipment,Asset
+CAPEX_IT,CAPEX,IT Infrastructure and Software,Asset
+CAPEX_ToolsDies,CAPEX,Tooling and Dies,Asset
+Acquisitions,InvestingActivities,Acquisitions (Net of Cash),Asset
+ACQ_BusinessAcquisitions,Acquisitions,Business Acquisitions,Asset
+ACQ_AssetAcquisitions,Acquisitions,Asset Acquisitions,Asset
+Disposals,InvestingActivities,Proceeds from Asset Disposals,Asset
+DISP_PropertySales,Disposals,Proceeds from Property Sales,Asset
+DISP_EquipmentSales,Disposals,Proceeds from Equipment Sales,Asset
+DISP_BusinessDisposals,Disposals,Proceeds from Business Disposals,Asset
+CF_OtherInvesting,InvestingActivities,Other Investing Activities,Asset
+NetCashInvesting,InvestingActivities,Net Cash from Investing Activities (Calculated),Asset
+FinancingActivities,TotalCashFlow,Cash Flow from Financing Activities,Asset
+DebtProceeds,FinancingActivities,Proceeds from Debt,Asset
+DEBT_LTProceeds,DebtProceeds,Proceeds from Long-Term Debt Issuance,Asset
+DEBT_STProceeds,DebtProceeds,Proceeds from Short-Term Borrowings,Asset
+DEBT_RevolvingDraws,DebtProceeds,Revolving Credit Facility Draws,Asset
+DebtRepayments,FinancingActivities,Debt Repayments,Asset
+DEBT_LTRepayments,DebtRepayments,Long-Term Debt Repayments,Asset
+DEBT_STRepayments,DebtRepayments,Short-Term Debt Repayments,Asset
+DEBT_RevolvingPaydowns,DebtRepayments,Revolving Credit Facility Paydowns,Asset
+DividendsPaid,FinancingActivities,Dividends Paid,Asset
+DIV_CommonDividends,DividendsPaid,Common Stock Dividends,Asset
+DIV_PreferredDividends,DividendsPaid,Preferred Stock Dividends,Asset
+StockIssuance,FinancingActivities,Stock Issuance Proceeds,Asset
+STK_CommonIssuance,StockIssuance,Common Stock Issuance,Asset
+STK_OptionExercise,StockIssuance,Stock Option Exercises,Asset
+StockRepurchase,FinancingActivities,Stock Repurchase,Asset
+STK_Buyback,StockRepurchase,Share Buyback Program,Asset
+CF_LeasePayments,FinancingActivities,Principal Payments on Lease Obligations,Asset
+CF_DebtIssuanceCosts,FinancingActivities,Debt Issuance Costs,Asset
+CF_OtherFinancing,FinancingActivities,Other Financing Activities,Asset
+NetCashFinancing,FinancingActivities,Net Cash from Financing Activities (Calculated),Asset
+FXEffect,TotalCashFlow,Effect of Exchange Rate on Cash,Asset
+NetCashChange,,Net Change in Cash (Calculated),Asset
+CF_BeginningCash,,Beginning Cash Balance,Asset
+CF_EndingCash,,Ending Cash Balance (Calculated),Asset

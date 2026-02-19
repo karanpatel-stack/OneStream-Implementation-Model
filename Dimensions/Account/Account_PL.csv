@@ -1,0 +1,132 @@
+MemberName,ParentName,Description,AccountType
+TotalRevenue,,Total Revenue,Revenue
+GrossRevenue,TotalRevenue,Gross Revenue,Revenue
+REV_Domestic,GrossRevenue,Domestic Revenue,Revenue
+REV_Domestic_Industrial,REV_Domestic,Domestic Industrial Revenue,Revenue
+REV_Domestic_Consumer,REV_Domestic,Domestic Consumer Revenue,Revenue
+REV_Domestic_Specialty,REV_Domestic,Domestic Specialty Revenue,Revenue
+REV_Export,GrossRevenue,Export Revenue,Revenue
+REV_Export_Industrial,REV_Export,Export Industrial Revenue,Revenue
+REV_Export_Consumer,REV_Export,Export Consumer Revenue,Revenue
+REV_Export_Specialty,REV_Export,Export Specialty Revenue,Revenue
+REV_Intercompany,GrossRevenue,Intercompany Revenue,Revenue
+REV_IC_TransferSales,REV_Intercompany,IC Transfer Sales,Revenue
+REV_IC_ServiceRevenue,REV_Intercompany,IC Service Revenue,Revenue
+REV_IC_RoyaltyIncome,REV_Intercompany,IC Royalty Income,Revenue
+Deductions,TotalRevenue,Revenue Deductions,Revenue
+REV_Discounts,Deductions,Trade Discounts,Revenue
+REV_VolumeDiscounts,Deductions,Volume Discounts,Revenue
+REV_EarlyPayDiscount,Deductions,Early Payment Discounts,Revenue
+REV_Returns,Deductions,Sales Returns,Revenue
+REV_Rebates,Deductions,Customer Rebates,Revenue
+REV_Allowances,Deductions,Sales Allowances,Revenue
+NetRevenue,TotalRevenue,Net Revenue (Calculated),Revenue
+TotalCOGS,,Total Cost of Goods Sold,Expense
+DirectMaterials,TotalCOGS,Direct Materials,Expense
+RawMaterials,DirectMaterials,Raw Materials Consumed,Expense
+RM_Steel,RawMaterials,Steel and Metal Alloys,Expense
+RM_Aluminum,RawMaterials,Aluminum and Light Metals,Expense
+RM_Polymers,RawMaterials,Polymers and Plastics,Expense
+RM_Electronics,RawMaterials,Electronic Components,Expense
+RM_Chemicals,RawMaterials,Chemicals and Solvents,Expense
+Components,DirectMaterials,Purchased Components,Expense
+COMP_Bearings,Components,Bearings and Bushings,Expense
+COMP_Motors,Components,Motors and Drives,Expense
+COMP_Sensors,Components,Sensors and Controls,Expense
+COMP_Fasteners,Components,Fasteners and Hardware,Expense
+COMP_Electrical,Components,Electrical Components,Expense
+Packaging,DirectMaterials,Packaging Materials,Expense
+PKG_Primary,Packaging,Primary Packaging,Expense
+PKG_Secondary,Packaging,Secondary Packaging,Expense
+PKG_Shipping,Packaging,Shipping and Crating,Expense
+DirectLabor,TotalCOGS,Direct Labor,Expense
+ProdLabor,DirectLabor,Production Labor,Expense
+ProdLabor_Machining,ProdLabor,Machining Labor,Expense
+ProdLabor_Assembly,ProdLabor,Assembly Labor,Expense
+ProdLabor_Finishing,ProdLabor,Finishing Labor,Expense
+ProdLabor_QualityInsp,ProdLabor,Quality Inspection Labor,Expense
+OvertimeLabor,DirectLabor,Overtime Labor,Expense
+OT_Scheduled,OvertimeLabor,Scheduled Overtime,Expense
+OT_Unscheduled,OvertimeLabor,Unscheduled Overtime,Expense
+ManufacturingOverhead,TotalCOGS,Manufacturing Overhead,Expense
+MOH_Depreciation,ManufacturingOverhead,Factory Depreciation,Expense
+MOH_Depr_Machinery,MOH_Depreciation,Machinery Depreciation,Expense
+MOH_Depr_Building,MOH_Depreciation,Factory Building Depreciation,Expense
+MOH_Depr_Equipment,MOH_Depreciation,Equipment Depreciation,Expense
+MOH_Utilities,ManufacturingOverhead,Factory Utilities,Expense
+MOH_Electricity,MOH_Utilities,Electricity,Expense
+MOH_Gas,MOH_Utilities,Natural Gas,Expense
+MOH_Water,MOH_Utilities,Water and Sewage,Expense
+MOH_Maintenance,ManufacturingOverhead,Maintenance and Repairs,Expense
+MOH_PreventiveMaint,MOH_Maintenance,Preventive Maintenance,Expense
+MOH_CorrectiveMaint,MOH_Maintenance,Corrective Maintenance,Expense
+MOH_SpareParts,MOH_Maintenance,Spare Parts,Expense
+IndirectLabor,ManufacturingOverhead,Indirect Labor,Expense
+IL_Supervisors,IndirectLabor,Production Supervisors,Expense
+IL_MaterialHandlers,IndirectLabor,Material Handlers,Expense
+IL_Maintenance,IndirectLabor,Maintenance Staff,Expense
+IL_Warehouse,IndirectLabor,Warehouse Labor,Expense
+MOH_Other,ManufacturingOverhead,Other Manufacturing Overhead,Expense
+MOH_Insurance,MOH_Other,Factory Insurance,Expense
+MOH_PropertyTax,MOH_Other,Factory Property Tax,Expense
+MOH_Supplies,MOH_Other,Factory Supplies,Expense
+MOH_ToolingExp,MOH_Other,Tooling Expense,Expense
+VarianceAccounts,TotalCOGS,Variance Accounts,Expense
+PriceVariance,VarianceAccounts,Material Price Variance,Expense
+UsageVariance,VarianceAccounts,Material Usage Variance,Expense
+EfficiencyVariance,VarianceAccounts,Labor Efficiency Variance,Expense
+VolumeVariance,VarianceAccounts,Production Volume Variance,Expense
+SpendingVariance,VarianceAccounts,Overhead Spending Variance,Expense
+MixVariance,VarianceAccounts,Product Mix Variance,Expense
+YieldVariance,VarianceAccounts,Yield Variance,Expense
+GrossProfit,,Gross Profit (Calculated),Expense
+TotalOPEX,,Total Operating Expenses,Expense
+SGA,TotalOPEX,Selling General and Administrative,Expense
+SGA_Salaries,SGA,SGA Salaries and Wages,Expense
+SGA_Benefits,SGA,SGA Employee Benefits,Expense
+SGA_Rent,SGA,Office Rent and Leases,Expense
+SGA_Travel,SGA,Travel and Entertainment,Expense
+SGA_Professional,SGA,Professional Services,Expense
+SGA_OfficeSupplies,SGA,Office Supplies,Expense
+SGA_Telecom,SGA,Telecommunications,Expense
+SGA_BadDebt,SGA,Bad Debt Expense,Expense
+RD,TotalOPEX,Research and Development,Expense
+RD_Salaries,RD,R&D Salaries,Expense
+RD_Materials,RD,R&D Materials and Prototypes,Expense
+RD_Testing,RD,Testing and Certification,Expense
+RD_PatentCosts,RD,Patent and IP Costs,Expense
+RD_ContractResearch,RD,Contract Research,Expense
+Marketing,TotalOPEX,Marketing Expenses,Expense
+MKT_Advertising,Marketing,Advertising,Expense
+MKT_TradeShows,Marketing,Trade Shows and Events,Expense
+MKT_DigitalMarketing,Marketing,Digital Marketing,Expense
+MKT_BrandDevelopment,Marketing,Brand Development,Expense
+MKT_ProductLaunch,Marketing,Product Launch Costs,Expense
+CorporateAllocation,TotalOPEX,Corporate Allocation,Expense
+CA_ITAllocation,CorporateAllocation,IT Allocation,Expense
+CA_HRAllocation,CorporateAllocation,HR Allocation,Expense
+CA_FinanceAllocation,CorporateAllocation,Finance Allocation,Expense
+CA_ExecutiveAllocation,CorporateAllocation,Executive Allocation,Expense
+EBITDA,,EBITDA (Calculated),Expense
+DepAmort,,Depreciation and Amortization,Expense
+DA_Depreciation,DepAmort,Depreciation - Non Manufacturing,Expense
+DA_Amortization,DepAmort,Amortization of Intangibles,Expense
+DA_ROU_Amortization,DepAmort,Right-of-Use Asset Amortization,Expense
+EBIT,,EBIT (Calculated),Expense
+InterestExpense,,Interest and Financing Costs,Expense
+INT_LongTermDebt,InterestExpense,Interest on Long-Term Debt,Expense
+INT_ShortTermDebt,InterestExpense,Interest on Short-Term Borrowings,Expense
+INT_LeaseFinancing,InterestExpense,Lease Financing Costs,Expense
+INT_OtherFinancing,InterestExpense,Other Financing Costs,Expense
+OtherIncExp,,Other Income and Expense,Revenue
+OIE_GainLossDisposal,OtherIncExp,Gain/Loss on Asset Disposal,Revenue
+OIE_FXGainLoss,OtherIncExp,Foreign Exchange Gain/Loss,Revenue
+OIE_InvestmentIncome,OtherIncExp,Investment Income,Revenue
+OIE_MiscIncome,OtherIncExp,Miscellaneous Income,Revenue
+EBT,,Earnings Before Tax (Calculated),Expense
+IncomeTax,,Income Tax,Expense
+TAX_CurrentFederal,IncomeTax,Current Federal Tax,Expense
+TAX_CurrentState,IncomeTax,Current State Tax,Expense
+TAX_CurrentForeign,IncomeTax,Current Foreign Tax,Expense
+TAX_DeferredTax,IncomeTax,Deferred Tax Expense,Expense
+NetIncome,,Net Income (Calculated),Expense

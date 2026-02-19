@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Connection Definition
+  Connection: Oracle E-Business Suite Production
+  Purpose: Oracle EBS General Ledger data extraction for subsidiary entities
+  Environment: Production
+  Created: 2026-02-18
+
+  IMPORTANT: Replace placeholder credentials with actual service account credentials
+  managed through OneStream Credential Vault before deployment.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <Connection>
+
+      <!-- ============================================================
+           CONNECTION IDENTITY
+           ============================================================ -->
+      <ConnectionName>Oracle_EBS_Production</ConnectionName>
+      <ConnectionDescription>Oracle E-Business Suite R12 production database connection for General Ledger data extraction. Provides access to GL journal entries, code combinations, and period balances for subsidiary entities not yet migrated to SAP S/4HANA.</ConnectionDescription>
+      <ConnectionType>OracleClient</ConnectionType>
+      <IsActive>true</IsActive>
+      <Category>ERP</Category>
+      <SourceSystem>Oracle_EBS_R12</SourceSystem>
+
+      <!-- ============================================================
+           SERVER AND DATABASE CONFIGURATION
+           ============================================================ -->
+      <ServerConfiguration>
+        <Server>oracle-ebs.company.com</Server>
+        <Port>1521</Port>
+        <ServiceName>EBSPROD</ServiceName>
+        <SID>EBSPROD</SID>
+        <Schema>GL</Schema>
+        <!-- Oracle version and edition -->
+        <DatabaseVersion>19c</DatabaseVersion>
+        <Edition>Enterprise</Edition>
+      </ServerConfiguration>
+
+      <!-- ============================================================
+           TNS CONNECTION DETAILS
+           Oracle TNS naming provides robust connection configuration
+           with failover and load balancing capabilities.
+           ============================================================ -->
+      <TNSConfiguration>
+        <TNSAlias>EBSPROD</TNSAlias>
+        <TNSEntry><![CDATA[
+          EBSPROD =
+            (DESCRIPTION =
+              (ADDRESS_LIST =
+                (ADDRESS = (PROTOCOL = TCP)(HOST = oracle-ebs.company.com)(PORT = 1521))
+                (ADDRESS = (PROTOCOL = TCP)(HOST = oracle-ebs-standby.company.com)(PORT = 1521))
+              )
+              (CONNECT_DATA =
+                (SERVER = DEDICATED)
+                (SERVICE_NAME = EBSPROD)
+                (FAILOVER_MODE =
+                  (TYPE = SELECT)
+                  (METHOD = BASIC)
+                  (RETRIES = 3)
+                  (DELAY = 5)
+                )
+              )
+            )
+        ]]></TNSEntry>
+        <!-- Path to tnsnames.ora on OneStream application server -->
+        <TNSNamesPath>C:\oracle\network\admin\tnsnames.ora</TNSNamesPath>
+        <!-- Oracle client home directory -->
+        <OracleHome>C:\oracle\product\19.0\client_1</OracleHome>
+      </TNSConfiguration>
+
+      <!-- ============================================================
+           AUTHENTICATION
+           ============================================================ -->
+      <Authentication>
+        <AuthenticationType>ServiceAccount</AuthenticationType>
+        <CredentialVaultKey>VAULT_ORACLE_EBS_PROD</CredentialVaultKey>
+        <!-- Placeholder values for development/testing only -->
+        <Username>SVC_ONESTREAM_GL</Username>
+        <Password>%%CREDENTIAL_VAULT%%</Password>
+        <!-- Service account requires the following Oracle grants:
+             - SELECT on GL.GL_JE_HEADERS
+             - SELECT on GL.GL_JE_LINES
+             - SELECT on GL.GL_CODE_COMBINATIONS
+             - SELECT on GL.GL_BALANCES
+             - SELECT on GL.GL_PERIODS
+             - SELECT on GL.GL_SETS_OF_BOOKS (R12: GL_LEDGERS)
+             - EXECUTE on custom package: GL.XXOS_ONESTREAM_PKG
+        -->
+        <RequiredGrants>
+          <Grant>SELECT ON GL.GL_JE_HEADERS</Grant>
+          <Grant>SELECT ON GL.GL_JE_LINES</Grant>
+          <Grant>SELECT ON GL.GL_CODE_COMBINATIONS</Grant>
+          <Grant>SELECT ON GL.GL_BALANCES</Grant>
+          <Grant>SELECT ON GL.GL_PERIODS</Grant>
+          <Grant>SELECT ON GL.GL_LEDGERS</Grant>
+          <Grant>EXECUTE ON GL.XXOS_ONESTREAM_PKG</Grant>
+        </RequiredGrants>
+      </Authentication>
+
+      <!-- ============================================================
+           CONNECTION STRINGS
+           ============================================================ -->
+      <!-- Primary: ODP.NET managed driver connection string -->
+      <ConnectionString>
+        Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=oracle-ebs.company.com)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=EBSPROD)));User Id=SVC_ONESTREAM_GL;Password=%%CREDENTIAL_VAULT%%;Connection Timeout=30;Enlist=false;Pooling=true;Min Pool Size=2;Max Pool Size=10;
+      </ConnectionString>
+
+      <!-- Alternate: TNS-based connection string -->
+      <AlternateConnectionString>
+        Data Source=EBSPROD;User Id=SVC_ONESTREAM_GL;Password=%%CREDENTIAL_VAULT%%;
+      </AlternateConnectionString>
+
+      <!-- JDBC-style connection string for cross-platform compatibility -->
+      <JDBCConnectionString>
+        jdbc:oracle:thin:@//oracle-ebs.company.com:1521/EBSPROD
+      </JDBCConnectionString>
+
+      <!-- ============================================================
+           TIMEOUT AND PERFORMANCE SETTINGS
+           ============================================================ -->
+      <TimeoutSettings>
+        <ConnectionTimeout>30</ConnectionTimeout>
+        <CommandTimeout>300</CommandTimeout>
+        <FetchSize>5000</FetchSize>
+        <EnableConnectionPooling>true</EnableConnectionPooling>
+        <MinPoolSize>2</MinPoolSize>
+        <MaxPoolSize>10</MaxPoolSize>
+        <PoolIdleTimeout>120</PoolIdleTimeout>
+        <!-- Oracle-specific performance hints -->
+        <ArrayBindCount>1000</ArrayBindCount>
+        <FetchArraySize>500</FetchArraySize>
+      </TimeoutSettings>
+
+      <!-- ============================================================
+           RETRY AND RESILIENCE
+           ============================================================ -->
+      <RetryPolicy>
+        <MaxRetries>3</MaxRetries>
+        <RetryIntervalSeconds>15</RetryIntervalSeconds>
+        <ExponentialBackoff>true</ExponentialBackoff>
+        <RetryOnErrors>
+          <ErrorCode>ORA-03113</ErrorCode>  <!-- End-of-file on communication channel -->
+          <ErrorCode>ORA-03114</ErrorCode>  <!-- Not connected to Oracle -->
+          <ErrorCode>ORA-12170</ErrorCode>  <!-- TNS connect timeout -->
+          <ErrorCode>ORA-12541</ErrorCode>  <!-- TNS no listener -->
+          <ErrorCode>ORA-01033</ErrorCode>  <!-- Oracle initialization or shutdown in progress -->
+        </RetryOnErrors>
+      </RetryPolicy>
+
+      <!-- ============================================================
+           TEST QUERY
+           ============================================================ -->
+      <TestQuery>
+        <SQL><![CDATA[
+          /* OneStream Connection Health Check - Oracle EBS */
+          SELECT
+            SYSDATE AS CheckTimestamp,
+            USER AS ConnectedUser,
+            SYS_CONTEXT('USERENV', 'DB_NAME') AS DatabaseName,
+            SYS_CONTEXT('USERENV', 'SERVICE_NAME') AS ServiceName,
+            SYS_CONTEXT('USERENV', 'INSTANCE_NAME') AS InstanceName,
+            (SELECT COUNT(*) FROM GL.GL_LEDGERS WHERE LEDGER_CATEGORY_CODE = 'PRIMARY') AS PrimaryLedgerCount
+          FROM DUAL
+        ]]></SQL>
+        <ExpectedResult>OneRowReturned</ExpectedResult>
+        <TimeoutSeconds>10</TimeoutSeconds>
+      </TestQuery>
+
+      <!-- Validation: confirm GL schema access -->
+      <ValidationQueries>
+        <Query name="CheckGLHeaders">
+          <SQL><![CDATA[
+            SELECT COUNT(*) AS RowCount
+            FROM GL.GL_JE_HEADERS
+            WHERE ROWNUM <= 1
+          ]]></SQL>
+        </Query>
+        <Query name="CheckCodeCombinations">
+          <SQL><![CDATA[
+            SELECT COUNT(*) AS RowCount
+            FROM GL.GL_CODE_COMBINATIONS
+            WHERE ENABLED_FLAG = 'Y'
+            AND ROWNUM <= 1
+          ]]></SQL>
+        </Query>
+      </ValidationQueries>
+
+      <!-- ============================================================
+           ORACLE EBS SPECIFIC SETTINGS
+           ============================================================ -->
+      <EBSConfiguration>
+        <!-- EBS Responsibility and Application context for API calls -->
+        <ResponsibilityName>General Ledger Super User</ResponsibilityName>
+        <ApplicationShortName>SQLGL</ApplicationShortName>
+        <!-- EBS organization context -->
+        <OperatingUnit>US Operating Unit</OperatingUnit>
+        <SetOfBooksId>1</SetOfBooksId>
+        <!-- EBS R12 multi-org access control -->
+        <MOACEnabled>true</MOACEnabled>
+        <SecurityProfile>OneStream ETL Security Profile</SecurityProfile>
+      </EBSConfiguration>
+
+      <!-- ============================================================
+           SCHEDULING AND MAINTENANCE
+           ============================================================ -->
+      <MaintenanceWindow>
+        <DayOfWeek>Saturday</DayOfWeek>
+        <StartTimeUTC>04:00</StartTimeUTC>
+        <EndTimeUTC>08:00</EndTimeUTC>
+        <BlockLoadsDuringMaintenance>true</BlockLoadsDuringMaintenance>
+      </MaintenanceWindow>
+
+      <!-- ============================================================
+           LOGGING AND AUDIT
+           ============================================================ -->
+      <Logging>
+        <LogLevel>Info</LogLevel>
+        <LogConnectionEvents>true</LogConnectionEvents>
+        <LogQueryExecution>true</LogQueryExecution>
+        <LogSlowQueryThresholdSeconds>60</LogSlowQueryThresholdSeconds>
+        <MaskSensitiveData>true</MaskSensitiveData>
+      </Logging>
+
+    </Connection>
+  </DataManagement>
+</OneStreamXF>

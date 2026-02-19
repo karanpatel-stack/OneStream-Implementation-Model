@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_RollingForecastTrend"
+  Description="Rolling Forecast Trend Lines Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#Forecast" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                          DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants"      DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#Revenue,A#EBITDA,A#CashAndEquivalents" DefaultMember="A#Revenue" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic"                   DefaultMember="F#Periodic" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_RollingForecastTrend"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="MainCube"
+      SuppressNoData="False"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="ForecastHorizon"          Value="18" />
+        <Parameter Name="MaxRows"                  Value="5000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Rolling Forecast Trend"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+      </Panel>
+      <Panel Row="0" Column="4" ColumnSpan="8" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <!-- Metric Selector -->
+        <FilterComponent
+          Name="MetricSelector"
+          FilterType="ButtonGroup"
+          Dimension="Account"
+          MemberFilter="A#Revenue,A#EBITDA,A#CashAndEquivalents"
+          DefaultMember="A#Revenue"
+          Label="Metric"
+          LabelForeColor="#A0B4D0"
+          ButtonActiveColor="#3498DB" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4"
+          ButtonWidth="110" ButtonHeight="30"
+          DisplayMapping="A#Revenue=Revenue,A#EBITDA=EBITDA,A#CashAndEquivalents=Cash"
+          OnChange="RefreshAll" />
+
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#Americas,E#EMEA,E#APAC"
+          DefaultMember="E#TopEntity"
+          Label="Entity" Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: MAIN 18-MONTH TIMELINE CHART -->
+    <Row Index="1" Height="380" HeightUnit="Pixel">
+      <Panel Row="1" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="18-Month Rolling Forecast" TitleFontSize="14" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="RollingForecastChart"
+          ChartType="Line"
+          DataAdapter="DDA_RollingForecastTrend"
+          AnimationEnabled="True" AnimationDuration="900"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="11" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingEighteenMonths"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            Title="{POV.Account.MemberDescription} ($M)"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,,M"
+            GridLineColor="#2D4470" GridLineStyle="Dotted"
+            MinValue="Auto" MaxValue="Auto" />
+
+          <!-- Actuals - Solid line up to current period -->
+          <Series Name="Actual"
+                  Expression="A#{POV.Account}:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB" LineWidth="3" LineStyle="Solid"
+                  MarkerType="Circle" MarkerSize="6"
+                  MarkerFillColor="#3498DB" MarkerBorderColor="#FFFFFF"
+                  ShowUpToCurrentPeriod="True" />
+
+          <!-- Forecast - Dashed line from current period forward -->
+          <Series Name="Forecast"
+                  Expression="A#{POV.Account}:S#Forecast:E#{POV.Entity}:F#Periodic"
+                  Color="#2ECC71" LineWidth="3" LineStyle="Dashed"
+                  MarkerType="Triangle" MarkerSize="6"
+                  MarkerFillColor="#2ECC71" MarkerBorderColor="#FFFFFF"
+                  ShowFromCurrentPeriod="True" />
+
+          <!-- Budget - reference line -->
+          <Series Name="Budget"
+                  Expression="A#{POV.Account}:S#Budget:E#{POV.Entity}:F#Periodic"
+                  Color="#E67E22" LineWidth="2" LineStyle="Dotted"
+                  MarkerType="Diamond" MarkerSize="4"
+                  MarkerFillColor="#E67E22" MarkerBorderColor="#FFFFFF" />
+
+          <!-- Confidence Bands -->
+          <AreaBand Name="ConfidenceBand_90"
+                    UpperExpression="A#{POV.Account}:S#ForecastUpper90:E#{POV.Entity}:F#Periodic"
+                    LowerExpression="A#{POV.Account}:S#ForecastLower90:E#{POV.Entity}:F#Periodic"
+                    FillColor="#2ECC7115" BorderColor="#2ECC7130"
+                    Label="90% Confidence"
+                    ShowFromCurrentPeriod="True" />
+          <AreaBand Name="ConfidenceBand_70"
+                    UpperExpression="A#{POV.Account}:S#ForecastUpper70:E#{POV.Entity}:F#Periodic"
+                    LowerExpression="A#{POV.Account}:S#ForecastLower70:E#{POV.Entity}:F#Periodic"
+                    FillColor="#2ECC7130" BorderColor="#2ECC7150"
+                    Label="70% Confidence"
+                    ShowFromCurrentPeriod="True" />
+
+          <!-- Current Period Marker -->
+          <VerticalLine Name="CurrentPeriodLine"
+                        Position="T#CurrentMonth"
+                        Color="#FFFFFF" LineWidth="2" LineStyle="Dashed"
+                        Label="Current" LabelFontSize="10" LabelForeColor="#FFFFFF" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: FORECAST ACCURACY + YTD SUMMARY -->
+    <Row Index="2" Height="240" HeightUnit="Pixel">
+
+      <!-- Forecast Accuracy Trend -->
+      <Panel Row="2" Column="0" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Forecast Accuracy (Past 12 Months)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="ForecastAccuracyChart"
+          ChartType="ComboChart"
+          DataAdapter="DDA_RollingForecastTrend"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis Position="Left"
+            Title="Variance ($M)"
+            LabelFormat="#,##0,,M"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis Position="Right"
+            Title="Accuracy %"
+            LabelFormat="0%"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            MinValue="0.8" MaxValue="1.05" />
+
+          <Series Name="Forecast Variance"
+                  SeriesType="Bar"
+                  YAxisPosition="Left"
+                  Expression="A#{POV.Account}:S#ForecastVariance:E#{POV.Entity}:F#Periodic"
+                  ColorExpression="Value >= 0 ? '#27AE6080' : '#E74C3C80'"
+                  BarWidth="0.5" />
+          <Series Name="Accuracy %"
+                  SeriesType="Line"
+                  YAxisPosition="Right"
+                  Expression="A#{POV.Account}:S#ForecastAccuracy:E#{POV.Entity}:F#Periodic"
+                  Color="#F39C12" LineWidth="2"
+                  MarkerType="Circle" MarkerSize="5" />
+
+          <ReferenceLine Name="Target Accuracy" Value="0.95" YAxisPosition="Right"
+                         Color="#27AE60" LineWidth="1" LineStyle="Dashed"
+                         Label="95% Target" LabelFontSize="9" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Key Driver Assumptions Panel -->
+      <Panel Row="2" Column="6" ColumnSpan="6" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Key Driver Assumptions" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="DriverAssumptionsGrid"
+          DataAdapter="DDA_RollingForecastTrend"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="30"
+          EnableSorting="False">
+
+          <Columns>
+            <Column Header="Driver"                Binding="Driver.Description"            Width="180" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Current Assumption"    Binding="Driver.CurrentValue"           Width="130" Alignment="Right" />
+            <Column Header="Prior Forecast"        Binding="Driver.PriorValue"             Width="130" Alignment="Right" ForeColor="#A0B4D0" />
+            <Column Header="Change"                Binding="Driver.ChangeValue"            Width="100" Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="Value contains '+'" ForeColor="#27AE60" />
+                <Rule Condition="Value contains '-'" ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Impact ($M)"           Binding="Driver.ImpactValue"            Width="110" Alignment="Right" Format="+#,##0.0,,M;-#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+
+          <StaticRows>
+            <Row Driver="Revenue Growth Rate"        />
+            <Row Driver="Gross Margin Assumption"    />
+            <Row Driver="OPEX Growth Rate"           />
+            <Row Driver="Headcount Plan"             />
+            <Row Driver="FX Rate (EUR/USD)"          />
+            <Row Driver="Commodity Price Index"      />
+            <Row Driver="Interest Rate Assumption"   />
+          </StaticRows>
+        </GridComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: MULTI-METRIC SPARKLINES -->
+    <Row Index="3" Height="160" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="SparklinePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Revenue Trend" TitleFontSize="12" TitleForeColor="#FFFFFF">
+        <SparklineComponent
+          Name="RevenueSparkline"
+          DataAdapter="DDA_RollingForecastTrend"
+          Expression="A#Revenue:S#Actual:E#{POV.Entity}:F#Periodic"
+          TimeRange="T#RollingEighteenMonths"
+          LineColor="#3498DB" LineWidth="2"
+          FillColor="#3498DB20"
+          ShowMinMax="True" MinMarkerColor="#E74C3C" MaxMarkerColor="#27AE60"
+          ShowLastValue="True" LastValueFormat="#,##0.0,,M" LastValueFontSize="18" LastValueForeColor="#FFFFFF" />
+      </Panel>
+
+      <Panel Row="3" Column="4" ColumnSpan="4" RowSpan="1"
+             PanelType="SparklinePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="EBITDA Trend" TitleFontSize="12" TitleForeColor="#FFFFFF">
+        <SparklineComponent
+          Name="EBITDASparkline"
+          DataAdapter="DDA_RollingForecastTrend"
+          Expression="A#EBITDA:S#Actual:E#{POV.Entity}:F#Periodic"
+          TimeRange="T#RollingEighteenMonths"
+          LineColor="#E67E22" LineWidth="2"
+          FillColor="#E67E2220"
+          ShowMinMax="True" MinMarkerColor="#E74C3C" MaxMarkerColor="#27AE60"
+          ShowLastValue="True" LastValueFormat="#,##0.0,,M" LastValueFontSize="18" LastValueForeColor="#FFFFFF" />
+      </Panel>
+
+      <Panel Row="3" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="SparklinePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Cash Position Trend" TitleFontSize="12" TitleForeColor="#FFFFFF">
+        <SparklineComponent
+          Name="CashSparkline"
+          DataAdapter="DDA_RollingForecastTrend"
+          Expression="A#CashAndEquivalents:S#Actual:E#{POV.Entity}:F#Periodic"
+          TimeRange="T#RollingEighteenMonths"
+          LineColor="#2ECC71" LineWidth="2"
+          FillColor="#2ECC7120"
+          ShowMinMax="True" MinMarkerColor="#E74C3C" MaxMarkerColor="#27AE60"
+          ShowLastValue="True" LastValueFormat="#,##0.0,,M" LastValueFontSize="18" LastValueForeColor="#FFFFFF" />
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Actual"           Value="#3498DB" />
+      <Color Name="Forecast"         Value="#2ECC71" />
+      <Color Name="Budget"           Value="#E67E22" />
+      <Color Name="ConfidenceBand"   Value="#2ECC7130" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

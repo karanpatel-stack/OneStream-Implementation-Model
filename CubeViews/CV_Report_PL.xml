@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_Report_PL - Profit & Loss Report View
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_Report_PL"
+           Description="Comprehensive P&amp;L report with Actual, Budget, Variance, and Prior Year comparisons"
+           CubeName="Finance"
+           ViewType="Report"
+           IsEnabled="true"
+           AllowDataInput="false"
+           SuppressNoData="true"
+           SuppressZeros="true"
+           SuppressZerosOption="SuppressRowsWithAllZeros"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: Full P&L Account Hierarchy (Expandable)             -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- Revenue Section -->
+        <Member Name="GrossRevenue" DisplayName="Gross Revenue" IsExpanded="true" IndentLevel="0" IsBold="true" AllowExpand="true" />
+        <Member Name="REV_Domestic" DisplayName="Domestic Revenue" IndentLevel="1" AllowExpand="true" />
+        <Member Name="REV_Export" DisplayName="Export Revenue" IndentLevel="1" AllowExpand="true" />
+        <Member Name="REV_Intercompany" DisplayName="Intercompany Revenue" IndentLevel="1" AllowExpand="true" />
+        <Member Name="REV_Deductions" DisplayName="Revenue Deductions" IndentLevel="1" AllowExpand="true" />
+        <Member Name="REV_Discounts" DisplayName="Sales Discounts" IndentLevel="2" />
+        <Member Name="REV_Returns" DisplayName="Returns &amp; Allowances" IndentLevel="2" />
+        <Member Name="REV_Rebates" DisplayName="Customer Rebates" IndentLevel="2" />
+        <Member Name="NetRevenue" DisplayName="Net Revenue" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <!-- Separator -->
+        <Member Name="_Separator1" DisplayName="" IsBlankRow="true" />
+
+        <!-- Cost of Goods Sold -->
+        <Member Name="COGS" DisplayName="Cost of Goods Sold" IsExpanded="true" IndentLevel="0" IsBold="true" AllowExpand="true" />
+        <Member Name="COGS_DirectMaterials" DisplayName="Direct Materials" IndentLevel="1" AllowExpand="true" />
+        <Member Name="COGS_DirectLabor" DisplayName="Direct Labor" IndentLevel="1" AllowExpand="true" />
+        <Member Name="COGS_MfgOverhead" DisplayName="Manufacturing Overhead" IndentLevel="1" AllowExpand="true" />
+        <Member Name="COGS_Depreciation" DisplayName="Production Depreciation" IndentLevel="1" />
+        <Member Name="COGS_Freight" DisplayName="Freight &amp; Logistics" IndentLevel="1" />
+        <Member Name="COGS_Warranty" DisplayName="Warranty Costs" IndentLevel="1" />
+        <Member Name="COGS_InventoryAdj" DisplayName="Inventory Adjustments" IndentLevel="1" />
+        <Member Name="TotalCOGS" DisplayName="Total Cost of Goods Sold" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <!-- Gross Profit -->
+        <Member Name="GrossProfit" DisplayName="Gross Profit" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="GrossMargin" DisplayName="Gross Margin %" IndentLevel="0" IsRatio="true" />
+
+        <Member Name="_Separator2" DisplayName="" IsBlankRow="true" />
+
+        <!-- Operating Expenses -->
+        <Member Name="OPEX" DisplayName="Operating Expenses" IsExpanded="true" IndentLevel="0" IsBold="true" AllowExpand="true" />
+        <Member Name="OPEX_SGA" DisplayName="SG&amp;A" IndentLevel="1" AllowExpand="true" />
+        <Member Name="OPEX_RD" DisplayName="Research &amp; Development" IndentLevel="1" AllowExpand="true" />
+        <Member Name="OPEX_Marketing" DisplayName="Marketing" IndentLevel="1" AllowExpand="true" />
+        <Member Name="OPEX_CorpAlloc" DisplayName="Corporate Allocations" IndentLevel="1" />
+        <Member Name="TotalOPEX" DisplayName="Total Operating Expenses" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator3" DisplayName="" IsBlankRow="true" />
+
+        <!-- Operating Income -->
+        <Member Name="OperatingIncome" DisplayName="Operating Income (EBIT)" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="OperatingMargin" DisplayName="Operating Margin %" IndentLevel="0" IsRatio="true" />
+
+        <!-- Other Income/Expense -->
+        <Member Name="OtherIncExp" DisplayName="Other Income / (Expense)" IsExpanded="true" IndentLevel="0" IsBold="true" AllowExpand="true" />
+        <Member Name="InterestIncome" DisplayName="Interest Income" IndentLevel="1" />
+        <Member Name="InterestExpense" DisplayName="Interest Expense" IndentLevel="1" />
+        <Member Name="FXGainLoss" DisplayName="Foreign Exchange Gain / (Loss)" IndentLevel="1" />
+        <Member Name="OtherIncome" DisplayName="Other Income" IndentLevel="1" />
+        <Member Name="TotalOtherIncExp" DisplayName="Total Other Income / (Expense)" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator4" DisplayName="" IsBlankRow="true" />
+
+        <!-- Pre-Tax and Net Income -->
+        <Member Name="PreTaxIncome" DisplayName="Pre-Tax Income (EBT)" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="IncomeTax" DisplayName="Income Tax Provision" IndentLevel="1" />
+        <Member Name="EffectiveTaxRate" DisplayName="Effective Tax Rate %" IndentLevel="1" IsRatio="true" />
+
+        <Member Name="_Separator5" DisplayName="" IsBlankRow="true" />
+
+        <Member Name="NetIncome" DisplayName="Net Income" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="NetMargin" DisplayName="Net Margin %" IndentLevel="0" IsRatio="true" />
+
+        <!-- EBITDA (Memo) -->
+        <Member Name="_Separator6" DisplayName="" IsBlankRow="true" />
+        <Member Name="EBITDA" DisplayName="EBITDA" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="EBITDAMargin" DisplayName="EBITDA Margin %" IndentLevel="0" IsRatio="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Multi-Scenario Comparison                        -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <ColumnGroup Name="ActualCurrentMonth">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="Periodic" />
+      </Dimensions>
+      <DisplayName>Actual (Current Month)</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="ActualYTD">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="YTD" />
+      </Dimensions>
+      <DisplayName>Actual YTD</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="BudgetCurrentMonth">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Budget" />
+        <DimensionMember Dimension="View" Member="Periodic" />
+      </Dimensions>
+      <DisplayName>Budget (Current Month)</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="BudgetYTD">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Budget" />
+        <DimensionMember Dimension="View" Member="YTD" />
+      </Dimensions>
+      <DisplayName>Budget YTD</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="VarianceDollar">
+      <CalculatedColumn>
+        <Formula>ActualYTD - BudgetYTD</Formula>
+      </CalculatedColumn>
+      <DisplayName>Variance $</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="VariancePercent">
+      <CalculatedColumn>
+        <Formula>(ActualYTD - BudgetYTD) / ABS(BudgetYTD)</Formula>
+      </CalculatedColumn>
+      <DisplayName>Variance %</DisplayName>
+      <NumberFormat Type="Percentage" DecimalPlaces="1" />
+    </ColumnGroup>
+
+    <ColumnGroup Name="PriorYear">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="YTD" />
+        <DimensionMember Dimension="Time" Member="PriorYear" />
+      </Dimensions>
+      <DisplayName>Prior Year YTD</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="PYVariance">
+      <CalculatedColumn>
+        <Formula>(ActualYTD - PriorYear) / ABS(PriorYear)</Formula>
+      </CalculatedColumn>
+      <DisplayName>PY Variance %</DisplayName>
+      <NumberFormat Type="Percentage" DecimalPlaces="1" />
+    </ColumnGroup>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="Consolidated">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Time" IsSelectable="true" DefaultMember="CurrentMonth">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllTime" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Elimination" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+    <Dimension Name="UD1_Product" IsSelectable="false" DefaultMember="AllProducts" />
+    <Dimension Name="UD2_CostCenter" IsSelectable="false" DefaultMember="AllCostCenters" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" ScaleFactor="1000"
+                    ScaleLabel="($ in thousands)" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <!-- Subtotal rows: bold with top border -->
+    <ConditionalFormat Name="SubtotalRows">
+      <Condition>
+        <CellProperty Property="IsSubtotal" Value="true" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Thin</BorderTopStyle>
+        <BackgroundColor>#F5F8FC</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Ratio rows: percentage format -->
+    <ConditionalFormat Name="RatioRows">
+      <Condition>
+        <CellProperty Property="IsRatio" Value="true" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Percentage" DecimalPlaces="1" />
+        <FontStyle>Italic</FontStyle>
+        <FontColor>#666666</FontColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Favorable variance: green -->
+    <ConditionalFormat Name="FavorableVariance">
+      <Condition>
+        <ColumnMember Members="VarianceDollar,VariancePercent,PYVariance" />
+        <ValueCondition Operator="GreaterThan" Value="0" />
+      </Condition>
+      <Format>
+        <FontColor>#006600</FontColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Unfavorable variance: red -->
+    <ConditionalFormat Name="UnfavorableVariance">
+      <Condition>
+        <ColumnMember Members="VarianceDollar,VariancePercent,PYVariance" />
+        <ValueCondition Operator="LessThan" Value="0" />
+      </Condition>
+      <Format>
+        <FontColor>#CC0000</FontColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Significant unfavorable variance highlight (worse than -10%) -->
+    <ConditionalFormat Name="SignificantUnfavorable">
+      <Condition>
+        <ColumnMember Members="VariancePercent" />
+        <ValueCondition Operator="LessThan" Value="-0.10" />
+      </Condition>
+      <Format>
+        <FontColor>#CC0000</FontColor>
+        <FontStyle>Bold</FontStyle>
+        <BackgroundColor>#FFE6E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Net Income row: special treatment -->
+    <ConditionalFormat Name="NetIncomeRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="NetIncome" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <FontSize>11</FontSize>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <BorderBottomStyle>Double</BorderBottomStyle>
+        <BackgroundColor>#E8F4E8</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- EBITDA row -->
+    <ConditionalFormat Name="EBITDARow">
+      <Condition>
+        <RowMember Dimension="Account" Member="EBITDA" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Thin</BorderTopStyle>
+        <BackgroundColor>#F0F5FA</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION - All cells read-only                         -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <AllCellsProtected>true</AllCellsProtected>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- REPORT OPTIONS                                                -->
+  <!-- ============================================================ -->
+  <ReportOptions>
+    <SuppressZeroRows>true</SuppressZeroRows>
+    <SuppressMissingRows>true</SuppressMissingRows>
+    <AllowDrillDown>true</AllowDrillDown>
+    <AllowMemberExpansion>true</AllowMemberExpansion>
+    <ShowRowHierarchyIndent>true</ShowRowHierarchyIndent>
+    <PrintSettings>
+      <Orientation>Landscape</Orientation>
+      <PaperSize>Letter</PaperSize>
+      <FitToPage>true</FitToPage>
+      <ShowGridLines>false</ShowGridLines>
+      <HeaderLeft>Profit &amp; Loss Statement</HeaderLeft>
+      <HeaderCenter>{Entity.Description}</HeaderCenter>
+      <HeaderRight>Period: {Time.Description}</HeaderRight>
+      <FooterLeft>Confidential</FooterLeft>
+      <FooterCenter>Page {PageNumber} of {TotalPages}</FooterCenter>
+      <FooterRight>Generated: {PrintDate}</FooterRight>
+    </PrintSettings>
+  </ReportOptions>
+
+</CubeView>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<OneStreamApplication>
+  <ApplicationInfo>
+    <ApplicationName>MFG_Enterprise</ApplicationName>
+    <Description>OneStream XF Enterprise Manufacturing Implementation - Global Multi-Plant Operations</Description>
+    <ApplicationType>Consolidation</ApplicationType>
+    <Version>8.2</Version>
+    <CreatedDate>2024-01-15</CreatedDate>
+    <LastModifiedDate>2024-01-15</LastModifiedDate>
+  </ApplicationInfo>
+
+  <CurrencySettings>
+    <BaseCurrency>USD</BaseCurrency>
+    <MultiCurrencyEnabled>true</MultiCurrencyEnabled>
+    <CurrencyConversionMethod>Triangulation</CurrencyConversionMethod>
+    <EnabledCurrencies>
+      <Currency Code="USD" Description="US Dollar" />
+      <Currency Code="CAD" Description="Canadian Dollar" />
+      <Currency Code="MXN" Description="Mexican Peso" />
+      <Currency Code="EUR" Description="Euro" />
+      <Currency Code="GBP" Description="British Pound" />
+      <Currency Code="CNY" Description="Chinese Yuan" />
+      <Currency Code="JPY" Description="Japanese Yen" />
+      <Currency Code="INR" Description="Indian Rupee" />
+    </EnabledCurrencies>
+    <ExchangeRateTypes>
+      <RateType Name="Average" Description="Period average rate for income statement" />
+      <RateType Name="Closing" Description="Period-end rate for balance sheet" />
+      <RateType Name="Historical" Description="Historical rate for equity and fixed assets" />
+      <RateType Name="Budget" Description="Budgeted exchange rate" />
+    </ExchangeRateTypes>
+  </CurrencySettings>
+
+  <CalendarSettings>
+    <CalendarType>Monthly</CalendarType>
+    <FiscalYearStartMonth>1</FiscalYearStartMonth>
+    <FirstYear>CY2024</FirstYear>
+    <LastYear>CY2027</LastYear>
+    <PeriodsPerYear>12</PeriodsPerYear>
+    <QuartersEnabled>true</QuartersEnabled>
+    <HalfYearsEnabled>false</HalfYearsEnabled>
+    <YearTotalEnabled>true</YearTotalEnabled>
+    <WeeklyBreakdownEnabled>false</WeeklyBreakdownEnabled>
+  </CalendarSettings>
+
+  <ConsolidationSettings>
+    <ConsolidationEnabled>true</ConsolidationEnabled>
+    <IntercompanyEnabled>true</IntercompanyEnabled>
+    <IntercompanyMatchingEnabled>true</IntercompanyMatchingEnabled>
+    <AutoEliminationEnabled>true</AutoEliminationEnabled>
+    <MinorityInterestEnabled>true</MinorityInterestEnabled>
+    <OwnershipCalculationMethod>Direct</OwnershipCalculationMethod>
+    <CurrencyTranslationMethod>CurrentRate</CurrencyTranslationMethod>
+    <ConsolidationProcessOrder>
+      <Step Order="1">CurrencyTranslation</Step>
+      <Step Order="2">IntercompanyElimination</Step>
+      <Step Order="3">MinorityInterestCalculation</Step>
+      <Step Order="4">ProportionalConsolidation</Step>
+      <Step Order="5">Consolidation</Step>
+    </ConsolidationProcessOrder>
+  </ConsolidationSettings>
+
+  <CubeReferences>
+    <Cube Name="Finance" Description="Financial Consolidation and Reporting" IsPrimary="true" />
+    <Cube Name="Planning" Description="Operational and Financial Planning" IsPrimary="false" />
+    <Cube Name="HR" Description="Workforce Planning and Headcount" IsPrimary="false" />
+    <Cube Name="Reconciliation" Description="Account Reconciliation and Matching" IsPrimary="false" />
+  </CubeReferences>
+
+  <DefaultSettings>
+    <DefaultScenario>Actual</DefaultScenario>
+    <DefaultEntity>Global</DefaultEntity>
+    <DefaultAccount>NetIncome</DefaultAccount>
+    <DefaultFlow>F_None</DefaultFlow>
+    <DefaultConsolidation>C_Consolidated</DefaultConsolidation>
+    <DefaultVersion>Working</DefaultVersion>
+  </DefaultSettings>
+
+  <ManufacturingSettings>
+    <AllowNegativeInventory>true</AllowNegativeInventory>
+    <CostAllocationEnabled>true</CostAllocationEnabled>
+    <StandardCostingEnabled>true</StandardCostingEnabled>
+    <VarianceAnalysisEnabled>true</VarianceAnalysisEnabled>
+    <ActivityBasedCostingEnabled>true</ActivityBasedCostingEnabled>
+    <TransferPricingEnabled>true</TransferPricingEnabled>
+    <BillOfMaterialsIntegration>true</BillOfMaterialsIntegration>
+    <OEETrackingEnabled>true</OEETrackingEnabled>
+    <CapacityPlanningEnabled>true</CapacityPlanningEnabled>
+    <ProductionSchedulingEnabled>true</ProductionSchedulingEnabled>
+    <QualityMetricsEnabled>true</QualityMetricsEnabled>
+    <ScrapTrackingEnabled>true</ScrapTrackingEnabled>
+    <InventoryValuationMethod>WeightedAverage</InventoryValuationMethod>
+    <OverheadAllocationBasis>MachineHours</OverheadAllocationBasis>
+    <CostPoolAllocationMethod>StepDown</CostPoolAllocationMethod>
+  </ManufacturingSettings>
+
+  <DataIntegration>
+    <ERPConnector>
+      <Type>SAP_S4HANA</Type>
+      <Enabled>true</Enabled>
+      <SyncFrequency>Daily</SyncFrequency>
+    </ERPConnector>
+    <MESConnector>
+      <Type>Siemens_Opcenter</Type>
+      <Enabled>true</Enabled>
+      <SyncFrequency>Hourly</SyncFrequency>
+    </MESConnector>
+    <HRISConnector>
+      <Type>Workday</Type>
+      <Enabled>true</Enabled>
+      <SyncFrequency>Weekly</SyncFrequency>
+    </HRISConnector>
+  </DataIntegration>
+
+  <SecuritySettings>
+    <CellLevelSecurityEnabled>true</CellLevelSecurityEnabled>
+    <EntityLevelLockEnabled>true</EntityLevelLockEnabled>
+    <WorkflowApprovalRequired>true</WorkflowApprovalRequired>
+    <AuditTrailEnabled>true</AuditTrailEnabled>
+    <MaxConcurrentUsers>250</MaxConcurrentUsers>
+  </SecuritySettings>
+
+  <PerformanceSettings>
+    <ParallelProcessingEnabled>true</ParallelProcessingEnabled>
+    <MaxParallelThreads>16</MaxParallelThreads>
+    <CacheEnabled>true</CacheEnabled>
+    <CacheSizeGB>8</CacheSizeGB>
+    <CalculationTimeout>300</CalculationTimeout>
+    <DataLoadBatchSize>50000</DataLoadBatchSize>
+  </PerformanceSettings>
+</OneStreamApplication>

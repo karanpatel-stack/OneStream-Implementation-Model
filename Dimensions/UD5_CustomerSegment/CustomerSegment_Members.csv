@@ -1,0 +1,26 @@
+MemberName,ParentName,Description
+Total_Segments,,Total Customer Segments
+No_Segment,Total_Segments,No Customer Segment Specified
+OEM,Total_Segments,Original Equipment Manufacturer
+OEM_Automotive,OEM,Automotive OEM Partners
+OEM_Aerospace,OEM,Aerospace OEM Partners
+OEM_Industrial,OEM,Industrial Equipment OEM Partners
+OEM_Electronics,OEM,Electronics OEM Partners
+Aftermarket,Total_Segments,Aftermarket and Replacement Parts
+AM_ServiceParts,Aftermarket,Service and Replacement Parts
+AM_Upgrades,Aftermarket,Product Upgrades and Retrofits
+AM_Refurbished,Aftermarket,Refurbished Equipment
+Government,Total_Segments,Government and Public Sector
+GOV_Federal,Government,Federal Government Contracts
+GOV_State_Local,Government,State and Local Government
+GOV_Defense,Government,Defense and Military Contracts
+GOV_International,Government,International Government
+Commercial,Total_Segments,Commercial and Industrial End Users
+COM_LargeEnterprise,Commercial,Large Enterprise Customers
+COM_MidMarket,Commercial,Mid-Market Customers
+COM_SmallBusiness,Commercial,Small Business Customers
+COM_Contractors,Commercial,Professional Contractors
+Internal,Total_Segments,Internal Consumption
+INT_Intercompany,Internal,Intercompany Transfers
+INT_InternalUse,Internal,Internal Use and Tooling
+INT_Samples,Internal,Samples and Prototypes

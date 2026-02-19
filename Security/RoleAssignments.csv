@@ -1,0 +1,30 @@
+UserID,UserName,Email,Role,Entity,Region,Department
+USR001,Michael Torres,michael.torres@acmemfg.com,SystemAdmin,AllEntities,Corporate,IT
+USR002,Jennifer Blackwell,jennifer.blackwell@acmemfg.com,SystemAdmin,AllEntities,Corporate,IT
+USR003,David Chen,david.chen@acmemfg.com,CorporateController,AllEntities,Corporate,Finance
+USR004,Sarah Mitchell,sarah.mitchell@acmemfg.com,CorporateController,AllEntities,Corporate,Finance
+USR005,Robert Andersen,robert.andersen@acmemfg.com,RegionalController,E_Americas,Americas,Finance
+USR006,Maria Garcia-Lopez,maria.garcia-lopez@acmemfg.com,RegionalController,E_EMEA,EMEA,Finance
+USR007,Hans Richter,hans.richter@acmemfg.com,RegionalController,E_APAC,APAC,Finance
+USR008,James Kowalski,james.kowalski@acmemfg.com,PlantController,E_NA_Plant01,Americas,Finance
+USR009,Patricia Nguyen,patricia.nguyen@acmemfg.com,PlantController,E_NA_Plant02,Americas,Finance
+USR010,Thomas Wilson,thomas.wilson@acmemfg.com,PlantController,E_NA_Plant03,Americas,Finance
+USR011,Klaus Hoffman,klaus.hoffman@acmemfg.com,PlantController,E_EU_Plant01,EMEA,Finance
+USR012,Elizabeth Clarke,elizabeth.clarke@acmemfg.com,PlantController,E_EU_Plant02,EMEA,Finance
+USR013,Wei Zhang,wei.zhang@acmemfg.com,PlantController,E_APAC_Plant01,APAC,Finance
+USR014,Yuki Tanaka,yuki.tanaka@acmemfg.com,PlantController,E_APAC_Plant02,APAC,Finance
+USR015,Amanda Foster,amanda.foster@acmemfg.com,FPAAnalyst,"E_NA_Plant01,E_NA_Plant02,E_NA_Plant03",Americas,FPA
+USR016,Carlos Reyes,carlos.reyes@acmemfg.com,FPAAnalyst,"E_LATAM_Plant01,E_LATAM_Sales",Americas,FPA
+USR017,Sophie Dubois,sophie.dubois@acmemfg.com,FPAAnalyst,"E_EU_Plant01,E_EU_Plant02,E_EU_Sales",EMEA,FPA
+USR018,Rajesh Patel,rajesh.patel@acmemfg.com,FPADirector,AllEntities,Corporate,FPA
+USR019,Christine Johansson,christine.johansson@acmemfg.com,FPADirector,AllEntities,Corporate,FPA
+USR020,Linda Morales,linda.morales@acmemfg.com,HRBusinessPartner,"E_NA_Plant01,E_NA_Plant02,E_NA_Plant03",Americas,Human Resources
+USR021,Stefan Mueller,stefan.mueller@acmemfg.com,HRBusinessPartner,"E_EU_Plant01,E_EU_Plant02",EMEA,Human Resources
+USR022,Brian Carpenter,brian.carpenter@acmemfg.com,DepartmentHead,E_NA_Plant01,Americas,Engineering
+USR023,Rebecca Lawson,rebecca.lawson@acmemfg.com,DepartmentHead,E_NA_Plant01,Americas,Marketing
+USR024,Richard Hartley,richard.hartley@acmemfg.com,ExecutiveViewer,AllEntities,Corporate,Executive
+USR025,Catherine Zhou,catherine.zhou@acmemfg.com,ExecutiveViewer,AllEntities,Corporate,Executive
+USR026,Mark Sullivan,mark.sullivan@acmemfg.com,DataSteward,AllEntities,Corporate,IT
+USR027,Jessica Park,jessica.park@acmemfg.com,DataSteward,AllEntities,Corporate,IT
+USR028,Andrew Bennett,andrew.bennett@acmemfg.com,Auditor,AllEntities,Corporate,Internal Audit
+USR029,Diane Kessler,diane.kessler@deloitte.com,Auditor,AllEntities,External,External Audit

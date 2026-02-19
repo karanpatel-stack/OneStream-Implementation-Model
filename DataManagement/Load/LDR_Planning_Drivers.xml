@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Load Rule
+  Load: Planning Drivers
+  Purpose: Load driver assumptions and planning inputs into the Planning cube
+  Target Cube: Planning
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <LoadRule>
+
+      <!-- ============================================================
+           LOAD IDENTITY
+           ============================================================ -->
+      <LoadName>Planning_Drivers</LoadName>
+      <LoadDescription>Loads driver-based planning assumptions and input metrics into the Planning cube. Includes pricing assumptions, volume forecasts, cost rate changes, inflation factors, FX rate assumptions, and operational drivers (machine utilization targets, labor efficiency rates, scrap targets). These drivers feed driver-based planning models that calculate detailed financial projections.</LoadDescription>
+      <IsActive>true</IsActive>
+      <LoadType>CubeLoad</LoadType>
+      <TargetCube>Planning</TargetCube>
+
+      <!-- ============================================================
+           SOURCE STAGES
+           ============================================================ -->
+      <SourceStages>
+        <Stage name="Excel_Budget" priority="1" description="Driver assumptions from planning templates (Revenue and COGS sheets contain driver rows)" />
+        <Stage name="MES_Production" priority="2" description="Historical production metrics as baseline for driver calculations" />
+      </SourceStages>
+
+      <!-- ============================================================
+           TRANSFORM PIPELINE
+           ============================================================ -->
+      <TransformPipeline>
+        <Transform name="EntityMapping"        order="1" description="Map entity codes" />
+        <Transform name="ProductMapping"       order="2" description="Map product codes" />
+        <Transform name="CostCenterMapping"    order="3" description="Map cost centers" />
+        <Transform name="DerivedMembers"        order="4" description="Derive scenario, period, defaults" />
+        <Transform name="DataValidation"        order="5" description="Validate driver values" />
+      </TransformPipeline>
+
+      <!-- ============================================================
+           DIMENSION MAPPINGS
+           ============================================================ -->
+      <DimensionMappings>
+        <Mapping dimension="Scenario"       sourceColumn="OS_Scenario"         defaultValue="Plan"          description="Plan scenario for driver assumptions" />
+        <Mapping dimension="Time"           sourceColumn="OS_Time"             defaultValue=""              description="Monthly period" />
+        <Mapping dimension="Entity"         sourceColumn="OS_Entity"           defaultValue=""              description="Entity/Plant" />
+        <Mapping dimension="Account"        sourceColumn="OS_Account"          defaultValue=""              description="Statistical/driver account" />
+        <Mapping dimension="Flow"           sourceColumn="OS_Flow"             defaultValue="F_BudgetInput" description="Input flow" />
+        <Mapping dimension="Consolidation"  sourceColumn="OS_Consolidation"    defaultValue="C_Local"       description="Local" />
+        <Mapping dimension="UD1"            sourceColumn="OS_UD1_Product"      defaultValue="Prod_Unassigned" description="Product line" />
+        <Mapping dimension="UD2"            sourceColumn="OS_UD2_CostCenter"   defaultValue="CC_Unassigned" description="Cost Center" />
+        <Mapping dimension="UD3"            sourceColumn="OS_UD3"              defaultValue="UD3_None"      description="Reserved" />
+        <Mapping dimension="UD4"            sourceColumn="OS_UD4"              defaultValue="UD4_None"      description="Reserved" />
+        <Mapping dimension="UD5"            sourceColumn="OS_UD5_Intercompany" defaultValue="IC_None"       description="Intercompany" />
+        <Mapping dimension="UD6"            sourceColumn="OS_UD6"              defaultValue="UD6_None"      description="Reserved" />
+        <Mapping dimension="UD7"            sourceColumn="OS_UD7"              defaultValue="UD7_None"      description="Reserved" />
+        <Mapping dimension="UD8"            sourceColumn="OS_UD8_Version"      defaultValue="Working"       description="Working version" />
+      </DimensionMappings>
+
+      <!-- ============================================================
+           DRIVER ACCOUNT DEFINITIONS
+           Statistical and driver accounts for planning inputs.
+           ============================================================ -->
+      <DriverAccounts>
+        <!-- Volume and Pricing Drivers -->
+        <Driver account="A_Drv_UnitVolume"          description="Planned unit sales volume"        unit="Units"     dataType="Decimal" />
+        <Driver account="A_Drv_UnitPrice"           description="Average selling price per unit"    unit="Currency"  dataType="Decimal" />
+        <Driver account="A_Drv_PriceIncreasePct"    description="Year-over-year price increase %"   unit="Percent"   dataType="Decimal" />
+
+        <!-- Cost Drivers -->
+        <Driver account="A_Drv_MaterialCostPerUnit"  description="Standard material cost per unit"   unit="Currency"  dataType="Decimal" />
+        <Driver account="A_Drv_LaborRatePerHour"     description="Average labor rate per hour"       unit="Currency"  dataType="Decimal" />
+        <Driver account="A_Drv_OverheadRate"          description="Manufacturing overhead rate %"     unit="Percent"   dataType="Decimal" />
+        <Driver account="A_Drv_LaborHoursPerUnit"     description="Direct labor hours per unit"       unit="Hours"     dataType="Decimal" />
+        <Driver account="A_Drv_InflationRate"         description="General inflation rate assumption" unit="Percent"   dataType="Decimal" />
+
+        <!-- Operational Drivers -->
+        <Driver account="A_Drv_MachineUtilTarget"    description="Target machine utilization %"      unit="Percent"   dataType="Decimal" />
+        <Driver account="A_Drv_ScrapTarget"          description="Target scrap rate %"               unit="Percent"   dataType="Decimal" />
+        <Driver account="A_Drv_OEETarget"            description="Target OEE %"                      unit="Percent"   dataType="Decimal" />
+        <Driver account="A_Drv_ProductionDays"       description="Production days in period"         unit="Days"      dataType="Integer" />
+        <Driver account="A_Drv_ShiftsPerDay"         description="Number of shifts per day"          unit="Count"     dataType="Integer" />
+
+        <!-- FX Assumptions -->
+        <Driver account="A_Drv_FXRate_EURUSD"        description="Planned EUR/USD rate"              unit="Rate"      dataType="Decimal" />
+        <Driver account="A_Drv_FXRate_CNYUSD"        description="Planned CNY/USD rate"              unit="Rate"      dataType="Decimal" />
+        <Driver account="A_Drv_FXRate_MXNUSD"        description="Planned MXN/USD rate"              unit="Rate"      dataType="Decimal" />
+      </DriverAccounts>
+
+      <!-- ============================================================
+           AMOUNT MAPPING
+           ============================================================ -->
+      <AmountMapping>
+        <AmountColumn>OS_Amount</AmountColumn>
+        <CurrencyColumn>OS_Currency</CurrencyColumn>
+        <AmountType>Statistical</AmountType>
+      </AmountMapping>
+
+      <!-- ============================================================
+           LOAD METHOD
+           ============================================================ -->
+      <LoadMethod>
+        <Type>Merge</Type>
+        <ConflictResolution>
+          <Strategy>LatestWins</Strategy>
+          <AggregateMultiple>false</AggregateMultiple>
+        </ConflictResolution>
+      </LoadMethod>
+
+      <!-- ============================================================
+           PRE-LOAD ACTIONS
+           ============================================================ -->
+      <PreLoadActions>
+        <Action name="ClearDriverData" order="1">
+          <Type>CubeClear</Type>
+          <ClearScope>
+            <Scenario>Plan</Scenario>
+            <Time>@@PlanYear</Time>
+            <Entity>@@LoadEntity</Entity>
+            <Account>A_Drv_*</Account>
+            <UD8>Working</UD8>
+          </ClearScope>
+        </Action>
+      </PreLoadActions>
+
+      <!-- ============================================================
+           POST-LOAD ACTIONS
+           ============================================================ -->
+      <PostLoadActions>
+        <Action name="UpdateLoadLog" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (LoadName, LoadDate, Entity, Period, Scenario, LoadedRows, Status) VALUES ('Planning_Drivers', GETDATE(), @@LoadEntity, @@PlanYear, 'Plan', @@LoadedRecordCount, 'Complete')</SQL>
+        </Action>
+        <Action name="TriggerDriverCalc" order="2">
+          <Type>BusinessRule</Type>
+          <RuleName>BR_CalculateDriverBasedPlan</RuleName>
+          <Description>Trigger driver-based calculation to generate detailed financial projections from loaded drivers</Description>
+        </Action>
+      </PostLoadActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>1000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelLoading>false</EnableParallelLoading>
+        <LogDetailLevel>Full</LogDetailLevel>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+      <ErrorHandling>
+        <OnLoadError>
+          <Action>RollbackAndNotify</Action>
+        </OnLoadError>
+        <MaxErrorRows>25</MaxErrorRows>
+      </ErrorHandling>
+
+    </LoadRule>
+  </DataManagement>
+</OneStreamXF>

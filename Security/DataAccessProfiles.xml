@@ -1,0 +1,549 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Security Configuration
+  DataAccessProfiles.xml - Dimension-Level Security Profiles
+  Manufacturing Implementation
+-->
+<DataAccessProfiles xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                    Application="MfgConsolidation"
+                    LastModified="2026-02-18T00:00:00"
+                    Version="1.0">
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: Corporate                                            -->
+  <!-- Full access to all dimension members                          -->
+  <!-- ============================================================ -->
+  <Profile Name="Corporate"
+           Description="Corporate-level access with unrestricted visibility to all entity members, products, cost centers, and projects"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="AllEntities" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Member Name="E_Consolidated" AccessLevel="ReadWrite" />
+          <Member Name="E_Eliminations" AccessLevel="ReadWrite" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="AllCostCenters" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD4_Project">
+        <AccessRule>
+          <Member Name="AllProjects" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD6_Channel">
+        <AccessRule>
+          <Member Name="AllChannels" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="ReadWrite" />
+          <Member Name="Budget" AccessLevel="ReadWrite" />
+          <Member Name="Forecast" AccessLevel="ReadWrite" />
+          <Member Name="FlexBudget" AccessLevel="ReadWrite" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="SystemAdmin" />
+      <Role Name="CorporateController" />
+      <Role Name="FPADirector" />
+    </AssignedRoles>
+  </Profile>
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: Americas                                             -->
+  <!-- Access to Americas sub-tree entities only                     -->
+  <!-- ============================================================ -->
+  <Profile Name="Americas"
+           Description="Americas region access restricted to the Americas entity sub-tree including all North and Latin American plants and offices"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="E_Americas" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Includes: E_NA_Plant01 (Detroit), E_NA_Plant02 (Houston), E_NA_Plant03 (Chicago), E_NA_Sales, E_LATAM_Plant01 (Monterrey), E_LATAM_Sales, E_NA_Corporate</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Consolidated" AccessLevel="Read" IncludeDescendants="false" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_EMEA" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_APAC" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Eliminations" AccessLevel="None" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="CC_Americas" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Americas cost centers: CC_NA_Ops, CC_NA_Sales, CC_NA_Admin, CC_LATAM_Ops, CC_LATAM_Sales</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD4_Project">
+        <AccessRule>
+          <Member Name="AllProjects" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="ReadWrite" />
+          <Member Name="Budget" AccessLevel="Read" />
+          <Member Name="Forecast" AccessLevel="Read" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="RegionalController" />
+    </AssignedRoles>
+  </Profile>
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: EMEA                                                 -->
+  <!-- Access to EMEA sub-tree entities only                         -->
+  <!-- ============================================================ -->
+  <Profile Name="EMEA"
+           Description="EMEA region access restricted to Europe, Middle East, and Africa entity sub-tree"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="E_EMEA" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Includes: E_EU_Plant01 (Stuttgart), E_EU_Plant02 (Birmingham), E_EU_Sales, E_MEA_Sales, E_EU_Corporate</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Consolidated" AccessLevel="Read" IncludeDescendants="false" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Americas" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_APAC" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Eliminations" AccessLevel="None" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="CC_EMEA" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>EMEA cost centers: CC_EU_Ops, CC_EU_Sales, CC_EU_Admin, CC_MEA_Sales</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD4_Project">
+        <AccessRule>
+          <Member Name="AllProjects" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="ReadWrite" />
+          <Member Name="Budget" AccessLevel="Read" />
+          <Member Name="Forecast" AccessLevel="Read" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="RegionalController" />
+    </AssignedRoles>
+  </Profile>
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: APAC                                                 -->
+  <!-- Access to APAC sub-tree entities only                         -->
+  <!-- ============================================================ -->
+  <Profile Name="APAC"
+           Description="Asia-Pacific region access restricted to the APAC entity sub-tree"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="E_APAC" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Includes: E_APAC_Plant01 (Shanghai), E_APAC_Plant02 (Osaka), E_APAC_Sales, E_APAC_Corporate</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Consolidated" AccessLevel="Read" IncludeDescendants="false" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Americas" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_EMEA" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Eliminations" AccessLevel="None" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="CC_APAC" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>APAC cost centers: CC_APAC_Ops, CC_APAC_Sales, CC_APAC_Admin</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD4_Project">
+        <AccessRule>
+          <Member Name="AllProjects" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="ReadWrite" />
+          <Member Name="Budget" AccessLevel="Read" />
+          <Member Name="Forecast" AccessLevel="Read" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="RegionalController" />
+    </AssignedRoles>
+  </Profile>
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: PlantLevel                                           -->
+  <!-- Access to a single plant entity only                          -->
+  <!-- ============================================================ -->
+  <Profile Name="PlantLevel"
+           Description="Plant-level access restricted to a single manufacturing plant entity with read-only parent visibility"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="{AssignedPlant}" AccessLevel="ReadWrite" IncludeDescendants="false" />
+          <Description>Single plant assignment, e.g., E_NA_Plant01, E_EU_Plant02, etc.</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="{ParentRegion}" AccessLevel="Read" IncludeDescendants="false" />
+          <Description>Read-only access to the parent regional rollup for context</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="E_Consolidated" AccessLevel="Read" IncludeDescendants="false" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="{PlantProductLines}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Products manufactured at the assigned plant</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="{PlantCostCenters}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Cost centers associated with the assigned plant</Description>
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD4_Project">
+        <AccessRule>
+          <Member Name="{PlantProjects}" AccessLevel="ReadWrite" IncludeDescendants="false" />
+          <Description>Capital projects at the assigned plant</Description>
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="ReadWrite" />
+          <Member Name="Budget" AccessLevel="Read" />
+          <Member Name="Forecast" AccessLevel="Read" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="PlantController" />
+    </AssignedRoles>
+
+    <!-- Plant-specific profile instances -->
+    <ProfileInstances>
+      <Instance Name="PlantLevel_NA_Plant01" PlantMember="E_NA_Plant01" ParentRegion="E_Americas"
+                PlantProductLines="PL_Automotive,PL_Industrial" PlantCostCenters="CC_NA_Plant01_Ops,CC_NA_Plant01_Maint,CC_NA_Plant01_QA"
+                PlantProjects="PRJ_PE_NewLine,PRJ_ME_CNCMachines,PRJ_ME_RoboticWeld" />
+      <Instance Name="PlantLevel_NA_Plant02" PlantMember="E_NA_Plant02" ParentRegion="E_Americas"
+                PlantProductLines="PL_Aerospace,PL_Defense" PlantCostCenters="CC_NA_Plant02_Ops,CC_NA_Plant02_Maint,CC_NA_Plant02_QA"
+                PlantProjects="PRJ_PE_Warehouse,PRJ_ME_PaintBooth" />
+      <Instance Name="PlantLevel_NA_Plant03" PlantMember="E_NA_Plant03" ParentRegion="E_Americas"
+                PlantProductLines="PL_Consumer,PL_Medical" PlantCostCenters="CC_NA_Plant03_Ops,CC_NA_Plant03_Maint,CC_NA_Plant03_QA"
+                PlantProjects="PRJ_ME_Conveyor,PRJ_ME_QualityInsp" />
+      <Instance Name="PlantLevel_EU_Plant01" PlantMember="E_EU_Plant01" ParentRegion="E_EMEA"
+                PlantProductLines="PL_Automotive,PL_Industrial" PlantCostCenters="CC_EU_Plant01_Ops,CC_EU_Plant01_Maint,CC_EU_Plant01_QA"
+                PlantProjects="PRJ_IT_MES,PRJ_ES_AirFiltration" />
+      <Instance Name="PlantLevel_EU_Plant02" PlantMember="E_EU_Plant02" ParentRegion="E_EMEA"
+                PlantProductLines="PL_Aerospace" PlantCostCenters="CC_EU_Plant02_Ops,CC_EU_Plant02_Maint,CC_EU_Plant02_QA"
+                PlantProjects="PRJ_ES_WasteWater" />
+      <Instance Name="PlantLevel_APAC_Plant01" PlantMember="E_APAC_Plant01" ParentRegion="E_APAC"
+                PlantProductLines="PL_Consumer,PL_Industrial" PlantCostCenters="CC_APAC_Plant01_Ops,CC_APAC_Plant01_Maint"
+                PlantProjects="PRJ_IT_IoTSensors,PRJ_PE_LoadingDock" />
+      <Instance Name="PlantLevel_APAC_Plant02" PlantMember="E_APAC_Plant02" ParentRegion="E_APAC"
+                PlantProductLines="PL_Automotive,PL_Medical" PlantCostCenters="CC_APAC_Plant02_Ops,CC_APAC_Plant02_Maint"
+                PlantProjects="PRJ_IT_ERPUpgrade,PRJ_ES_FireSuppress" />
+    </ProfileInstances>
+  </Profile>
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: ProductManager                                       -->
+  <!-- Access to assigned product families                           -->
+  <!-- ============================================================ -->
+  <Profile Name="ProductManager"
+           Description="Product manager access restricted to assigned product families with cross-entity read visibility"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="{AssignedProductFamily}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Product families assigned to the product manager</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD6_Channel">
+        <AccessRule>
+          <Member Name="AllChannels" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="Read" />
+          <Member Name="Budget" AccessLevel="ReadWrite" />
+          <Member Name="Forecast" AccessLevel="ReadWrite" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="FPAAnalyst" />
+    </AssignedRoles>
+
+    <ProfileInstances>
+      <Instance Name="ProductManager_Automotive" AssignedProductFamily="PL_Automotive" />
+      <Instance Name="ProductManager_Aerospace" AssignedProductFamily="PL_Aerospace" />
+      <Instance Name="ProductManager_Industrial" AssignedProductFamily="PL_Industrial" />
+      <Instance Name="ProductManager_Consumer" AssignedProductFamily="PL_Consumer" />
+      <Instance Name="ProductManager_Medical" AssignedProductFamily="PL_Medical" />
+      <Instance Name="ProductManager_Defense" AssignedProductFamily="PL_Defense" />
+    </ProfileInstances>
+  </Profile>
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: DeptHead                                             -->
+  <!-- Access to assigned cost centers                               -->
+  <!-- ============================================================ -->
+  <Profile Name="DeptHead"
+           Description="Department head access restricted to assigned cost centers with Budget write and broad read visibility"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="{AssignedEntity}" AccessLevel="ReadWrite" IncludeDescendants="false" />
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="{AssignedCostCenters}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Specific cost centers managed by the department head</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Account">
+        <AccessRule>
+          <Member Name="OPEX" AccessLevel="ReadWrite" IncludeDescendants="true" />
+          <Description>Write access limited to operating expense accounts for budget input</Description>
+        </AccessRule>
+        <AccessRule>
+          <Member Name="AllAccounts" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="Read" />
+          <Member Name="Budget" AccessLevel="ReadWrite" />
+          <Member Name="Forecast" AccessLevel="Read" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="DepartmentHead" />
+    </AssignedRoles>
+
+    <ProfileInstances>
+      <Instance Name="DeptHead_Engineering_P1" AssignedEntity="E_NA_Plant01"
+                AssignedCostCenters="CC_NA_Plant01_Engineering,CC_NA_Plant01_QA" />
+      <Instance Name="DeptHead_Marketing_P1" AssignedEntity="E_NA_Plant01"
+                AssignedCostCenters="CC_NA_Marketing" />
+      <Instance Name="DeptHead_Operations_P2" AssignedEntity="E_NA_Plant02"
+                AssignedCostCenters="CC_NA_Plant02_Ops,CC_NA_Plant02_Maint" />
+      <Instance Name="DeptHead_Sales_NA" AssignedEntity="E_NA_Sales"
+                AssignedCostCenters="CC_NA_Sales_Inside,CC_NA_Sales_Field" />
+      <Instance Name="DeptHead_RD" AssignedEntity="E_NA_Corporate"
+                AssignedCostCenters="CC_RD_Core,CC_RD_Advanced,CC_RD_Testing" />
+    </ProfileInstances>
+  </Profile>
+
+  <!-- ============================================================ -->
+  <!-- PROFILE: ReadOnly                                             -->
+  <!-- Read access to all dimensions                                 -->
+  <!-- ============================================================ -->
+  <Profile Name="ReadOnly"
+           Description="Universal read-only access to all dimensions and members for reporting and audit purposes"
+           IsActive="true">
+
+    <DimensionSecurity>
+      <Dimension Name="Entity">
+        <AccessRule>
+          <Member Name="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+          <Member Name="E_Consolidated" AccessLevel="Read" />
+          <Member Name="E_Eliminations" AccessLevel="Read" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Account">
+        <AccessRule>
+          <Member Name="AllAccounts" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD1_Product">
+        <AccessRule>
+          <Member Name="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD2_CostCenter">
+        <AccessRule>
+          <Member Name="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD4_Project">
+        <AccessRule>
+          <Member Name="AllProjects" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="UD6_Channel">
+        <AccessRule>
+          <Member Name="AllChannels" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Scenario">
+        <AccessRule>
+          <Member Name="Actual" AccessLevel="Read" />
+          <Member Name="Budget" AccessLevel="Read" />
+          <Member Name="Forecast" AccessLevel="Read" />
+          <Member Name="FlexBudget" AccessLevel="Read" />
+        </AccessRule>
+      </Dimension>
+
+      <Dimension Name="Time">
+        <AccessRule>
+          <Member Name="AllTime" AccessLevel="Read" IncludeDescendants="true" />
+        </AccessRule>
+      </Dimension>
+    </DimensionSecurity>
+
+    <AssignedRoles>
+      <Role Name="ExecutiveViewer" />
+      <Role Name="Auditor" />
+    </AssignedRoles>
+  </Profile>
+
+</DataAccessProfiles>

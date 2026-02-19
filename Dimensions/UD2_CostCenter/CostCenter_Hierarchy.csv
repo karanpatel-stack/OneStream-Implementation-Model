@@ -1,0 +1,99 @@
+MemberName,ParentName,Description
+Total_CostCenters,,Total Cost Centers
+CC_NoCC,Total_CostCenters,No Cost Center Specified
+Production,Total_CostCenters,Production Cost Centers
+Machining,Production,Machining Department
+CC_CNC_Milling,Machining,CNC Milling Operations
+CC_CNC_Turning,Machining,CNC Turning Operations
+CC_CNC_Grinding,Machining,CNC Grinding Operations
+CC_ManualMachining,Machining,Manual Machining Operations
+Assembly,Production,Assembly Department
+CC_SubAssembly,Assembly,Sub-Assembly Operations
+CC_FinalAssembly,Assembly,Final Assembly Operations
+CC_ElectricalAssembly,Assembly,Electrical Assembly Operations
+CC_TestAssembly,Assembly,Assembly Test Station
+Finishing,Production,Finishing Department
+CC_Painting,Finishing,Painting and Coating
+CC_HeatTreat,Finishing,Heat Treatment Operations
+CC_SurfaceFinish,Finishing,Surface Finishing Operations
+CC_Plating,Finishing,Plating Operations
+PackagingDept,Production,Packaging Department
+CC_PrimaryPack,PackagingDept,Primary Packaging Operations
+CC_FinalPack,PackagingDept,Final Packaging and Crating
+Warehouse,Total_CostCenters,Warehouse and Logistics
+Receiving,Warehouse,Receiving Department
+CC_InboundDock,Receiving,Inbound Dock Operations
+CC_Inspection,Receiving,Incoming Inspection
+Storage,Warehouse,Storage Department
+CC_RawMatStorage,Storage,Raw Material Storage
+CC_WIPStorage,Storage,WIP Storage
+CC_FGStorage,Storage,Finished Goods Storage
+Shipping,Warehouse,Shipping Department
+CC_OutboundDock,Shipping,Outbound Dock Operations
+CC_FreightMgmt,Shipping,Freight Management
+QualityControl,Total_CostCenters,Quality Control Department
+CC_InProcessQC,QualityControl,In-Process Quality Control
+CC_FinalQC,QualityControl,Final Quality Inspection
+CC_Metrology,QualityControl,Metrology Lab
+CC_QA_Systems,QualityControl,Quality Assurance Systems
+Maintenance,Total_CostCenters,Maintenance Department
+CC_PreventiveMaint,Maintenance,Preventive Maintenance Team
+CC_CorrectiveMaint,Maintenance,Corrective Maintenance Team
+CC_ToolRoom,Maintenance,Tool Room and Calibration
+CC_FacilitiesMaint,Maintenance,Facilities Maintenance
+Admin,Total_CostCenters,Administrative Cost Centers
+Finance,Admin,Finance Department
+CC_Accounting,Finance,Accounting
+CC_FPA,Finance,Financial Planning and Analysis
+CC_Treasury,Finance,Treasury
+CC_Tax,Finance,Tax Department
+HR,Admin,Human Resources Department
+CC_Recruiting,HR,Recruiting and Talent Acquisition
+CC_CompBenefits,HR,Compensation and Benefits
+CC_Training,HR,Training and Development
+CC_EmployeeRelations,HR,Employee Relations
+Legal,Admin,Legal Department
+CC_Corporate_Legal,Legal,Corporate Legal
+CC_Compliance,Legal,Compliance
+Executive,Admin,Executive Management
+CC_CEO_Office,Executive,CEO Office
+CC_COO_Office,Executive,COO Office
+CC_CFO_Office,Executive,CFO Office
+RD,Total_CostCenters,Research and Development
+ProductDev,RD,Product Development
+CC_MechanicalDesign,ProductDev,Mechanical Design Engineering
+CC_ElectricalDesign,ProductDev,Electrical Design Engineering
+CC_SoftwareDev,ProductDev,Software Development
+ProcessEng,RD,Process Engineering
+CC_MfgEngineering,ProcessEng,Manufacturing Engineering
+CC_IndustrialEng,ProcessEng,Industrial Engineering
+CC_AutomationEng,ProcessEng,Automation Engineering
+Testing,RD,Testing and Validation
+CC_ProtoLab,Testing,Prototype Lab
+CC_TestLab,Testing,Testing Laboratory
+CC_Certification,Testing,Certification and Standards
+Sales,Total_CostCenters,Sales Cost Centers
+DomesticSales,Sales,Domestic Sales
+CC_NortheastSales,DomesticSales,Northeast Region Sales
+CC_SoutheastSales,DomesticSales,Southeast Region Sales
+CC_MidwestSales,DomesticSales,Midwest Region Sales
+CC_WestSales,DomesticSales,West Region Sales
+IntlSales,Sales,International Sales
+CC_EMEASales,IntlSales,EMEA Sales
+CC_APACSales,IntlSales,APAC Sales
+CC_LatAmSales,IntlSales,Latin America Sales
+KeyAccounts,Sales,Key Account Management
+CC_OEM_Accounts,KeyAccounts,OEM Account Management
+CC_Strategic_Accounts,KeyAccounts,Strategic Account Management
+IT,Total_CostCenters,Information Technology
+Infrastructure,IT,IT Infrastructure
+CC_DataCenter,Infrastructure,Data Center Operations
+CC_Network,Infrastructure,Network and Telecom
+CC_CloudServices,Infrastructure,Cloud Services
+Applications,IT,IT Applications
+CC_ERP,Applications,ERP Systems
+CC_MES,Applications,Manufacturing Execution Systems
+CC_BI_Analytics,Applications,Business Intelligence and Analytics
+Security,IT,IT Security
+CC_CyberSecurity,Security,Cybersecurity
+CC_InfoSec,Security,Information Security and Compliance

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_Report_BS - Balance Sheet Report View
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_Report_BS"
+           Description="Balance sheet report with period-over-period and prior year comparisons plus financial ratios"
+           CubeName="Finance"
+           ViewType="Report"
+           IsEnabled="true"
+           AllowDataInput="false"
+           SuppressNoData="true"
+           SuppressZeros="true"
+           SuppressZerosOption="SuppressRowsWithAllZeros"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: Full Balance Sheet Account Hierarchy                -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- ASSETS -->
+        <Member Name="TotalAssets" DisplayName="TOTAL ASSETS" IndentLevel="0" IsBold="true" AllowExpand="true" IsExpanded="true" />
+
+        <!-- Current Assets -->
+        <Member Name="CurrentAssets" DisplayName="Current Assets" IndentLevel="1" IsBold="true" AllowExpand="true" IsExpanded="true" />
+        <Member Name="BS_Cash" DisplayName="Cash &amp; Cash Equivalents" IndentLevel="2" />
+        <Member Name="BS_ShortTermInvestments" DisplayName="Short-Term Investments" IndentLevel="2" />
+        <Member Name="BS_AccountsReceivable" DisplayName="Accounts Receivable, Net" IndentLevel="2" />
+        <Member Name="BS_Inventory" DisplayName="Inventory" IndentLevel="2" AllowExpand="true" />
+        <Member Name="BS_Inv_RawMaterials" DisplayName="Raw Materials" IndentLevel="3" />
+        <Member Name="BS_Inv_WIP" DisplayName="Work-In-Process" IndentLevel="3" />
+        <Member Name="BS_Inv_FinishedGoods" DisplayName="Finished Goods" IndentLevel="3" />
+        <Member Name="BS_Inv_Reserve" DisplayName="Inventory Reserve" IndentLevel="3" />
+        <Member Name="BS_Prepaid" DisplayName="Prepaid Expenses" IndentLevel="2" />
+        <Member Name="BS_OtherCurrentAssets" DisplayName="Other Current Assets" IndentLevel="2" />
+        <Member Name="TotalCurrentAssets" DisplayName="Total Current Assets" IndentLevel="1" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator1" DisplayName="" IsBlankRow="true" />
+
+        <!-- Non-Current Assets -->
+        <Member Name="NonCurrentAssets" DisplayName="Non-Current Assets" IndentLevel="1" IsBold="true" AllowExpand="true" IsExpanded="true" />
+        <Member Name="BS_PPE_Gross" DisplayName="Property, Plant &amp; Equipment (Gross)" IndentLevel="2" AllowExpand="true" />
+        <Member Name="BS_PPE_Land" DisplayName="Land" IndentLevel="3" />
+        <Member Name="BS_PPE_Buildings" DisplayName="Buildings &amp; Improvements" IndentLevel="3" />
+        <Member Name="BS_PPE_MfgEquipment" DisplayName="Manufacturing Equipment" IndentLevel="3" />
+        <Member Name="BS_PPE_OfficeEquip" DisplayName="Office Equipment &amp; Furniture" IndentLevel="3" />
+        <Member Name="BS_PPE_Vehicles" DisplayName="Vehicles" IndentLevel="3" />
+        <Member Name="BS_PPE_CIP" DisplayName="Construction In Progress" IndentLevel="3" />
+        <Member Name="BS_AccumDepr" DisplayName="Accumulated Depreciation" IndentLevel="2" />
+        <Member Name="BS_PPE_Net" DisplayName="Property, Plant &amp; Equipment (Net)" IndentLevel="2" IsBold="true" IsSubtotal="true" />
+        <Member Name="BS_Intangibles" DisplayName="Intangible Assets" IndentLevel="2" />
+        <Member Name="BS_Goodwill" DisplayName="Goodwill" IndentLevel="2" />
+        <Member Name="BS_OtherLTAssets" DisplayName="Other Long-Term Assets" IndentLevel="2" />
+        <Member Name="TotalNonCurrentAssets" DisplayName="Total Non-Current Assets" IndentLevel="1" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator2" DisplayName="" IsBlankRow="true" />
+        <Member Name="TotalAssetsCalc" DisplayName="TOTAL ASSETS" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator3" DisplayName="" IsBlankRow="true" />
+
+        <!-- LIABILITIES -->
+        <Member Name="TotalLiabilities" DisplayName="TOTAL LIABILITIES" IndentLevel="0" IsBold="true" AllowExpand="true" IsExpanded="true" />
+
+        <!-- Current Liabilities -->
+        <Member Name="CurrentLiabilities" DisplayName="Current Liabilities" IndentLevel="1" IsBold="true" AllowExpand="true" IsExpanded="true" />
+        <Member Name="BS_AccountsPayable" DisplayName="Accounts Payable" IndentLevel="2" />
+        <Member Name="BS_AccruedLiabilities" DisplayName="Accrued Liabilities" IndentLevel="2" />
+        <Member Name="BS_AccruedPayroll" DisplayName="Accrued Payroll &amp; Benefits" IndentLevel="2" />
+        <Member Name="BS_ShortTermDebt" DisplayName="Short-Term Debt / Current Portion LTD" IndentLevel="2" />
+        <Member Name="BS_DeferredRevenue" DisplayName="Deferred Revenue" IndentLevel="2" />
+        <Member Name="BS_TaxPayable" DisplayName="Income Taxes Payable" IndentLevel="2" />
+        <Member Name="BS_OtherCurrentLiab" DisplayName="Other Current Liabilities" IndentLevel="2" />
+        <Member Name="TotalCurrentLiabilities" DisplayName="Total Current Liabilities" IndentLevel="1" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator4" DisplayName="" IsBlankRow="true" />
+
+        <!-- Non-Current Liabilities -->
+        <Member Name="NonCurrentLiabilities" DisplayName="Non-Current Liabilities" IndentLevel="1" IsBold="true" AllowExpand="true" IsExpanded="true" />
+        <Member Name="BS_LongTermDebt" DisplayName="Long-Term Debt" IndentLevel="2" />
+        <Member Name="BS_PensionObligation" DisplayName="Pension &amp; Retirement Obligations" IndentLevel="2" />
+        <Member Name="BS_DeferredTax" DisplayName="Deferred Tax Liabilities" IndentLevel="2" />
+        <Member Name="BS_OtherLTLiabilities" DisplayName="Other Long-Term Liabilities" IndentLevel="2" />
+        <Member Name="TotalNonCurrentLiabilities" DisplayName="Total Non-Current Liabilities" IndentLevel="1" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator5" DisplayName="" IsBlankRow="true" />
+        <Member Name="TotalLiabilitiesCalc" DisplayName="TOTAL LIABILITIES" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator6" DisplayName="" IsBlankRow="true" />
+
+        <!-- SHAREHOLDERS EQUITY -->
+        <Member Name="ShareholdersEquity" DisplayName="SHAREHOLDERS' EQUITY" IndentLevel="0" IsBold="true" AllowExpand="true" IsExpanded="true" />
+        <Member Name="BS_CommonStock" DisplayName="Common Stock" IndentLevel="1" />
+        <Member Name="BS_APIC" DisplayName="Additional Paid-In Capital" IndentLevel="1" />
+        <Member Name="BS_RetainedEarnings" DisplayName="Retained Earnings" IndentLevel="1" />
+        <Member Name="BS_TreasuryStock" DisplayName="Treasury Stock" IndentLevel="1" />
+        <Member Name="BS_AOCI" DisplayName="Accumulated Other Comprehensive Income" IndentLevel="1" />
+        <Member Name="TotalEquity" DisplayName="Total Shareholders' Equity" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <Member Name="_Separator7" DisplayName="" IsBlankRow="true" />
+        <Member Name="TotalLiabEquity" DisplayName="TOTAL LIABILITIES &amp; EQUITY" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+
+        <!-- Financial Ratios Section -->
+        <Member Name="_Separator8" DisplayName="" IsBlankRow="true" />
+        <Member Name="BS_Ratios" DisplayName="KEY RATIOS" IndentLevel="0" IsBold="true" />
+        <Member Name="BS_CurrentRatio" DisplayName="Current Ratio" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_QuickRatio" DisplayName="Quick Ratio" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_DebtToEquity" DisplayName="Debt-to-Equity Ratio" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_WorkingCapital" DisplayName="Working Capital" IndentLevel="1" />
+        <Member Name="BS_DaysReceivable" DisplayName="Days Sales Outstanding" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_DaysPayable" DisplayName="Days Payable Outstanding" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_InventoryTurnover" DisplayName="Inventory Turnover" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_DaysInventory" DisplayName="Days Inventory Outstanding" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_CashConversionCycle" DisplayName="Cash Conversion Cycle" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_AssetTurnover" DisplayName="Asset Turnover" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_ROA" DisplayName="Return on Assets %" IndentLevel="1" IsRatio="true" />
+        <Member Name="BS_ROE" DisplayName="Return on Equity %" IndentLevel="1" IsRatio="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Period Comparisons                               -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <ColumnGroup Name="CurrentPeriod">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="Periodic" />
+      </Dimensions>
+      <DisplayName>Current Period</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="PriorPeriod">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="Periodic" />
+        <DimensionMember Dimension="Time" Member="PriorMonth" />
+      </Dimensions>
+      <DisplayName>Prior Period</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="ChangeDollar">
+      <CalculatedColumn>
+        <Formula>CurrentPeriod - PriorPeriod</Formula>
+      </CalculatedColumn>
+      <DisplayName>Change $</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="ChangePercent">
+      <CalculatedColumn>
+        <Formula>IF(PriorPeriod = 0, 0, (CurrentPeriod - PriorPeriod) / ABS(PriorPeriod))</Formula>
+      </CalculatedColumn>
+      <DisplayName>% Change</DisplayName>
+      <NumberFormat Type="Percentage" DecimalPlaces="1" />
+    </ColumnGroup>
+
+    <ColumnGroup Name="PriorYear">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="Periodic" />
+        <DimensionMember Dimension="Time" Member="PriorYearSamePeriod" />
+      </Dimensions>
+      <DisplayName>Prior Year</DisplayName>
+    </ColumnGroup>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="Consolidated">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Time" IsSelectable="true" DefaultMember="CurrentMonth">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllTime" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Elimination" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" ScaleFactor="1000"
+                    ScaleLabel="($ in thousands)" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <ConditionalFormat Name="SubtotalRows">
+      <Condition>
+        <CellProperty Property="IsSubtotal" Value="true" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Thin</BorderTopStyle>
+        <BackgroundColor>#F5F8FC</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="RatioRows">
+      <Condition>
+        <CellProperty Property="IsRatio" Value="true" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Number" DecimalPlaces="2" />
+        <FontStyle>Italic</FontStyle>
+        <FontColor>#666666</FontColor>
+        <BackgroundColor>#FAFAFA</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="PercentageRatios">
+      <Condition>
+        <RowMember Dimension="Account" Members="BS_ROA,BS_ROE" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Percentage" DecimalPlaces="1" />
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="DaysRatios">
+      <Condition>
+        <RowMember Dimension="Account" Members="BS_DaysReceivable,BS_DaysPayable,BS_DaysInventory,BS_CashConversionCycle" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Number" DecimalPlaces="0" Suffix=" days" />
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="TotalLiabEquityRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="TotalLiabEquity" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <FontSize>11</FontSize>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <BorderBottomStyle>Double</BorderBottomStyle>
+        <BackgroundColor>#E8F4E8</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION - All cells read-only                         -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <AllCellsProtected>true</AllCellsProtected>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- CALCULATION RULES FOR RATIOS                                  -->
+  <!-- ============================================================ -->
+  <CalculationRules>
+    <Rule Name="CurrentRatio">
+      <Formula>TotalCurrentAssets / TotalCurrentLiabilities</Formula>
+    </Rule>
+    <Rule Name="QuickRatio">
+      <Formula>(TotalCurrentAssets - BS_Inventory) / TotalCurrentLiabilities</Formula>
+    </Rule>
+    <Rule Name="DebtToEquity">
+      <Formula>(BS_ShortTermDebt + BS_LongTermDebt) / TotalEquity</Formula>
+    </Rule>
+    <Rule Name="WorkingCapital">
+      <Formula>TotalCurrentAssets - TotalCurrentLiabilities</Formula>
+    </Rule>
+    <Rule Name="DaysSalesOutstanding">
+      <Formula>(BS_AccountsReceivable / (NetRevenue / 365))</Formula>
+    </Rule>
+    <Rule Name="DaysPayableOutstanding">
+      <Formula>(BS_AccountsPayable / (TotalCOGS / 365))</Formula>
+    </Rule>
+    <Rule Name="InventoryTurnover">
+      <Formula>TotalCOGS / BS_Inventory</Formula>
+    </Rule>
+    <Rule Name="DaysInventoryOutstanding">
+      <Formula>365 / InventoryTurnover</Formula>
+    </Rule>
+    <Rule Name="CashConversionCycle">
+      <Formula>DaysSalesOutstanding + DaysInventoryOutstanding - DaysPayableOutstanding</Formula>
+    </Rule>
+    <Rule Name="AssetTurnover">
+      <Formula>NetRevenue / TotalAssetsCalc</Formula>
+    </Rule>
+    <Rule Name="ReturnOnAssets">
+      <Formula>NetIncome / TotalAssetsCalc</Formula>
+    </Rule>
+    <Rule Name="ReturnOnEquity">
+      <Formula>NetIncome / TotalEquity</Formula>
+    </Rule>
+  </CalculationRules>
+
+  <!-- ============================================================ -->
+  <!-- REPORT OPTIONS                                                -->
+  <!-- ============================================================ -->
+  <ReportOptions>
+    <SuppressZeroRows>true</SuppressZeroRows>
+    <AllowDrillDown>true</AllowDrillDown>
+    <AllowMemberExpansion>true</AllowMemberExpansion>
+    <ShowRowHierarchyIndent>true</ShowRowHierarchyIndent>
+    <PrintSettings>
+      <Orientation>Portrait</Orientation>
+      <PaperSize>Letter</PaperSize>
+      <FitToPage>true</FitToPage>
+      <ShowGridLines>false</ShowGridLines>
+      <HeaderLeft>Balance Sheet</HeaderLeft>
+      <HeaderCenter>{Entity.Description}</HeaderCenter>
+      <HeaderRight>As of: {Time.Description}</HeaderRight>
+      <FooterLeft>Confidential</FooterLeft>
+      <FooterCenter>Page {PageNumber} of {TotalPages}</FooterCenter>
+      <FooterRight>Generated: {PrintDate}</FooterRight>
+    </PrintSettings>
+  </ReportOptions>
+
+</CubeView>

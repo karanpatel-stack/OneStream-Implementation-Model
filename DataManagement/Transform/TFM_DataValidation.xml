@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Data Validation
+  Purpose: Cross-field validation rules to ensure data quality before cube loading
+  Created: 2026-02-18
+
+  Comprehensive data validation framework that checks all staged records for
+  data quality, referential integrity, and business rule compliance before
+  they are loaded into OneStream cubes.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>DataValidation</TransformName>
+      <TransformDescription>Comprehensive data validation rules applied after dimension mappings and sign conventions. Validates data types, required fields, referential integrity against OneStream metadata, date ranges, duplicate detection, and business-specific rules. Records failing validation are rejected to an error table with detailed rejection reasons for analyst review.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Validation</TransformType>
+      <ExecutionOrder>900</ExecutionOrder>
+
+      <!-- ============================================================
+           VALIDATION RULES
+           Rules are evaluated in order. A record may fail multiple rules.
+           All failures are captured before the record is rejected.
+           ============================================================ -->
+      <ValidationRules>
+
+        <!-- ====================== DATA TYPE VALIDATIONS ====================== -->
+        <RuleGroup name="DataTypeValidation" description="Ensure data types are correct">
+
+          <Rule id="V001" name="AmountIsNumeric" severity="Error">
+            <Description>Amount field must contain a valid numeric value</Description>
+            <Field>OS_Amount</Field>
+            <Condition><![CDATA[
+              OS_Amount IS NOT NULL AND ISNUMERIC(CAST(OS_Amount AS VARCHAR)) = 1
+            ]]></Condition>
+            <ErrorMessage>Amount field contains non-numeric value: {OS_Amount}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V002" name="AmountWithinRange" severity="Warning">
+            <Description>Amount should be within reasonable range (flag outliers)</Description>
+            <Field>OS_Amount</Field>
+            <Condition><![CDATA[
+              ABS(OS_Amount) <= 999999999999.99
+            ]]></Condition>
+            <ErrorMessage>Amount exceeds expected range: {OS_Amount}. Verify this is not a data error.</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+          </Rule>
+
+          <Rule id="V003" name="AmountNotZeroForGL" severity="Warning">
+            <Description>GL records should not have zero amount (may indicate extraction issue)</Description>
+            <Field>OS_Amount</Field>
+            <Condition><![CDATA[
+              NOT (OS_Amount = 0 AND OS_DataType = 'Financial')
+            ]]></Condition>
+            <ErrorMessage>Zero amount GL record detected for {OS_Entity}/{OS_Account}. May be extraction artifact.</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+          </Rule>
+
+        </RuleGroup>
+
+        <!-- ====================== DATE VALIDATIONS ====================== -->
+        <RuleGroup name="DateValidation" description="Validate date fields are within expected ranges">
+
+          <Rule id="V010" name="PeriodWithinRange" severity="Error">
+            <Description>Period must be within the expected fiscal calendar range</Description>
+            <Field>OS_Period</Field>
+            <Condition><![CDATA[
+              OS_Period IS NOT NULL
+              AND OS_Period >= '2020M1'
+              AND OS_Period <= '2027M12'
+            ]]></Condition>
+            <ErrorMessage>Period {OS_Period} is outside the expected range (2020M1 to 2027M12)</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V011" name="PeriodNotFuture" severity="Warning">
+            <Description>Actuals data should not be in future periods</Description>
+            <Field>OS_Period</Field>
+            <Condition><![CDATA[
+              NOT (OS_Scenario = 'Actual'
+                   AND OS_Period > FORMAT(GETDATE(), 'yyyyM') + CAST(MONTH(GETDATE()) AS VARCHAR))
+            ]]></Condition>
+            <ErrorMessage>Actual data loaded for future period {OS_Period}. Verify this is intentional.</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+          </Rule>
+
+          <Rule id="V012" name="EffectiveDateValid" severity="Error">
+            <Description>Effective dates must be valid calendar dates</Description>
+            <Field>SRC_EffectiveDate</Field>
+            <Condition><![CDATA[
+              SRC_EffectiveDate IS NULL
+              OR (ISDATE(SRC_EffectiveDate) = 1
+                  AND SRC_EffectiveDate >= '2000-01-01'
+                  AND SRC_EffectiveDate <= '2030-12-31')
+            ]]></Condition>
+            <ErrorMessage>Invalid effective date: {SRC_EffectiveDate}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+        </RuleGroup>
+
+        <!-- ====================== REQUIRED FIELD VALIDATIONS ====================== -->
+        <RuleGroup name="RequiredFields" description="Ensure mandatory fields are populated">
+
+          <Rule id="V020" name="EntityRequired" severity="Error">
+            <Description>Entity dimension member is required for all records</Description>
+            <Field>OS_Entity</Field>
+            <Condition><![CDATA[
+              OS_Entity IS NOT NULL AND LEN(LTRIM(RTRIM(OS_Entity))) > 0
+            ]]></Condition>
+            <ErrorMessage>Entity is null or empty. Source: {SRC_Entity}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V021" name="AccountRequired" severity="Error">
+            <Description>Account dimension member is required for all records</Description>
+            <Field>OS_Account</Field>
+            <Condition><![CDATA[
+              OS_Account IS NOT NULL AND LEN(LTRIM(RTRIM(OS_Account))) > 0
+            ]]></Condition>
+            <ErrorMessage>Account is null or empty. Source: {SRC_Account}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V022" name="PeriodRequired" severity="Error">
+            <Description>Time period is required for all records</Description>
+            <Field>OS_Period</Field>
+            <Condition><![CDATA[
+              OS_Period IS NOT NULL AND LEN(LTRIM(RTRIM(OS_Period))) > 0
+            ]]></Condition>
+            <ErrorMessage>Period is null or empty. Source Year: {SRC_Year}, Source Period: {SRC_Period}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V023" name="ScenarioRequired" severity="Error">
+            <Description>Scenario must be populated</Description>
+            <Field>OS_Scenario</Field>
+            <Condition><![CDATA[
+              OS_Scenario IS NOT NULL AND OS_Scenario IN ('Actual','Budget','Forecast','Plan')
+            ]]></Condition>
+            <ErrorMessage>Scenario is null or not a valid value: {OS_Scenario}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V024" name="CurrencyRequired" severity="Error">
+            <Description>Currency code is required for financial records</Description>
+            <Field>OS_Currency</Field>
+            <Condition><![CDATA[
+              OS_Currency IS NOT NULL AND LEN(OS_Currency) = 3
+            ]]></Condition>
+            <ErrorMessage>Currency is null or not a valid 3-character ISO code: {OS_Currency}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+        </RuleGroup>
+
+        <!-- ====================== REFERENTIAL INTEGRITY ====================== -->
+        <RuleGroup name="ReferentialIntegrity" description="Validate dimension members exist in OneStream metadata">
+
+          <Rule id="V030" name="EntityExistsInMetadata" severity="Error">
+            <Description>Entity member must exist in the OneStream Entity dimension</Description>
+            <Field>OS_Entity</Field>
+            <Condition><![CDATA[
+              EXISTS (SELECT 1 FROM OS_DimensionMembers
+                      WHERE DimensionName = 'Entity'
+                        AND MemberName = OS_Entity
+                        AND IsActive = 1)
+            ]]></Condition>
+            <ErrorMessage>Entity '{OS_Entity}' does not exist in OneStream metadata. Source: {SRC_Entity}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V031" name="AccountExistsInMetadata" severity="Error">
+            <Description>Account member must exist in the OneStream Account dimension</Description>
+            <Field>OS_Account</Field>
+            <Condition><![CDATA[
+              OS_Account = 'UNMAPPED_ACCOUNT'
+              OR EXISTS (SELECT 1 FROM OS_DimensionMembers
+                         WHERE DimensionName = 'Account'
+                           AND MemberName = OS_Account
+                           AND IsActive = 1)
+            ]]></Condition>
+            <ErrorMessage>Account '{OS_Account}' does not exist in OneStream metadata. Source: {SRC_Account}</ErrorMessage>
+            <OnFailure>Reject</OnFailure>
+          </Rule>
+
+          <Rule id="V032" name="UD1ProductExistsInMetadata" severity="Warning">
+            <Description>UD1 Product member should exist (warn if not)</Description>
+            <Field>OS_UD1_Product</Field>
+            <Condition><![CDATA[
+              OS_UD1_Product IS NULL
+              OR OS_UD1_Product = 'Prod_Unassigned'
+              OR EXISTS (SELECT 1 FROM OS_DimensionMembers
+                         WHERE DimensionName = 'UD1'
+                           AND MemberName = OS_UD1_Product
+                           AND IsActive = 1)
+            ]]></Condition>
+            <ErrorMessage>UD1 Product '{OS_UD1_Product}' not found in metadata</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+          </Rule>
+
+          <Rule id="V033" name="UD2CostCenterExistsInMetadata" severity="Warning">
+            <Description>UD2 Cost Center member should exist (warn if not)</Description>
+            <Field>OS_UD2_CostCenter</Field>
+            <Condition><![CDATA[
+              OS_UD2_CostCenter IS NULL
+              OR OS_UD2_CostCenter = 'CC_Unassigned'
+              OR EXISTS (SELECT 1 FROM OS_DimensionMembers
+                         WHERE DimensionName = 'UD2'
+                           AND MemberName = OS_UD2_CostCenter
+                           AND IsActive = 1)
+            ]]></Condition>
+            <ErrorMessage>UD2 CostCenter '{OS_UD2_CostCenter}' not found in metadata</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+          </Rule>
+
+        </RuleGroup>
+
+        <!-- ====================== DUPLICATE DETECTION ====================== -->
+        <RuleGroup name="DuplicateDetection" description="Identify duplicate records that would cause double-counting">
+
+          <Rule id="V040" name="NoDuplicateRecords" severity="Error">
+            <Description>No duplicate records for the same Entity + Account + Period combination within a single load. Duplicates would cause double-counting in the cube.</Description>
+            <Type>Aggregate</Type>
+            <GroupBy>OS_Entity, OS_Account, OS_Period, OS_Scenario, OS_UD1_Product, OS_UD2_CostCenter</GroupBy>
+            <Condition><![CDATA[
+              COUNT(*) = 1
+            ]]></Condition>
+            <ErrorMessage>Duplicate record detected for {OS_Entity}/{OS_Account}/{OS_Period}. Count: {COUNT}. Records will be aggregated.</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+            <!-- When duplicates found, aggregate instead of reject -->
+            <ResolutionAction>Aggregate</ResolutionAction>
+            <AggregationMethod>Sum</AggregationMethod>
+          </Rule>
+
+        </RuleGroup>
+
+        <!-- ====================== BUSINESS RULE VALIDATIONS ====================== -->
+        <RuleGroup name="BusinessRules" description="Manufacturing-specific business validations">
+
+          <Rule id="V050" name="RevenueSignCheck" severity="Warning">
+            <Description>Revenue accounts should typically have positive amounts</Description>
+            <Condition><![CDATA[
+              NOT (OS_Account LIKE 'A_Rev_%' AND OS_Amount < -1000000)
+            ]]></Condition>
+            <ErrorMessage>Large negative revenue detected: {OS_Entity}/{OS_Account} = {OS_Amount}. Verify sign convention.</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+          </Rule>
+
+          <Rule id="V051" name="UnmappedAccountFlag" severity="Warning">
+            <Description>Flag records mapped to UNMAPPED_ACCOUNT for review</Description>
+            <Condition><![CDATA[
+              OS_Account <> 'UNMAPPED_ACCOUNT'
+            ]]></Condition>
+            <ErrorMessage>Record mapped to UNMAPPED_ACCOUNT. Source account: {SRC_Account} from {SRC_SourceSystem}</ErrorMessage>
+            <OnFailure>Warn</OnFailure>
+          </Rule>
+
+        </RuleGroup>
+
+      </ValidationRules>
+
+      <!-- ============================================================
+           REJECTION HANDLING
+           Records that fail Error-severity rules are moved to error table.
+           ============================================================ -->
+      <RejectionHandling>
+        <ErrorTable>DM_ValidationErrors</ErrorTable>
+        <ErrorTableColumns>
+          <Column name="ErrorID" expression="NEWID()" description="Unique error identifier" />
+          <Column name="LoadRunID" expression="@@LoadRunID" description="Load execution ID" />
+          <Column name="StageName" expression="@@StageName" description="Source stage name" />
+          <Column name="RuleID" expression="@@FailedRuleID" description="Validation rule that failed" />
+          <Column name="RuleName" expression="@@FailedRuleName" description="Rule name" />
+          <Column name="Severity" expression="@@RuleSeverity" description="Error/Warning" />
+          <Column name="ErrorMessage" expression="@@ErrorMessage" description="Formatted error message" />
+          <Column name="SRC_Entity" from="SRC_Entity" description="Source entity" />
+          <Column name="SRC_Account" from="SRC_Account" description="Source account" />
+          <Column name="OS_Entity" from="OS_Entity" description="Mapped entity" />
+          <Column name="OS_Account" from="OS_Account" description="Mapped account" />
+          <Column name="OS_Period" from="OS_Period" description="Target period" />
+          <Column name="OS_Amount" from="OS_Amount" description="Amount value" />
+          <Column name="FullRecord" expression="@@SerializedRecord" description="Full record as JSON for debugging" />
+          <Column name="ErrorDate" expression="GETDATE()" description="Error timestamp" />
+          <Column name="ReviewedFlag" expression="0" description="0=Unreviewed, 1=Reviewed" />
+          <Column name="ReviewedBy" expression="NULL" description="Reviewer username" />
+          <Column name="ReviewedDate" expression="NULL" description="Review date" />
+        </ErrorTableColumns>
+
+        <!-- Maximum allowed error percentage before aborting the load -->
+        <MaxErrorThreshold>
+          <Type>Percentage</Type>
+          <Value>5</Value>
+          <OnExceed>AbortLoad</OnExceed>
+          <Message>Validation error rate exceeds 5% threshold. Load aborted. Review errors in DM_ValidationErrors table.</Message>
+        </MaxErrorThreshold>
+
+        <!-- Notification on validation errors -->
+        <Notification>
+          <Enabled>true</Enabled>
+          <OnErrorCount>1</OnErrorCount>
+          <Recipients>dm_admin@company.com,data_stewards@company.com</Recipients>
+          <Subject>OneStream DM: Data Validation Errors Detected - {StageName}</Subject>
+          <IncludeErrorSummary>true</IncludeErrorSummary>
+          <MaxErrorsInEmail>50</MaxErrorsInEmail>
+        </Notification>
+      </RejectionHandling>
+
+      <!-- ============================================================
+           VALIDATION SUMMARY
+           Generate summary statistics after validation completes.
+           ============================================================ -->
+      <ValidationSummary>
+        <GenerateSummary>true</GenerateSummary>
+        <SummaryTable>DM_ValidationSummary</SummaryTable>
+        <SummaryMetrics>
+          <Metric name="TotalRecords" expression="COUNT(*)" />
+          <Metric name="PassedRecords" expression="COUNT(*) WHERE ValidationStatus = 'Passed'" />
+          <Metric name="RejectedRecords" expression="COUNT(*) WHERE ValidationStatus = 'Rejected'" />
+          <Metric name="WarningRecords" expression="COUNT(*) WHERE ValidationStatus = 'Warning'" />
+          <Metric name="ErrorRate" expression="CAST(RejectedRecords AS FLOAT) / NULLIF(TotalRecords, 0) * 100" />
+        </SummaryMetrics>
+      </ValidationSummary>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

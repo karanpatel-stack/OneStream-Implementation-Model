@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Workflow Definition
+  Workflow:    WF_MonthlyClose
+  Description: Monthly Financial Close workflow governing the end-to-end close
+               process from data load through certification and period lock.
+  Timeline:    Day 1 through Day 8 of each close period.
+  Owner:       Corporate Accounting / Office of the CFO
+-->
+<WorkflowDefinition
+  xmlns="http://www.intactsoft.com/OneStream/Workflows"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.intactsoft.com/OneStream/Workflows WorkflowSchema.xsd">
+
+  <!-- ================================================================== -->
+  <!-- WORKFLOW HEADER                                                    -->
+  <!-- ================================================================== -->
+  <Workflow
+    Name="WF_MonthlyClose"
+    DisplayName="Monthly Financial Close"
+    Description="End-to-end monthly financial close process encompassing data load, local GAAP adjustments, intercompany reconciliation, currency translation, consolidation, management review, and final certification with period lock."
+    WorkflowType="Close"
+    Frequency="Monthly"
+    IsActive="true"
+    Version="1.0"
+    CreatedBy="Admin"
+    CreatedDate="2026-01-15"
+    ModifiedBy="Admin"
+    ModifiedDate="2026-02-18">
+
+    <!-- ================================================================ -->
+    <!-- STATUS TRANSITIONS                                               -->
+    <!-- ================================================================ -->
+    <StatusTransitions>
+      <Status Name="NotStarted" DisplayName="Not Started" IsInitial="true" Color="#9E9E9E" />
+      <Status Name="InProgress" DisplayName="In Progress" Color="#2196F3" />
+      <Status Name="PendingApproval" DisplayName="Pending Approval" Color="#FF9800" />
+      <Status Name="Approved" DisplayName="Approved" Color="#4CAF50" />
+      <Status Name="Locked" DisplayName="Locked" IsFinal="true" Color="#7B1FA2" />
+
+      <Transition From="NotStarted" To="InProgress" TriggerType="Automatic" />
+      <Transition From="InProgress" To="PendingApproval" TriggerType="StepCompletion" />
+      <Transition From="PendingApproval" To="Approved" TriggerType="Approval" />
+      <Transition From="PendingApproval" To="InProgress" TriggerType="Rejection" />
+      <Transition From="Approved" To="Locked" TriggerType="Certification" />
+    </StatusTransitions>
+
+    <!-- ================================================================ -->
+    <!-- GLOBAL NOTIFICATIONS                                             -->
+    <!-- ================================================================ -->
+    <Notifications>
+      <Notification
+        EventType="WorkflowStarted"
+        Template="WF_MonthlyClose_Kickoff"
+        Recipients="AllParticipants"
+        Channel="Email" />
+      <Notification
+        EventType="StepTransition"
+        Template="WF_StepTransition_Generic"
+        Recipients="NextStepAssignee,PriorStepAssignee"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="WorkflowCompleted"
+        Template="WF_MonthlyClose_Complete"
+        Recipients="AllParticipants,ExecutiveTeam"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="StepOverdue"
+        Template="WF_StepOverdue_Escalation"
+        Recipients="StepAssignee,StepAssigneeManager"
+        Channel="Email" />
+    </Notifications>
+
+    <!-- ================================================================ -->
+    <!-- STEPS                                                            -->
+    <!-- ================================================================ -->
+    <Steps>
+
+      <!-- ============================================================== -->
+      <!-- STEP 1: Data Load                                              -->
+      <!-- ============================================================== -->
+      <Step
+        Order="1"
+        Name="DataLoad"
+        DisplayName="Data Load"
+        Description="Import ERP data via configured connectors, run data quality validation, and auto-assign results to the Data Steward role for review."
+        StepType="DataCollection"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>1</PlannedStartDay>
+          <PlannedEndDay>2</PlannedEndDay>
+          <DurationDays>2</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>DataSteward</Role>
+          <AssignmentType>AutoAssign</AssignmentType>
+          <EscalationHours>8</EscalationHours>
+          <EscalationTarget>AccountingManager</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CN_ERP_GL_Import"
+            RuleType="Connector"
+            ExecutionOrder="1"
+            Description="Execute ERP General Ledger data connector to import trial balance and transactional data."
+            IsRequired="true"
+            OnFailure="Halt" />
+          <Rule
+            Name="CN_ERP_SubLedger_Import"
+            RuleType="Connector"
+            ExecutionOrder="2"
+            Description="Execute ERP Sub-Ledger connectors for AP, AR, FA, and Inventory."
+            IsRequired="true"
+            OnFailure="Halt" />
+          <Rule
+            Name="EH_DataQualityValidation"
+            RuleType="EventHandler"
+            ExecutionOrder="3"
+            Description="Run data quality validation checks including balance validation, account mapping completeness, and data integrity rules."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="ValidationLevel" Value="Full" />
+              <Parameter Name="BalanceCheckTolerance" Value="0.01" />
+              <Parameter Name="FlagOrphanAccounts" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="DataLoadComplete"
+            Description="All connectors executed successfully and data validation passed with no critical errors."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>ConnectorStatus = 'Success' AND CriticalErrorCount = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>false</ApprovalRequired>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_DataLoad_Started"
+            Recipients="DataSteward"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="ValidationFailed"
+            Template="WF_DataLoad_ValidationErrors"
+            Recipients="DataSteward,PlantController"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_DataLoad_Complete"
+            Recipients="DataSteward,PlantController"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 2: Local GAAP Adjustments                                 -->
+      <!-- ============================================================== -->
+      <Step
+        Order="2"
+        Name="LocalGAAPAdjustments"
+        DisplayName="Local GAAP Adjustments"
+        Description="Enter manual journal entries and reclassifications required to adjust local entity trial balances to conform with local GAAP requirements."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>2</PlannedStartDay>
+          <PlannedEndDay>3</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>PlantController</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>16</EscalationHours>
+          <EscalationTarget>AccountingManager</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="FR_JournalEntries"
+            RuleType="FinanceRule"
+            ExecutionOrder="1"
+            Description="Open journal entry forms for manual adjustments, reclassifications, and accruals. Enforces debit/credit balance and required documentation."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="JournalType" Value="LocalGAAP" />
+              <Parameter Name="RequireDescription" Value="true" />
+              <Parameter Name="EnforceBalance" Value="true" />
+              <Parameter Name="MaxEntryAmount" Value="1000000" />
+              <Parameter Name="RequireAttachment" Value="false" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="JournalsBalanced"
+            Description="All journal entries must be balanced (debits equal credits) before step can be completed."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>UnbalancedJournalCount = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>AccountingManager</ApproverRole>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_LocalGAAP_Started"
+            Recipients="PlantController"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="SubmittedForApproval"
+            Template="WF_LocalGAAP_PendingApproval"
+            Recipients="AccountingManager"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_LocalGAAP_Complete"
+            Recipients="PlantController,ICAccountant"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>PendingApproval</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 3: Intercompany Reconciliation                            -->
+      <!-- ============================================================== -->
+      <Step
+        Order="3"
+        Name="IntercompanyReconciliation"
+        DisplayName="Intercompany Reconciliation"
+        Description="Execute intercompany matching checks to ensure all IC transactions are balanced within tolerance. Manage dispute resolution for out-of-balance items."
+        StepType="Reconciliation"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>3</PlannedStartDay>
+          <PlannedEndDay>4</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>ICAccountant</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>12</EscalationHours>
+          <EscalationTarget>ConsolidationManager</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EH_ICMatchingCheck"
+            RuleType="EventHandler"
+            ExecutionOrder="1"
+            Description="Run automated intercompany matching engine to identify matched, partially matched, and unmatched IC transactions across all entity pairs."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="MatchingTolerance" Value="100" />
+              <Parameter Name="ToleranceCurrency" Value="USD" />
+              <Parameter Name="MatchingMethod" Value="AmountAndAccount" />
+              <Parameter Name="AutoMatchThreshold" Value="0.00" />
+              <Parameter Name="GenerateDisputeQueue" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="ICBalancedWithinTolerance"
+            Description="Intercompany balances must be within the configured tolerance threshold for all entity pairs before consolidation can proceed."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>ICOutOfBalanceAmount &lt;= ToleranceThreshold AND OpenDisputeCount = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <DisputeResolution>
+          <EnableDisputeQueue>true</EnableDisputeQueue>
+          <DisputeAssignment>ICAccountant</DisputeAssignment>
+          <DisputeEscalationHours>8</DisputeEscalationHours>
+          <DisputeEscalationTarget>ConsolidationManager</DisputeEscalationTarget>
+        </DisputeResolution>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>ConsolidationManager</ApproverRole>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_ICRecon_Started"
+            Recipients="ICAccountant"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="DisputeCreated"
+            Template="WF_ICRecon_Dispute"
+            Recipients="ICAccountant,CounterpartyICAccountant"
+            Channel="Email" />
+          <Notification
+            EventType="GateFailed"
+            Template="WF_ICRecon_OutOfBalance"
+            Recipients="ICAccountant,ConsolidationManager"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_ICRecon_Complete"
+            Recipients="ICAccountant,CorporateAccounting"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>PendingApproval</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 4: Currency Translation                                   -->
+      <!-- ============================================================== -->
+      <Step
+        Order="4"
+        Name="CurrencyTranslation"
+        DisplayName="Currency Translation"
+        Description="Execute foreign currency translation for all reporting entities, review cumulative translation adjustments (CTA), and validate translated balances."
+        StepType="Calculation"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>4</PlannedStartDay>
+          <PlannedEndDay>5</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>CorporateAccounting</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>12</EscalationHours>
+          <EscalationTarget>ConsolidationManager</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="FR_CurrencyTranslation"
+            RuleType="FinanceRule"
+            ExecutionOrder="1"
+            Description="Execute foreign currency translation using period-end rates for balance sheet accounts and average rates for income statement accounts. Calculate CTA and post to equity."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="BalanceSheetRateType" Value="PeriodEnd" />
+              <Parameter Name="IncomeStatementRateType" Value="Average" />
+              <Parameter Name="CTAAccount" Value="3900_CTA" />
+              <Parameter Name="HistoricalRateAccounts" Value="Equity,FixedAssets" />
+              <Parameter Name="ReportingCurrency" Value="USD" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="TranslationBalanced"
+            Description="Translated trial balances must be in balance and CTA must be properly posted."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>TranslatedTrialBalanceVariance = 0 AND CTAPosted = true</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>ConsolidationManager</ApproverRole>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_FXTranslation_Started"
+            Recipients="CorporateAccounting"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_FXTranslation_Complete"
+            Recipients="CorporateAccounting,ConsolidationManager"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>PendingApproval</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 5: Consolidation                                          -->
+      <!-- ============================================================== -->
+      <Step
+        Order="5"
+        Name="Consolidation"
+        DisplayName="Consolidation"
+        Description="Run full consolidation including intercompany eliminations, minority interest calculations, and ownership-based proportional consolidation."
+        StepType="Calculation"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>5</PlannedStartDay>
+          <PlannedEndDay>6</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>ConsolidationManager</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>16</EscalationHours>
+          <EscalationTarget>Controller</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="FR_Consolidation"
+            RuleType="FinanceRule"
+            ExecutionOrder="1"
+            Description="Execute the main consolidation routine, aggregating entity-level data up through the ownership hierarchy to produce group-level financial statements."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="ConsolidationType" Value="Full" />
+              <Parameter Name="OwnershipMethod" Value="Proportional" />
+              <Parameter Name="ProcessingOrder" Value="BottomUp" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="FR_IntercompanyElimination"
+            RuleType="FinanceRule"
+            ExecutionOrder="2"
+            Description="Process intercompany elimination entries to remove IC revenue/expense, receivables/payables, dividends, and investments at each consolidation level."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="EliminationType" Value="Full" />
+              <Parameter Name="EliminateICRevenue" Value="true" />
+              <Parameter Name="EliminateICBalances" Value="true" />
+              <Parameter Name="EliminateICDividends" Value="true" />
+              <Parameter Name="EliminateICInvestments" Value="true" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="FR_MinorityInterest"
+            RuleType="FinanceRule"
+            ExecutionOrder="3"
+            Description="Calculate minority interest (non-controlling interest) for partially-owned subsidiaries based on ownership percentages."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="CalculationMethod" Value="OwnershipBased" />
+              <Parameter Name="NCIAccount" Value="3800_NCI" />
+              <Parameter Name="ApplyToIncomeStatement" Value="true" />
+              <Parameter Name="ApplyToBalanceSheet" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="ConsolidationBalanced"
+            Description="Consolidated trial balance must be in balance, all eliminations posted, and NCI properly calculated."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>ConsolidatedTrialBalanceVariance = 0 AND EliminationsComplete = true AND NCICalculated = true</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>Controller</ApproverRole>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_Consolidation_Started"
+            Recipients="ConsolidationManager"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="CalculationComplete"
+            Template="WF_Consolidation_CalcComplete"
+            Recipients="ConsolidationManager,Controller"
+            Channel="Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_Consolidation_Complete"
+            Recipients="ConsolidationManager,FPAManager"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>PendingApproval</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 6: Management Review                                      -->
+      <!-- ============================================================== -->
+      <Step
+        Order="6"
+        Name="ManagementReview"
+        DisplayName="Management Review"
+        Description="Perform variance analysis against prior period, budget, and forecast. Require management commentary for all significant variances exceeding 10% threshold."
+        StepType="Review"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>6</PlannedStartDay>
+          <PlannedEndDay>7</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>FPAManager</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>12</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_VarianceAnalysis"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Execute automated variance analysis comparing actuals to prior period, budget, and latest forecast. Flag variances exceeding materiality thresholds."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="CompareTo" Value="PriorPeriod,Budget,Forecast" />
+              <Parameter Name="VarianceThresholdPercent" Value="10" />
+              <Parameter Name="VarianceThresholdAmount" Value="50000" />
+              <Parameter Name="MaterialityBasis" Value="PercentOrAmount" />
+              <Parameter Name="RequireCommentary" Value="true" />
+              <Parameter Name="CommentaryMinLength" Value="50" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="CommentaryComplete"
+            Description="Management commentary must be provided for all line items with variances exceeding 10% threshold."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>FlaggedVariancesWithoutCommentary = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>MultiApprover</ApprovalType>
+          <ApproverRoles>
+            <ApproverRole>FPADirector</ApproverRole>
+            <ApproverRole>Controller</ApproverRole>
+          </ApproverRoles>
+          <ApprovalMode>All</ApprovalMode>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_MgmtReview_Started"
+            Recipients="FPAManager"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="CommentaryRequired"
+            Template="WF_MgmtReview_CommentaryNeeded"
+            Recipients="FPAManager,DepartmentHeads"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_MgmtReview_Complete"
+            Recipients="FPAManager,CFO,Controller"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>PendingApproval</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 7: Certification & Lock                                   -->
+      <!-- ============================================================== -->
+      <Step
+        Order="7"
+        Name="CertificationAndLock"
+        DisplayName="Certification &amp; Lock"
+        Description="Final executive sign-off by the CFO/Controller. Upon certification, the period is locked and an audit trail entry is generated to record the close event."
+        StepType="Certification"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>8</PlannedStartDay>
+          <PlannedEndDay>8</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>CFO</Role>
+          <SecondaryRole>Controller</SecondaryRole>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>24</EscalationHours>
+          <EscalationTarget>CEO</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EH_AuditTrailLogger"
+            RuleType="EventHandler"
+            ExecutionOrder="1"
+            Description="Generate a comprehensive audit trail entry recording the certification event, certifying user, timestamp, and all workflow step completion details."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="LogLevel" Value="Full" />
+              <Parameter Name="IncludeStepHistory" Value="true" />
+              <Parameter Name="IncludeApprovalChain" Value="true" />
+              <Parameter Name="RetentionYears" Value="7" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="AllPriorStepsApproved"
+            Description="All prior workflow steps must be in Approved status before certification can proceed."
+            GateType="WorkflowStatus"
+            IsBlocking="true">
+            <Condition>AllPriorStepsStatus = 'Approved'</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>Certification</ApprovalType>
+          <CertifierRole>CFO</CertifierRole>
+          <AlternateCertifierRole>Controller</AlternateCertifierRole>
+          <RequireDigitalSignature>true</RequireDigitalSignature>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <PeriodLock>
+          <LockOnCertification>true</LockOnCertification>
+          <LockScope>AllEntities</LockScope>
+          <PreventDataEntry>true</PreventDataEntry>
+          <PreventJournalEntry>true</PreventJournalEntry>
+          <PreventRecalculation>true</PreventRecalculation>
+        </PeriodLock>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_Certification_Ready"
+            Recipients="CFO,Controller"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="Certified"
+            Template="WF_MonthlyClose_Certified"
+            Recipients="AllParticipants,ExecutiveTeam,ExternalAuditors"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="PeriodLocked"
+            Template="WF_PeriodLocked"
+            Recipients="AllParticipants"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>PendingApproval</StatusOnEntry>
+        <StatusOnCompletion>Locked</StatusOnCompletion>
+      </Step>
+
+    </Steps>
+
+    <!-- ================================================================ -->
+    <!-- TIMELINE SUMMARY                                                 -->
+    <!-- ================================================================ -->
+    <TimelineSummary>
+      <TotalDuration>8</TotalDuration>
+      <DurationUnit>Days</DurationUnit>
+      <Milestones>
+        <Milestone Day="2" Name="DataLoadComplete" Description="All ERP data loaded and validated" />
+        <Milestone Day="3" Name="AdjustmentsComplete" Description="Local GAAP adjustments finalized" />
+        <Milestone Day="4" Name="ICReconciled" Description="Intercompany balances reconciled" />
+        <Milestone Day="5" Name="TranslationComplete" Description="Currency translation executed" />
+        <Milestone Day="6" Name="ConsolidationComplete" Description="Consolidation and eliminations finalized" />
+        <Milestone Day="7" Name="ReviewComplete" Description="Management review and commentary finalized" />
+        <Milestone Day="8" Name="PeriodCertified" Description="Period certified and locked" />
+      </Milestones>
+    </TimelineSummary>
+
+  </Workflow>
+</WorkflowDefinition>

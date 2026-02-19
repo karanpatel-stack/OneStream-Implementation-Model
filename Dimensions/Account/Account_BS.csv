@@ -1,0 +1,116 @@
+MemberName,ParentName,Description,AccountType
+TotalAssets,,Total Assets,Asset
+CurrentAssets,TotalAssets,Total Current Assets,Asset
+Cash,CurrentAssets,Cash and Cash Equivalents,Asset
+Cash_Unrestricted,Cash,Unrestricted Cash,Asset
+Cash_Restricted,Cash,Restricted Cash,Asset
+Cash_ShortTermInvest,Cash,Short-Term Investments,Asset
+AccountsReceivable,CurrentAssets,Accounts Receivable,Asset
+AR_Trade,AccountsReceivable,Trade Receivables,Asset
+AR_Intercompany,AccountsReceivable,Intercompany Receivables,Asset
+AR_Other,AccountsReceivable,Other Receivables,Asset
+AR_Allowance,AccountsReceivable,Allowance for Doubtful Accounts,Asset
+Inventory,CurrentAssets,Inventory,Asset
+INV_RawMaterials,Inventory,Raw Materials Inventory,Asset
+INV_WIP,Inventory,Work in Process Inventory,Asset
+INV_FinishedGoods,Inventory,Finished Goods Inventory,Asset
+INV_PackagingMaterials,Inventory,Packaging Materials Inventory,Asset
+INV_MRO,Inventory,MRO Supplies Inventory,Asset
+INV_InTransit,Inventory,Inventory in Transit,Asset
+INV_Reserve,Inventory,Inventory Obsolescence Reserve,Asset
+Inventory_Detail,CurrentAssets,Inventory Detail Breakdown,Asset
+INVD_RawMat_Steel,Inventory_Detail,Steel Raw Material Stock,Asset
+INVD_RawMat_Aluminum,Inventory_Detail,Aluminum Raw Material Stock,Asset
+INVD_RawMat_Polymers,Inventory_Detail,Polymer Raw Material Stock,Asset
+INVD_RawMat_Electronics,Inventory_Detail,Electronic Components Stock,Asset
+INVD_WIP_Machining,Inventory_Detail,WIP - Machining Stage,Asset
+INVD_WIP_Assembly,Inventory_Detail,WIP - Assembly Stage,Asset
+INVD_WIP_Finishing,Inventory_Detail,WIP - Finishing Stage,Asset
+INVD_FG_Industrial,Inventory_Detail,Finished Goods - Industrial,Asset
+INVD_FG_Consumer,Inventory_Detail,Finished Goods - Consumer,Asset
+INVD_FG_Specialty,Inventory_Detail,Finished Goods - Specialty,Asset
+INVD_Packaging_Primary,Inventory_Detail,Primary Packaging Stock,Asset
+INVD_Packaging_Shipping,Inventory_Detail,Shipping Materials Stock,Asset
+Prepaid,CurrentAssets,Prepaid Expenses,Asset
+Prepaid_Insurance,Prepaid,Prepaid Insurance,Asset
+Prepaid_Rent,Prepaid,Prepaid Rent,Asset
+Prepaid_Maintenance,Prepaid,Prepaid Maintenance Contracts,Asset
+Prepaid_Other,Prepaid,Other Prepaid Expenses,Asset
+FixedAssets,TotalAssets,Total Fixed Assets,Asset
+Land,FixedAssets,Land,Asset
+Land_Manufacturing,Land,Manufacturing Site Land,Asset
+Land_Office,Land,Office Site Land,Asset
+Buildings,FixedAssets,Buildings and Improvements,Asset
+BLDG_Factory,Buildings,Factory Buildings,Asset
+BLDG_Warehouse,Buildings,Warehouse Buildings,Asset
+BLDG_Office,Buildings,Office Buildings,Asset
+BLDG_Improvements,Buildings,Leasehold Improvements,Asset
+Machinery,FixedAssets,Machinery and Production Equipment,Asset
+MACH_CNC,Machinery,CNC Machining Centers,Asset
+MACH_Assembly,Machinery,Assembly Line Equipment,Asset
+MACH_Finishing,Machinery,Finishing and Coating Equipment,Asset
+MACH_Testing,Machinery,Testing and Inspection Equipment,Asset
+MACH_Robotic,Machinery,Robotic Systems,Asset
+Equipment,FixedAssets,Other Equipment,Asset
+EQUIP_IT,Equipment,IT Equipment and Servers,Asset
+EQUIP_Office,Equipment,Office Furniture and Equipment,Asset
+EQUIP_Vehicles,Equipment,Vehicles and Transportation,Asset
+EQUIP_ToolsDies,Equipment,Tools and Dies,Asset
+AccumDepr,FixedAssets,Accumulated Depreciation,Asset
+AD_Buildings,AccumDepr,Accum Depr - Buildings,Asset
+AD_Machinery,AccumDepr,Accum Depr - Machinery,Asset
+AD_Equipment,AccumDepr,Accum Depr - Equipment,Asset
+AD_Vehicles,AccumDepr,Accum Depr - Vehicles,Asset
+Intangibles,FixedAssets,Intangible Assets,Asset
+INTANG_Patents,Intangibles,Patents,Asset
+INTANG_Trademarks,Intangibles,Trademarks,Asset
+INTANG_Software,Intangibles,Capitalized Software,Asset
+INTANG_CustomerLists,Intangibles,Customer Lists,Asset
+INTANG_AccumAmort,Intangibles,Accumulated Amortization - Intangibles,Asset
+Goodwill,FixedAssets,Goodwill,Asset
+ROU_Assets,FixedAssets,Right-of-Use Assets,Asset
+TotalLiabilities,,Total Liabilities,Liability
+CurrentLiabilities,TotalLiabilities,Total Current Liabilities,Liability
+AccountsPayable,CurrentLiabilities,Accounts Payable,Liability
+AP_Trade,AccountsPayable,Trade Payables,Liability
+AP_Intercompany,AccountsPayable,Intercompany Payables,Liability
+AP_Other,AccountsPayable,Other Payables,Liability
+AccruedExpenses,CurrentLiabilities,Accrued Expenses,Liability
+ACCR_Payroll,AccruedExpenses,Accrued Payroll,Liability
+ACCR_Benefits,AccruedExpenses,Accrued Benefits,Liability
+ACCR_Taxes,AccruedExpenses,Accrued Taxes,Liability
+ACCR_Interest,AccruedExpenses,Accrued Interest,Liability
+ACCR_Warranty,AccruedExpenses,Warranty Reserve,Liability
+ACCR_LegalContingency,AccruedExpenses,Legal Contingency Reserve,Liability
+ACCR_Utilities,AccruedExpenses,Accrued Utilities,Liability
+ACCR_Other,AccruedExpenses,Other Accrued Liabilities,Liability
+ShortTermDebt,CurrentLiabilities,Short-Term Debt,Liability
+STD_LineOfCredit,ShortTermDebt,Line of Credit,Liability
+STD_CommercialPaper,ShortTermDebt,Commercial Paper,Liability
+CurrentPortionLTD,CurrentLiabilities,Current Portion of Long-Term Debt,Liability
+DeferredRevenue,CurrentLiabilities,Deferred Revenue,Liability
+CurrentLeaseLiability,CurrentLiabilities,Current Lease Liability,Liability
+LongTermLiabilities,TotalLiabilities,Total Long-Term Liabilities,Liability
+LTDebt,LongTermLiabilities,Long-Term Debt,Liability
+LTD_SeniorNotes,LTDebt,Senior Notes,Liability
+LTD_TermLoan,LTDebt,Term Loan Facility,Liability
+LTD_Bonds,LTDebt,Corporate Bonds,Liability
+DeferredTaxLiab,LongTermLiabilities,Deferred Tax Liability,Liability
+PensionObligation,LongTermLiabilities,Pension and Post-Retirement Obligation,Liability
+OtherLTLiabilities,LongTermLiabilities,Other Long-Term Liabilities,Liability
+OLTL_EnvironmentalReserve,OtherLTLiabilities,Environmental Reserve,Liability
+OLTL_AssetRetirement,OtherLTLiabilities,Asset Retirement Obligations,Liability
+OLTL_DeferredComp,OtherLTLiabilities,Deferred Compensation,Liability
+LTLeaseLiability,LongTermLiabilities,Long-Term Lease Liability,Liability
+TotalEquity,,Total Stockholders Equity,Equity
+CommonStock,TotalEquity,Common Stock,Equity
+APIC,TotalEquity,Additional Paid-In Capital,Equity
+RetainedEarnings,TotalEquity,Retained Earnings,Equity
+RE_PriorYears,RetainedEarnings,Prior Year Retained Earnings,Equity
+RE_CurrentYear,RetainedEarnings,Current Year Net Income,Equity
+OCI,TotalEquity,Accumulated Other Comprehensive Income,Equity
+OCI_ForeignCurrency,OCI,Foreign Currency Translation Adjustment,Equity
+OCI_Pension,OCI,Pension Adjustment,Equity
+OCI_Hedging,OCI,Cash Flow Hedge Adjustment,Equity
+TreasuryStock,TotalEquity,Treasury Stock,Equity
+MinorityInterest,TotalEquity,Minority Interest / Non-Controlling Interest,Equity

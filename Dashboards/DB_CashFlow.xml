@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_CashFlow"
+  Description="Cash Flow Analysis Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget,S#PriorYear" DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                           DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants"       DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#CashFlow.Descendants"        DefaultMember="A#CashFlow" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"              DefaultMember="F#YTD" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_CashFlow"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="MainCube"
+      SuppressNoData="True"
+      SuppressZeros="True">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="5000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Cash Flow Analysis"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="ScenarioFilter"
+          FilterType="DropDown"
+          Dimension="Scenario"
+          MemberFilter="S#Actual,S#Budget,S#PriorYear"
+          DefaultMember="S#Actual"
+          Label="Scenario" Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#Americas,E#EMEA,E#APAC"
+          DefaultMember="E#TopEntity"
+          Label="Entity" Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="FlowToggle"
+          FilterType="ButtonGroup"
+          Dimension="Flow"
+          MemberFilter="F#Periodic,F#YTD"
+          DefaultMember="F#YTD"
+          Label="Flow"
+          ButtonActiveColor="#3498DB" ButtonInactiveColor="#243B67"
+          ButtonForeColor="#FFFFFF" ButtonBorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: CASH FLOW WATERFALL -->
+    <Row Index="1" Height="380" HeightUnit="Pixel">
+      <Panel Row="1" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Cash Flow Waterfall" TitleFontSize="14" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CashFlowWaterfallChart"
+          ChartType="Waterfall"
+          DataAdapter="DDA_CashFlow"
+          AnimationEnabled="True" AnimationDuration="900"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0.0,,M"
+          BarWidth="0.50">
+
+          <XAxis
+            LabelFontSize="10" LabelForeColor="#D0D8E8"
+            LabelRotation="-35"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Amount ($M)"
+            TitleFontSize="11" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,,M"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <WaterfallCategories>
+            <Category Name="Opening Cash"
+                      Expression="A#CashOpening:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Total" Color="#3498DB" />
+            <Category Name="Net Income"
+                      Expression="A#NetIncome:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Increase" Color="#2ECC71" />
+            <Category Name="D&amp;A"
+                      Expression="A#DepAmort:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Increase" Color="#2ECC71" />
+            <Category Name="Working Capital"
+                      Expression="A#WorkingCapitalChange:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#2ECC71" UnfavorableColor="#E74C3C" />
+            <Category Name="Other Operating"
+                      Expression="A#OtherOperatingCF:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#2ECC71" UnfavorableColor="#E74C3C" />
+            <Category Name="Operating CF"
+                      Expression="A#OperatingCashFlow:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Subtotal" Color="#1ABC9C" />
+            <Category Name="CAPEX"
+                      Expression="A#CAPEX:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease" Color="#E74C3C" />
+            <Category Name="Acquisitions"
+                      Expression="A#Acquisitions:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease" Color="#E74C3C" />
+            <Category Name="Other Investing"
+                      Expression="A#OtherInvestingCF:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#2ECC71" UnfavorableColor="#E74C3C" />
+            <Category Name="Debt Proceeds/Repay"
+                      Expression="A#DebtNetChange:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#2ECC71" UnfavorableColor="#E74C3C" />
+            <Category Name="Dividends"
+                      Expression="A#DividendsPaid:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Decrease" Color="#9B59B6" />
+            <Category Name="Equity Issuance"
+                      Expression="A#EquityIssuance:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Variance" FavorableColor="#2ECC71" UnfavorableColor="#E74C3C" />
+            <Category Name="Closing Cash"
+                      Expression="A#CashClosing:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}:F#{POV.Flow}"
+                      CategoryType="Total" Color="#E67E22" />
+          </WaterfallCategories>
+
+          <ConnectorLine Color="#8CA8CC" LineWidth="1" LineStyle="Dotted" />
+          <DataLabels Enabled="True" FontSize="9" ForeColor="#D0D8E8" Format="#,##0.0,,M" Position="Outside" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: CASH CONVERSION CYCLE + FCF TREND -->
+    <Row Index="2" Height="280" HeightUnit="Pixel">
+
+      <!-- Cash Conversion Cycle -->
+      <Panel Row="2" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Cash Conversion Cycle" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CashConversionCycleChart"
+          ChartType="HorizontalStackedBar"
+          DataAdapter="DDA_CashFlow"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0 days"
+          BarWidth="0.4">
+
+          <XAxis
+            Title="Days"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="Custom"
+            Labels="CCC"
+            LabelFontSize="11" LabelForeColor="#D0D8E8" />
+
+          <Series Name="DIO (Days Inventory Outstanding)"
+                  Expression="A#DIO:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}"
+                  Color="#3498DB" StackGroup="CCC" />
+          <Series Name="DSO (Days Sales Outstanding)"
+                  Expression="A#DSO:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}"
+                  Color="#E67E22" StackGroup="CCC" />
+          <Series Name="DPO (Days Payable Outstanding)"
+                  Expression="A#DPO:S#{POV.Scenario}:T#{POV.Time}:E#{POV.Entity}"
+                  Color="#27AE60" StackGroup="CCC_Offset" />
+
+          <AnnotationLabel
+            Text="CCC = DIO + DSO - DPO"
+            FontSize="10" ForeColor="#8CA8CC"
+            Position="BottomRight" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Free Cash Flow Trend -->
+      <Panel Row="2" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Free Cash Flow Trend" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="FCFTrendChart"
+          ChartType="ComboChart"
+          DataAdapter="DDA_CashFlow"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis Position="Left"
+            Title="Amount ($M)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0,,M"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Operating CF"
+                  SeriesType="Bar"
+                  Expression="A#OperatingCashFlow:S#{POV.Scenario}:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB60" BarWidth="0.7" />
+          <Series Name="CAPEX"
+                  SeriesType="Bar"
+                  Expression="A#CAPEX:S#{POV.Scenario}:E#{POV.Entity}:F#Periodic"
+                  Color="#E74C3C60" BarWidth="0.7" />
+          <Series Name="Free Cash Flow"
+                  SeriesType="Line"
+                  Expression="A#FreeCashFlow:S#{POV.Scenario}:E#{POV.Entity}:F#Periodic"
+                  Color="#2ECC71" LineWidth="3"
+                  MarkerType="Circle" MarkerSize="6" MarkerFillColor="#2ECC71" />
+
+          <ReferenceLine Name="Zero" Value="0"
+                         Color="#8CA8CC" LineWidth="1" LineStyle="Solid" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: CASH POSITION BY ENTITY -->
+    <Row Index="3" Height="250" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Cash Position by Entity" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="CashByEntityGrid"
+          DataAdapter="DDA_CashFlow"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="30"
+          EnableSorting="True"
+          FreezeColumns="1"
+          ShowTotalRow="True"
+          TotalRowBackgroundColor="#243B67" TotalRowFontWeight="Bold">
+
+          <RowDimension Dimension="Entity" MemberFilter="E#TopEntity.Children" ShowHierarchy="False" />
+
+          <Columns>
+            <Column Header="Entity"           Binding="Entity.Description"                     Width="160" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Opening Cash"     Binding="A#CashOpening:F#{POV.Flow}"             Width="120" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="Operating CF"     Binding="A#OperatingCashFlow:F#{POV.Flow}"       Width="120" Alignment="Right" Format="#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Investing CF"     Binding="A#InvestingCashFlow:F#{POV.Flow}"       Width="120" Alignment="Right" Format="#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Financing CF"     Binding="A#FinancingCashFlow:F#{POV.Flow}"       Width="120" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="FX Impact"        Binding="A#FXImpactCash:F#{POV.Flow}"            Width="100" Alignment="Right" Format="#,##0.0,,M" />
+            <Column Header="Closing Cash"     Binding="A#CashClosing:F#{POV.Flow}"             Width="120" Alignment="Right" Format="#,##0.0,,M" FontWeight="Bold" />
+            <Column Header="FCF"              Binding="A#FreeCashFlow:F#{POV.Flow}"            Width="110" Alignment="Right" Format="#,##0.0,,M">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 0" ForeColor="#27AE60" />
+                <Rule Condition="Value &lt; 0"  ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Operating"  Value="#3498DB" />
+      <Color Name="Investing"  Value="#E74C3C" />
+      <Color Name="Financing"  Value="#9B59B6" />
+      <Color Name="FCF"        Value="#2ECC71" />
+      <Color Name="Opening"    Value="#3498DB" />
+      <Color Name="Closing"    Value="#E67E22" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

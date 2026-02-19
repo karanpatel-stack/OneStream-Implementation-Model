@@ -1,0 +1,23 @@
+MemberName,ParentName,Description
+Total_Channels,,Total Sales Channels
+No_Channel,Total_Channels,No Channel Specified
+Direct,Total_Channels,Direct Sales Channel
+Direct_FieldSales,Direct,Direct Field Sales Team
+Direct_InsideSales,Direct,Direct Inside Sales Team
+Direct_NationalAccounts,Direct,National Account Direct Sales
+Direct_GovernmentSales,Direct,Government Direct Sales
+Distributor,Total_Channels,Distributor Channel
+Dist_Authorized,Distributor,Authorized Distributors
+Dist_Industrial,Distributor,Industrial Supply Distributors
+Dist_Regional,Distributor,Regional Distributor Network
+Dist_Specialty,Distributor,Specialty Distributors
+Dist_International,Distributor,International Distributor Network
+OEM_Channel,Total_Channels,OEM Sales Channel
+OEM_Tier1,OEM_Channel,Tier 1 OEM Partners
+OEM_Tier2,OEM_Channel,Tier 2 OEM Partners
+OEM_ContractMfg,OEM_Channel,Contract Manufacturing
+E_Commerce,Total_Channels,E-Commerce Channel
+EC_DirectWebsite,E_Commerce,Company Direct Website
+EC_Marketplace,E_Commerce,Third-Party Marketplace (Amazon Business etc)
+EC_B2BPortal,E_Commerce,B2B Customer Portal
+EC_ConfigureToOrder,E_Commerce,Configure-to-Order Platform

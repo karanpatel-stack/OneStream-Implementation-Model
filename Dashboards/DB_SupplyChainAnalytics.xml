@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_SupplyChainAnalytics"
+  Description="Supply Chain Analytics Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget"       DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                     DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants" DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#*"                     DefaultMember="A#SupplyChain" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic,F#YTD"        DefaultMember="F#Periodic" />
+    <POVBinding Dimension="UD1"       MemberFilter="UD1#ProductLines.Base"   DefaultMember="UD1#AllProducts" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS (Uses existing adapters - no dedicated DDA) -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_KPICockpit"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="OperationsCube"
+      SuppressNoData="True"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+
+    <DataAdapter
+      Name="DDA_PlantPerformance"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="OperationsCube"
+      SuppressNoData="True"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Supply Chain Analytics"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+        <LabelComponent
+          Name="Subtitle"
+          Text="Inventory, Fulfillment &amp; Cash Conversion"
+          FontFamily="Segoe UI" FontSize="12" ForeColor="#A0B4D0" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#Plants.Base"
+          DefaultMember="E#TopEntity"
+          Label="Entity / Plant" Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="ProductFilter"
+          FilterType="DropDown"
+          Dimension="UD1"
+          MemberFilter="UD1#AllProducts,UD1#ProductLines.Base"
+          DefaultMember="UD1#AllProducts"
+          Label="Product Line" Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="PeriodFilter"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period" Width="140"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: INVENTORY LEVELS + INVENTORY TURNS -->
+    <Row Index="1" Height="320" HeightUnit="Pixel">
+
+      <!-- Inventory Levels by Category - Stacked Bar -->
+      <Panel Row="1" Column="0" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Inventory Levels by Category" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="InventoryLevelsChart"
+          ChartType="StackedBar"
+          DataAdapter="DDA_KPICockpit"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0,K"
+          BarWidth="0.55">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Inventory Value ($K)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Raw Materials"
+                  Expression="A#InvRawMaterials:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#3498DB" StackGroup="Inventory" />
+          <Series Name="Work in Progress"
+                  Expression="A#InvWIP:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#E67E22" StackGroup="Inventory" />
+          <Series Name="Finished Goods"
+                  Expression="A#InvFinishedGoods:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#2ECC71" StackGroup="Inventory" />
+
+          <ReferenceLine Name="Target Level"
+                         ValueExpression="A#InvTargetLevel:S#Budget:E#{POV.Entity}:T#{POV.Time}:F#Periodic"
+                         Color="#E74C3C" LineWidth="2" LineStyle="Dashed"
+                         Label="Target" LabelFontSize="9" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Inventory Turns Trend -->
+      <Panel Row="1" Column="6" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Inventory Turns Trend" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="InvTurnsTrendChart"
+          ChartType="ComboChart"
+          DataAdapter="DDA_KPICockpit"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis Position="Left"
+            Title="Inventory Turns"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="0.0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis Position="Right"
+            Title="Inventory Value ($K)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0" />
+
+          <Series Name="Inventory Turns"
+                  SeriesType="Line"
+                  YAxisPosition="Left"
+                  Expression="A#InventoryTurns:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#3498DB" LineWidth="3"
+                  MarkerType="Circle" MarkerSize="6" />
+          <Series Name="Target Turns"
+                  SeriesType="Line"
+                  YAxisPosition="Left"
+                  Expression="A#InventoryTurns:S#Budget:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#E74C3C" LineWidth="2" LineStyle="Dashed" />
+          <Series Name="Total Inventory"
+                  SeriesType="Area"
+                  YAxisPosition="Right"
+                  Expression="A#TotalInventory:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#2ECC7130" BorderColor="#2ECC71" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: SUPPLIER LEAD TIME + ORDER FULFILLMENT -->
+    <Row Index="2" Height="280" HeightUnit="Pixel">
+
+      <!-- Supplier Lead Time Analysis -->
+      <Panel Row="2" Column="0" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Supplier Lead Time Analysis" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="SupplierLeadTimeChart"
+          ChartType="HorizontalBar"
+          DataAdapter="DDA_PlantPerformance"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0 days"
+          BarWidth="0.5">
+
+          <XAxis
+            Title="Lead Time (Days)"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="UD2"
+            MemberFilter="UD2#Suppliers.TopN10"
+            LabelFontSize="10" LabelForeColor="#D0D8E8" />
+
+          <Series Name="Actual Lead Time"
+                  Expression="A#SupplierLeadTime:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB" />
+          <Series Name="Contracted Lead Time"
+                  Expression="A#SupplierLeadTime:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                  Color="#E67E2260" />
+
+          <ReferenceLine Name="Target"
+                         ValueExpression="A#AvgLeadTimeTarget:E#{POV.Entity}"
+                         Color="#27AE60" LineWidth="2" LineStyle="Dashed"
+                         Label="Avg Target" LabelFontSize="9" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Order Fulfillment Rate -->
+      <Panel Row="2" Column="6" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Order Fulfillment Rate" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="FulfillmentRateChart"
+          ChartType="ComboChart"
+          DataAdapter="DDA_KPICockpit"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis Position="Left"
+            Title="Fulfillment Rate %"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="0%"
+            MinValue="0.85" MaxValue="1.0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis Position="Right"
+            Title="Orders"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0" />
+
+          <Series Name="Fulfillment Rate"
+                  SeriesType="Line"
+                  YAxisPosition="Left"
+                  Expression="A#OrderFulfillmentRate:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#2ECC71" LineWidth="3"
+                  MarkerType="Circle" MarkerSize="6" />
+          <Series Name="Total Orders"
+                  SeriesType="Bar"
+                  YAxisPosition="Right"
+                  Expression="A#TotalOrders:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#3498DB40" BarWidth="0.5" />
+          <Series Name="Fulfilled Orders"
+                  SeriesType="Bar"
+                  YAxisPosition="Right"
+                  Expression="A#FulfilledOrders:S#Actual:E#{POV.Entity}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#3498DB" BarWidth="0.5" />
+
+          <ReferenceLine Name="SLA Target" Value="0.97" YAxisPosition="Left"
+                         Color="#E74C3C" LineWidth="2" LineStyle="Dashed"
+                         Label="SLA 97%" LabelFontSize="9" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: CASH CONVERSION CYCLE VISUAL + KPI TILES -->
+    <Row Index="3" Height="240" HeightUnit="Pixel">
+
+      <!-- DIO/DSO/DPO Cash Conversion Cycle Visual -->
+      <Panel Row="3" Column="0" ColumnSpan="8" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Cash Conversion Cycle (DIO + DSO - DPO)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CCCVisualization"
+          ChartType="HorizontalStackedBar"
+          DataAdapter="DDA_KPICockpit"
+          AnimationEnabled="True" AnimationDuration="800"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0 days"
+          BarWidth="0.35">
+
+          <XAxis
+            Title="Days"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingSixMonths"
+            LabelFontSize="10" LabelForeColor="#D0D8E8" />
+
+          <Series Name="DIO"
+                  Expression="A#DIO:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#3498DB" StackGroup="CCC"
+                  Label="Days Inventory Outstanding" />
+          <Series Name="DSO"
+                  Expression="A#DSO:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#E67E22" StackGroup="CCC"
+                  Label="Days Sales Outstanding" />
+          <Series Name="DPO (Offset)"
+                  Expression="A#DPO:S#Actual:E#{POV.Entity}:F#Periodic"
+                  Color="#27AE60" StackGroup="CCC_Offset"
+                  Label="Days Payable Outstanding"
+                  IsNegativeOffset="True" />
+
+          <DataLabels Enabled="True" FontSize="9" ForeColor="#FFFFFF" Position="Inside" />
+
+          <AnnotationLine
+            Text="CCC"
+            Expression="A#CashConversionCycle:S#Actual:E#{POV.Entity}:T#{POV.Time}:F#Periodic"
+            FontSize="12" FontWeight="Bold" ForeColor="#FFFFFF"
+            Position="Right" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Supply Chain KPI Tiles -->
+      <Panel Row="3" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="KPIPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Key Metrics" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <KPIListComponent
+          Name="SupplyChainKPIs"
+          DataAdapter="DDA_KPICockpit"
+          Orientation="Vertical"
+          ItemSpacing="12"
+          ItemPadding="8">
+
+          <KPIItem
+            Name="DIO_KPI"
+            Title="DIO"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            ValueFontSize="20" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="#,##0"
+            ValueSuffix=" days"
+            Expression="A#DIO:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            DataAdapter="DDA_KPICockpit">
+            <Threshold Low="30" Mid="45" High="60"
+                       LowColor="#27AE60" MidColor="#F39C12" HighColor="#E74C3C" />
+          </KPIItem>
+
+          <KPIItem
+            Name="DSO_KPI"
+            Title="DSO"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            ValueFontSize="20" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="#,##0"
+            ValueSuffix=" days"
+            Expression="A#DSO:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            DataAdapter="DDA_KPICockpit">
+            <Threshold Low="25" Mid="35" High="50"
+                       LowColor="#27AE60" MidColor="#F39C12" HighColor="#E74C3C" />
+          </KPIItem>
+
+          <KPIItem
+            Name="DPO_KPI"
+            Title="DPO"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            ValueFontSize="20" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="#,##0"
+            ValueSuffix=" days"
+            Expression="A#DPO:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            DataAdapter="DDA_KPICockpit">
+            <Threshold Low="30" Mid="45" High="60"
+                       LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" />
+          </KPIItem>
+
+          <KPIItem
+            Name="CCC_KPI"
+            Title="CCC"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            ValueFontSize="22" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+            ValueFormat="#,##0"
+            ValueSuffix=" days"
+            Expression="A#CashConversionCycle:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            DataAdapter="DDA_KPICockpit">
+            <Threshold Low="30" Mid="50" High="70"
+                       LowColor="#27AE60" MidColor="#F39C12" HighColor="#E74C3C" />
+            <Divider Position="Top" Color="#2D4470" Height="1" Margin="8" />
+          </KPIItem>
+        </KPIListComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="RawMaterials"  Value="#3498DB" />
+      <Color Name="WIP"           Value="#E67E22" />
+      <Color Name="FinishedGoods" Value="#2ECC71" />
+      <Color Name="DIO"           Value="#3498DB" />
+      <Color Name="DSO"           Value="#E67E22" />
+      <Color Name="DPO"           Value="#27AE60" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

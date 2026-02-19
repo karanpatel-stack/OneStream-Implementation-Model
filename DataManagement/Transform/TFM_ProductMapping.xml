@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Product Mapping
+  Purpose: Map source system material groups and product codes to OneStream UD1 Product hierarchy
+  Created: 2026-02-18
+
+  Maps SAP Material Groups and product identifiers to the OneStream UD1 (Product)
+  dimension for manufacturing product line reporting and analysis.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>ProductMapping</TransformName>
+      <TransformDescription>Maps SAP Material Groups (MATKL), Oracle Product segments, and NetSuite Class IDs to the OneStream UD1 Product dimension hierarchy. The product hierarchy supports manufacturing product line analysis with levels for Division, Product Family, and Product Line. Used for revenue analysis, COGS allocation, and manufacturing KPI reporting by product.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Lookup</TransformType>
+      <ExecutionOrder>300</ExecutionOrder>
+
+      <!-- ============================================================
+           MAPPING CONFIGURATION
+           ============================================================ -->
+      <MappingConfig>
+        <SourceField>SRC_Product</SourceField>
+        <TargetField>OS_UD1_Product</TargetField>
+        <ContextField>SRC_SourceSystem</ContextField>
+        <CaseSensitive>false</CaseSensitive>
+        <TrimWhitespace>true</TrimWhitespace>
+      </MappingConfig>
+
+      <!-- ============================================================
+           MAPPING TABLE
+           ============================================================ -->
+      <MappingTable>
+
+        <!-- ====================== SAP MATERIAL GROUPS ====================== -->
+        <MappingGroup name="SAP_MaterialGroups" description="SAP Material Group (MATKL) to OneStream Product">
+
+          <!-- Industrial Equipment Division -->
+          <Mapping sourceSystem="SAP" sourceProduct="MG_IE_01"  targetProduct="Prod_IE_Turbines"          description="Industrial Equipment: Gas Turbines" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_IE_02"  targetProduct="Prod_IE_Compressors"       description="Industrial Equipment: Compressors" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_IE_03"  targetProduct="Prod_IE_Pumps"             description="Industrial Equipment: Industrial Pumps" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_IE_04"  targetProduct="Prod_IE_Generators"        description="Industrial Equipment: Power Generators" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_IE_05"  targetProduct="Prod_IE_HeatExchangers"    description="Industrial Equipment: Heat Exchangers" />
+
+          <!-- Precision Components Division -->
+          <Mapping sourceSystem="SAP" sourceProduct="MG_PC_01"  targetProduct="Prod_PC_Bearings"          description="Precision Components: Bearings" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_PC_02"  targetProduct="Prod_PC_Gears"             description="Precision Components: Gears & Gearboxes" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_PC_03"  targetProduct="Prod_PC_Seals"             description="Precision Components: Mechanical Seals" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_PC_04"  targetProduct="Prod_PC_Valves"            description="Precision Components: Control Valves" />
+
+          <!-- Aftermarket / Services -->
+          <Mapping sourceSystem="SAP" sourceProduct="MG_AM_01"  targetProduct="Prod_AM_SpareParts"        description="Aftermarket: Spare Parts" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_AM_02"  targetProduct="Prod_AM_ServiceContracts"  description="Aftermarket: Service Contracts" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_AM_03"  targetProduct="Prod_AM_FieldService"      description="Aftermarket: Field Service" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_AM_04"  targetProduct="Prod_AM_Refurbishment"     description="Aftermarket: Refurbishment & Overhaul" />
+
+          <!-- Automation Systems Division -->
+          <Mapping sourceSystem="SAP" sourceProduct="MG_AS_01"  targetProduct="Prod_AS_PLCSystems"        description="Automation: PLC Control Systems" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_AS_02"  targetProduct="Prod_AS_Robotics"          description="Automation: Robotics & Actuators" />
+          <Mapping sourceSystem="SAP" sourceProduct="MG_AS_03"  targetProduct="Prod_AS_Sensors"           description="Automation: Sensors & Instrumentation" />
+
+        </MappingGroup>
+
+        <!-- ====================== ORACLE EBS PRODUCT SEGMENT ====================== -->
+        <MappingGroup name="Oracle_Products" description="Oracle EBS Segment4 Product to OneStream UD1">
+          <Mapping sourceSystem="Oracle" sourceProduct="IE01"    targetProduct="Prod_IE_Turbines"          description="Oracle: Turbines" />
+          <Mapping sourceSystem="Oracle" sourceProduct="IE02"    targetProduct="Prod_IE_Compressors"       description="Oracle: Compressors" />
+          <Mapping sourceSystem="Oracle" sourceProduct="IE03"    targetProduct="Prod_IE_Pumps"             description="Oracle: Pumps" />
+          <Mapping sourceSystem="Oracle" sourceProduct="PC01"    targetProduct="Prod_PC_Bearings"          description="Oracle: Bearings" />
+          <Mapping sourceSystem="Oracle" sourceProduct="PC02"    targetProduct="Prod_PC_Gears"             description="Oracle: Gears" />
+          <Mapping sourceSystem="Oracle" sourceProduct="AM01"    targetProduct="Prod_AM_SpareParts"        description="Oracle: Spare Parts" />
+          <Mapping sourceSystem="Oracle" sourceProduct="AM02"    targetProduct="Prod_AM_ServiceContracts"  description="Oracle: Service" />
+        </MappingGroup>
+
+        <!-- ====================== NETSUITE CLASS ====================== -->
+        <MappingGroup name="NetSuite_Classes" description="NetSuite Class ID to OneStream UD1 Product">
+          <Mapping sourceSystem="NetSuite" sourceProduct="100"   targetProduct="Prod_IE_Turbines"          description="NS: Turbines" />
+          <Mapping sourceSystem="NetSuite" sourceProduct="200"   targetProduct="Prod_PC_Bearings"          description="NS: Bearings" />
+          <Mapping sourceSystem="NetSuite" sourceProduct="300"   targetProduct="Prod_AM_SpareParts"        description="NS: Spare Parts" />
+          <Mapping sourceSystem="NetSuite" sourceProduct="400"   targetProduct="Prod_AS_Sensors"           description="NS: Sensors" />
+        </MappingGroup>
+
+        <!-- ====================== NON-PRODUCT MAPPINGS ====================== -->
+        <MappingGroup name="NonProduct" description="Non-product-specific entries">
+          <Mapping sourceSystem="*" sourceProduct="CORP"         targetProduct="Prod_Corporate"            description="Corporate/Unallocated" />
+          <Mapping sourceSystem="*" sourceProduct="SHARED"       targetProduct="Prod_SharedServices"       description="Shared Services" />
+          <Mapping sourceSystem="*" sourceProduct="ELIM"         targetProduct="Prod_Elimination"          description="IC Elimination" />
+          <Mapping sourceSystem="*" sourceProduct=""             targetProduct="Prod_Unassigned"           description="No product assigned (blank)" />
+        </MappingGroup>
+
+      </MappingTable>
+
+      <!-- ============================================================
+           UNMAPPED HANDLING
+           ============================================================ -->
+      <UnmappedHandling>
+        <DefaultProduct>Prod_Unassigned</DefaultProduct>
+        <OnUnmapped>
+          <Action>MapToDefault</Action>
+          <FlagForReview>true</FlagForReview>
+          <ReviewFlagColumn>OS_MappingFlag</ReviewFlagColumn>
+          <ReviewFlagValue>UNMAPPED_PRODUCT</ReviewFlagValue>
+          <LogToTable>DM_UnmappedProducts</LogToTable>
+        </OnUnmapped>
+      </UnmappedHandling>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

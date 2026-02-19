@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_DataEntry_Revenue - Revenue Input Form
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_DataEntry_Revenue"
+           Description="Revenue data entry form for domestic, export, and intercompany revenue streams"
+           CubeName="Finance"
+           ViewType="DataEntry"
+           IsEnabled="true"
+           AllowDataInput="true"
+           SuppressNoData="false"
+           SuppressZeros="false"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: Account Dimension - Revenue Hierarchy               -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- Gross Revenue Components (Input) -->
+        <Member Name="REV_Domestic"
+                DisplayName="Domestic Revenue"
+                IsInput="true"
+                IsExpanded="false"
+                IndentLevel="1" />
+        <Member Name="REV_Export"
+                DisplayName="Export Revenue"
+                IsInput="true"
+                IsExpanded="false"
+                IndentLevel="1" />
+        <Member Name="REV_Intercompany"
+                DisplayName="Intercompany Revenue"
+                IsInput="true"
+                IsExpanded="false"
+                IndentLevel="1" />
+
+        <!-- Deductions (Input) -->
+        <Member Name="REV_Discounts"
+                DisplayName="Sales Discounts"
+                IsInput="true"
+                IsExpanded="false"
+                IndentLevel="1" />
+        <Member Name="REV_Returns"
+                DisplayName="Sales Returns &amp; Allowances"
+                IsInput="true"
+                IsExpanded="false"
+                IndentLevel="1" />
+        <Member Name="REV_Rebates"
+                DisplayName="Customer Rebates"
+                IsInput="true"
+                IsExpanded="false"
+                IndentLevel="1" />
+
+        <!-- Calculated Total (Read-Only) -->
+        <Member Name="NetRevenue"
+                DisplayName="Net Revenue"
+                IsInput="false"
+                IsExpanded="false"
+                IndentLevel="0"
+                IsBold="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Time Dimension - Monthly, Quarterly, Annual      -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <Dimension Name="Time" AliasTable="Default">
+      <MemberSelections>
+        <!-- Monthly Periods -->
+        <Member Name="M1" DisplayName="Jan" IsInput="true" />
+        <Member Name="M2" DisplayName="Feb" IsInput="true" />
+        <Member Name="M3" DisplayName="Mar" IsInput="true" />
+        <Member Name="Q1" DisplayName="Q1" IsInput="false" IsBold="true" />
+
+        <Member Name="M4" DisplayName="Apr" IsInput="true" />
+        <Member Name="M5" DisplayName="May" IsInput="true" />
+        <Member Name="M6" DisplayName="Jun" IsInput="true" />
+        <Member Name="Q2" DisplayName="Q2" IsInput="false" IsBold="true" />
+
+        <Member Name="M7" DisplayName="Jul" IsInput="true" />
+        <Member Name="M8" DisplayName="Aug" IsInput="true" />
+        <Member Name="M9" DisplayName="Sep" IsInput="true" />
+        <Member Name="Q3" DisplayName="Q3" IsInput="false" IsBold="true" />
+
+        <Member Name="M10" DisplayName="Oct" IsInput="true" />
+        <Member Name="M11" DisplayName="Nov" IsInput="true" />
+        <Member Name="M12" DisplayName="Dec" IsInput="true" />
+        <Member Name="Q4" DisplayName="Q4" IsInput="false" IsBold="true" />
+
+        <Member Name="YearTotal" DisplayName="Full Year" IsInput="false" IsBold="true" />
+      </MemberSelections>
+    </Dimension>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="E_NA_Plant01">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Scenario" IsSelectable="true" DefaultMember="Budget">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="Budget" />
+          <Member Name="Forecast" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="UD1_Product" IsSelectable="true" DefaultMember="AllProducts">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllProducts" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="UD6_Channel" IsSelectable="true" DefaultMember="AllChannels">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="AllChannels" />
+          <Member Name="CH_Direct" DisplayName="Direct Sales" />
+          <Member Name="CH_Distributor" DisplayName="Distributor" />
+          <Member Name="CH_OEM" DisplayName="OEM" />
+          <Member Name="CH_Ecommerce" DisplayName="E-Commerce" />
+          <Member Name="CH_Government" DisplayName="Government / Contract" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <!-- Fixed POV members -->
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Local" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+    <Dimension Name="View" IsSelectable="false" DefaultMember="Periodic" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <!-- Input cells: light yellow background -->
+    <ConditionalFormat Name="InputCells">
+      <Condition>
+        <CellProperty Property="IsInput" Value="true" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#FFF9E6</BackgroundColor>
+        <BorderColor>#D4C577</BorderColor>
+        <BorderStyle>Thin</BorderStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Calculated / read-only cells: light gray background -->
+    <ConditionalFormat Name="CalculatedCells">
+      <Condition>
+        <CellProperty Property="IsInput" Value="false" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#F0F0F0</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Net Revenue row: bold with top border -->
+    <ConditionalFormat Name="NetRevenueRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="NetRevenue" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#E8F4E8</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <BorderTopColor>#333333</BorderTopColor>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Quarter columns: light blue background -->
+    <ConditionalFormat Name="QuarterColumns">
+      <Condition>
+        <ColumnMember Dimension="Time" Members="Q1,Q2,Q3,Q4" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#E6F0FA</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Year Total column -->
+    <ConditionalFormat Name="YearTotalColumn">
+      <Condition>
+        <ColumnMember Dimension="Time" Members="YearTotal" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#D6E8D6</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+        <BorderLeftStyle>Double</BorderLeftStyle>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION                                               -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <ProtectedIntersections>
+      <!-- All quarterly and annual totals are protected -->
+      <Intersection ColumnMembers="Q1,Q2,Q3,Q4,YearTotal" IsProtected="true" />
+      <!-- NetRevenue row is always protected -->
+      <Intersection RowMembers="NetRevenue" IsProtected="true" />
+    </ProtectedIntersections>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- DATA ENTRY OPTIONS                                            -->
+  <!-- ============================================================ -->
+  <DataEntryOptions>
+    <AllowSpreadEntry>true</AllowSpreadEntry>
+    <SpreadMethod>Proportional</SpreadMethod>
+    <AllowAnnotations>true</AllowAnnotations>
+    <RequireAnnotationOnChange>false</RequireAnnotationOnChange>
+    <ValidationRule>
+      <MinValue>-999999999</MinValue>
+      <MaxValue>999999999</MaxValue>
+      <AllowNegative>true</AllowNegative>
+    </ValidationRule>
+    <SubmitAction>SaveAndCalc</SubmitAction>
+    <AutoCalcOnSave>true</AutoCalcOnSave>
+  </DataEntryOptions>
+
+</CubeView>

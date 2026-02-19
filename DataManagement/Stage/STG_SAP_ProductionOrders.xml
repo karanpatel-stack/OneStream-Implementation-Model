@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: SAP Production Orders
+  Purpose: Extract production order data from SAP PP module for manufacturing cost analysis
+  Source Connection: CONN_SAP_HANA
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>SAP_ProductionOrders</StageName>
+      <StageDescription>Extracts production order headers and items from SAP S/4HANA Production Planning (PP) module. Joins AFKO (production order header) with AFPO (production order items) to retrieve planned vs actual quantities, costs, and status for manufacturing variance analysis and production reporting in OneStream.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>DatabaseQuery</StageType>
+      <SourceConnection>CONN_SAP_HANA</SourceConnection>
+      <TargetStagingTable>STG_SAP_ProductionOrders</TargetStagingTable>
+
+      <!-- ============================================================
+           SOURCE QUERY
+           Joins AFKO (order header) with AFPO (order items) and
+           AUFK (order master) for complete production order data.
+           ============================================================ -->
+      <SourceQuery>
+        <SQL><![CDATA[
+          /*
+            SAP Production Order Extraction
+            Source: AFKO (Production Order Header), AFPO (Order Items), AUFK (Order Master)
+            Purpose: Planned vs. Actual production quantities and costs for variance analysis
+          */
+          SELECT
+            h.AUFNR                           AS OrderNumber,
+            m.AUART                           AS OrderType,
+            h.PLNBEZ                          AS Material,
+            p.MATNR                           AS ItemMaterial,
+            h.DESSION                         AS BOMNumber,
+            h.PLNNR                           AS RoutingNumber,
+            m.WERKS                           AS Plant,
+            h.GAMNG                           AS PlannedQty,
+            h.GASMG                           AS ConfirmedScrapQty,
+            h.IGMNG                           AS ActualQty,
+            h.GSTRI                           AS PlannedStartDate,
+            h.GETRI                           AS PlannedEndDate,
+            h.GSTRS                           AS ScheduledStartDate,
+            h.GLTRS                           AS ScheduledEndDate,
+            h.GSTRP                           AS ActualStartDate,
+            h.GLTRP                           AS ActualEndDate,
+            m.OBJNR                           AS ObjectNumber,
+            CASE
+              WHEN m.STAT36 = 'I0045' THEN 'TECO'
+              WHEN m.STAT36 = 'I0046' THEN 'CLSD'
+              WHEN m.STAT36 = 'I0002' THEN 'REL'
+              WHEN m.STAT36 = 'I0001' THEN 'CRTD'
+              ELSE m.STAT36
+            END                               AS OrderStatus,
+            p.PSMNG                           AS PlannedOrderItemQty,
+            p.WEMNG                           AS GoodsReceiptQty,
+            m.KTEXT                           AS OrderDescription,
+            /* Cost data from order settlement */
+            (SELECT SUM(k.WTG001) FROM COEP k
+             WHERE k.OBJNR = m.OBJNR
+               AND k.GJAHR = :FiscalYear
+               AND k.VERSN = '000')           AS PlannedCost,
+            (SELECT SUM(k.WTG001) FROM COEP k
+             WHERE k.OBJNR = m.OBJNR
+               AND k.GJAHR = :FiscalYear
+               AND k.VERSN = '000'
+               AND k.VRGNG IN ('COIN','RKL','RKLN'))  AS ActualCost,
+            m.WAERS                           AS Currency,
+            h.ERDAT                           AS CreationDate,
+            h.AEDAT                           AS LastChangeDate
+          FROM AFKO h
+          INNER JOIN AUFK m ON h.AUFNR = m.AUFNR AND m.MANDT = '100'
+          LEFT JOIN AFPO p ON h.AUFNR = p.AUFNR AND p.MANDT = '100'
+          WHERE h.MANDT = '100'
+            AND m.AUART IN ('PP01','PP02','PP03','PP04')    /* Production order types */
+            AND m.WERKS IN ('1000','1100','2000','2100','3000','4000')  /* Manufacturing plants */
+            AND h.GSTRI >= ADD_DAYS(CURRENT_DATE, -365)     /* Orders from last 12 months */
+            AND (
+              :FiscalYear IS NULL
+              OR YEAR(h.GSTRI) = CAST(:FiscalYear AS INTEGER)
+              OR YEAR(h.GSTRP) = CAST(:FiscalYear AS INTEGER)
+            )
+          ORDER BY
+            m.WERKS, h.AUFNR
+        ]]></SQL>
+
+        <Parameters>
+          <Parameter name="FiscalYear" dataType="String" defaultValue="2026" description="Fiscal year for cost data retrieval" />
+        </Parameters>
+      </SourceQuery>
+
+      <!-- ============================================================
+           COLUMN MAPPINGS
+           ============================================================ -->
+      <ColumnMappings>
+        <Column ordinal="1"  sourceName="OrderNumber"         stagingColumn="SRC_OrderNumber"       dataType="String"   maxLength="12"  nullable="false" description="Production Order Number (AUFNR)" />
+        <Column ordinal="2"  sourceName="OrderType"           stagingColumn="SRC_OrderType"         dataType="String"   maxLength="4"   nullable="false" description="Order Type (AUART)" />
+        <Column ordinal="3"  sourceName="Material"            stagingColumn="SRC_Material"          dataType="String"   maxLength="18"  nullable="false" description="Header Material (PLNBEZ)" />
+        <Column ordinal="4"  sourceName="ItemMaterial"        stagingColumn="SRC_ItemMaterial"      dataType="String"   maxLength="18"  nullable="true"  description="Order Item Material (MATNR)" />
+        <Column ordinal="5"  sourceName="BOMNumber"           stagingColumn="SRC_BOM"               dataType="String"   maxLength="8"   nullable="true"  description="Bill of Materials Number" />
+        <Column ordinal="6"  sourceName="RoutingNumber"       stagingColumn="SRC_Routing"           dataType="String"   maxLength="8"   nullable="true"  description="Routing Number" />
+        <Column ordinal="7"  sourceName="Plant"               stagingColumn="SRC_Plant"             dataType="String"   maxLength="4"   nullable="false" description="Manufacturing Plant (WERKS)" />
+        <Column ordinal="8"  sourceName="PlannedQty"          stagingColumn="SRC_PlannedQty"        dataType="Decimal"  precision="13" scale="3" nullable="false" description="Total Planned Quantity" />
+        <Column ordinal="9"  sourceName="ConfirmedScrapQty"   stagingColumn="SRC_ScrapQty"          dataType="Decimal"  precision="13" scale="3" nullable="true"  description="Confirmed Scrap Quantity" />
+        <Column ordinal="10" sourceName="ActualQty"           stagingColumn="SRC_ActualQty"         dataType="Decimal"  precision="13" scale="3" nullable="true"  description="Actual Delivered Quantity" />
+        <Column ordinal="11" sourceName="PlannedStartDate"    stagingColumn="SRC_PlannedStartDate"  dataType="Date"     nullable="true"  description="Planned Start Date (Basic)" />
+        <Column ordinal="12" sourceName="PlannedEndDate"      stagingColumn="SRC_PlannedEndDate"    dataType="Date"     nullable="true"  description="Planned End Date (Basic)" />
+        <Column ordinal="13" sourceName="ScheduledStartDate"  stagingColumn="SRC_SchedStartDate"    dataType="Date"     nullable="true"  description="Scheduled Start Date" />
+        <Column ordinal="14" sourceName="ScheduledEndDate"    stagingColumn="SRC_SchedEndDate"      dataType="Date"     nullable="true"  description="Scheduled End Date" />
+        <Column ordinal="15" sourceName="ActualStartDate"     stagingColumn="SRC_ActualStartDate"   dataType="Date"     nullable="true"  description="Actual Start Date" />
+        <Column ordinal="16" sourceName="ActualEndDate"       stagingColumn="SRC_ActualEndDate"     dataType="Date"     nullable="true"  description="Actual End Date" />
+        <Column ordinal="17" sourceName="ObjectNumber"        stagingColumn="SRC_ObjectNumber"      dataType="String"   maxLength="22"  nullable="true"  description="SAP Object Number for cost assignment" />
+        <Column ordinal="18" sourceName="OrderStatus"         stagingColumn="SRC_OrderStatus"       dataType="String"   maxLength="10"  nullable="false" description="Order Status (TECO/CLSD/REL/CRTD)" />
+        <Column ordinal="19" sourceName="PlannedOrderItemQty" stagingColumn="SRC_PlannedItemQty"    dataType="Decimal"  precision="13" scale="3" nullable="true" description="Planned Item Quantity" />
+        <Column ordinal="20" sourceName="GoodsReceiptQty"     stagingColumn="SRC_GRQty"             dataType="Decimal"  precision="13" scale="3" nullable="true" description="Goods Receipt Quantity" />
+        <Column ordinal="21" sourceName="OrderDescription"    stagingColumn="SRC_Description"       dataType="String"   maxLength="40"  nullable="true"  description="Order Short Text" />
+        <Column ordinal="22" sourceName="PlannedCost"         stagingColumn="SRC_PlannedCost"       dataType="Decimal"  precision="23" scale="2" nullable="true" description="Planned/Standard Cost" />
+        <Column ordinal="23" sourceName="ActualCost"          stagingColumn="SRC_ActualCost"        dataType="Decimal"  precision="23" scale="2" nullable="true" description="Actual Cost (Confirmations + Allocations)" />
+        <Column ordinal="24" sourceName="Currency"            stagingColumn="SRC_Currency"          dataType="String"   maxLength="5"   nullable="false" description="Order Currency" />
+        <Column ordinal="25" sourceName="CreationDate"        stagingColumn="SRC_CreationDate"      dataType="Date"     nullable="true"  description="Order Creation Date" />
+        <Column ordinal="26" sourceName="LastChangeDate"      stagingColumn="SRC_LastChangeDate"    dataType="Date"     nullable="true"  description="Last Change Date" />
+      </ColumnMappings>
+
+      <!-- ============================================================
+           FILTERS
+           ============================================================ -->
+      <Filters>
+        <Filter name="PlantFilter" description="Filter by manufacturing plant for phased extraction">
+          <Type>ValueList</Type>
+          <AllowedValues>1000,1100,2000,2100,3000,4000</AllowedValues>
+        </Filter>
+        <Filter name="OrderStatusFilter" description="Include only relevant order statuses">
+          <Type>ValueList</Type>
+          <AllowedValues>REL,TECO,CLSD</AllowedValues>
+        </Filter>
+        <Filter name="DateRangeFilter" description="Rolling 12-month window for production orders">
+          <Type>DateRange</Type>
+          <LookbackDays>365</LookbackDays>
+        </Filter>
+      </Filters>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <Action name="ClearStagingTable" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_SAP_ProductionOrders</SQL>
+        </Action>
+        <Action name="LogStart" order="2">
+          <Type>Log</Type>
+          <Message>Starting SAP Production Orders extraction for FiscalYear={FiscalYear}</Message>
+          <LogLevel>Info</LogLevel>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status) SELECT 'SAP_ProductionOrders', GETDATE(), COUNT(*), 'Staged' FROM STG_SAP_ProductionOrders</SQL>
+        </Action>
+        <Action name="CalculateVariances" order="2">
+          <Type>SQL</Type>
+          <SQL><![CDATA[
+            /* Calculate production variances in staging for downstream analysis */
+            UPDATE STG_SAP_ProductionOrders
+            SET SRC_QtyVariance = SRC_ActualQty - SRC_PlannedQty,
+                SRC_CostVariance = SRC_ActualCost - SRC_PlannedCost
+            WHERE SRC_ActualQty IS NOT NULL AND SRC_PlannedQty IS NOT NULL
+          ]]></SQL>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>5000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelExecution>false</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

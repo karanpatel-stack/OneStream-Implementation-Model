@@ -1,0 +1,6 @@
+MemberName,Description,IsLocked
+Working,Working Version - Active data entry and modifications,false
+Submitted,Submitted Version - Pending review and approval,true
+Approved,Approved Version - Management approved data,true
+Published,Published Version - Official reporting version,true
+Archived,Archived Version - Historical reference only,true

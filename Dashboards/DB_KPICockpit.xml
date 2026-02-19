@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_KPICockpit"
+  Description="Operational KPI Cockpit Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual,S#Budget"       DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                     DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants" DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#KPIAccounts.Descendants" DefaultMember="A#KPIAccounts" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#Periodic"              DefaultMember="F#Periodic" />
+    <POVBinding Dimension="UD1"       MemberFilter="UD1#ProductLines.Base"   DefaultMember="UD1#AllProducts" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_KPICockpit"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="OperationsCube"
+      SuppressNoData="True"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeCalculatedMembers" Value="True" />
+        <Parameter Name="IncludeTargets"           Value="True" />
+        <Parameter Name="MaxRows"                  Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="KPI Cockpit"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+        <LabelComponent
+          Name="Subtitle"
+          Text="Operational Performance Metrics"
+          FontFamily="Segoe UI" FontSize="12" ForeColor="#A0B4D0" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#Plants.Base"
+          DefaultMember="E#TopEntity"
+          Label="Plant / Entity" Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="ProductFilter"
+          FilterType="DropDown"
+          Dimension="UD1"
+          MemberFilter="UD1#AllProducts,UD1#ProductLines.Base"
+          DefaultMember="UD1#AllProducts"
+          Label="Product" Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="PeriodFilter"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period" Width="140"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: GAUGE CHARTS -->
+    <Row Index="1" Height="260" HeightUnit="Pixel">
+
+      <!-- OEE Gauge -->
+      <Panel Row="1" Column="0" ColumnSpan="3" RowSpan="1"
+             PanelType="GaugePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="OEE" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GaugeComponent
+          Name="OEEGauge"
+          GaugeType="Radial"
+          DataAdapter="DDA_KPICockpit"
+          ValueExpression="A#OEE:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+          MinValue="0" MaxValue="100"
+          StartAngle="180" EndAngle="0"
+          ValueFontSize="32" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.0"
+          ValueSuffix="%"
+          NeedleColor="#FFFFFF" NeedleWidth="3"
+          CenterCircleRadius="6" CenterCircleColor="#FFFFFF">
+
+          <GaugeRanges>
+            <Range Start="0"  End="65"  Color="#E74C3C" />
+            <Range Start="65" End="80"  Color="#F39C12" />
+            <Range Start="80" End="90"  Color="#3498DB" />
+            <Range Start="90" End="100" Color="#27AE60" />
+          </GaugeRanges>
+
+          <TargetMarker
+            ValueExpression="A#OEE:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            MarkerColor="#FFFFFF" MarkerWidth="3" MarkerLength="20"
+            Label="Target" LabelFontSize="9" LabelForeColor="#8CA8CC" />
+        </GaugeComponent>
+      </Panel>
+
+      <!-- Yield Gauge -->
+      <Panel Row="1" Column="3" ColumnSpan="3" RowSpan="1"
+             PanelType="GaugePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Yield" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GaugeComponent
+          Name="YieldGauge"
+          GaugeType="Radial"
+          DataAdapter="DDA_KPICockpit"
+          ValueExpression="A#Yield:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+          MinValue="80" MaxValue="100"
+          StartAngle="180" EndAngle="0"
+          ValueFontSize="32" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.0"
+          ValueSuffix="%"
+          NeedleColor="#FFFFFF" NeedleWidth="3"
+          CenterCircleRadius="6" CenterCircleColor="#FFFFFF">
+
+          <GaugeRanges>
+            <Range Start="80" End="90"  Color="#E74C3C" />
+            <Range Start="90" End="95"  Color="#F39C12" />
+            <Range Start="95" End="98"  Color="#3498DB" />
+            <Range Start="98" End="100" Color="#27AE60" />
+          </GaugeRanges>
+
+          <TargetMarker
+            ValueExpression="A#Yield:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            MarkerColor="#FFFFFF" MarkerWidth="3" />
+        </GaugeComponent>
+      </Panel>
+
+      <!-- On-Time Delivery Gauge -->
+      <Panel Row="1" Column="6" ColumnSpan="3" RowSpan="1"
+             PanelType="GaugePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="On-Time Delivery" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GaugeComponent
+          Name="OTDGauge"
+          GaugeType="Radial"
+          DataAdapter="DDA_KPICockpit"
+          ValueExpression="A#OnTimeDelivery:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+          MinValue="70" MaxValue="100"
+          StartAngle="180" EndAngle="0"
+          ValueFontSize="32" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.0"
+          ValueSuffix="%"
+          NeedleColor="#FFFFFF" NeedleWidth="3"
+          CenterCircleRadius="6" CenterCircleColor="#FFFFFF">
+
+          <GaugeRanges>
+            <Range Start="70" End="85"  Color="#E74C3C" />
+            <Range Start="85" End="92"  Color="#F39C12" />
+            <Range Start="92" End="97"  Color="#3498DB" />
+            <Range Start="97" End="100" Color="#27AE60" />
+          </GaugeRanges>
+
+          <TargetMarker
+            ValueExpression="A#OnTimeDelivery:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            MarkerColor="#FFFFFF" MarkerWidth="3" />
+        </GaugeComponent>
+      </Panel>
+
+      <!-- Customer Satisfaction Gauge -->
+      <Panel Row="1" Column="9" ColumnSpan="3" RowSpan="1"
+             PanelType="GaugePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Customer Satisfaction" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GaugeComponent
+          Name="CSATGauge"
+          GaugeType="Radial"
+          DataAdapter="DDA_KPICockpit"
+          ValueExpression="A#CustomerSatisfaction:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+          MinValue="0" MaxValue="10"
+          StartAngle="180" EndAngle="0"
+          ValueFontSize="32" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0.0"
+          ValueSuffix="/10"
+          NeedleColor="#FFFFFF" NeedleWidth="3"
+          CenterCircleRadius="6" CenterCircleColor="#FFFFFF">
+
+          <GaugeRanges>
+            <Range Start="0" End="6"  Color="#E74C3C" />
+            <Range Start="6" End="7.5" Color="#F39C12" />
+            <Range Start="7.5" End="8.5" Color="#3498DB" />
+            <Range Start="8.5" End="10"  Color="#27AE60" />
+          </GaugeRanges>
+
+          <TargetMarker
+            ValueExpression="A#CustomerSatisfaction:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+            MarkerColor="#FFFFFF" MarkerWidth="3" />
+        </GaugeComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: SPARKLINES + TRAFFIC LIGHTS -->
+    <Row Index="2" Height="240" HeightUnit="Pixel">
+      <Panel Row="2" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="KPI Summary: Target vs Actual with Trends" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="KPISummaryGrid"
+          DataAdapter="DDA_KPICockpit"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="8"
+          RowHeight="42"
+          EnableSorting="False">
+
+          <StaticRows>
+            <Row KPI="OEE"                    Account="A#OEE"                  Format="0.0%"   FavorableDir="Up" />
+            <Row KPI="Yield"                  Account="A#Yield"                Format="0.0%"   FavorableDir="Up" />
+            <Row KPI="On-Time Delivery"       Account="A#OnTimeDelivery"       Format="0.0%"   FavorableDir="Up" />
+            <Row KPI="Customer Satisfaction"   Account="A#CustomerSatisfaction" Format="0.0"    FavorableDir="Up" />
+            <Row KPI="Scrap Rate"             Account="A#ScrapRate"            Format="0.00%"  FavorableDir="Down" />
+            <Row KPI="Throughput"             Account="A#Throughput"            Format="#,##0"  FavorableDir="Up" />
+            <Row KPI="Capacity Utilization"   Account="A#CapacityUtilization"  Format="0.0%"   FavorableDir="Up" />
+            <Row KPI="Cost per Unit"          Account="A#CostPerUnit"          Format="$#,##0.00" FavorableDir="Down" />
+          </StaticRows>
+
+          <Columns>
+            <Column Header="KPI"            Binding="KPI.Name"              Width="180" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Actual"         Binding="KPI.ActualValue"       Width="100" Alignment="Right" />
+            <Column Header="Target"         Binding="KPI.TargetValue"       Width="100" Alignment="Right" ForeColor="#A0B4D0" />
+            <Column Header="Var"            Binding="KPI.Variance"          Width="90"  Alignment="Right">
+              <ConditionalFormat>
+                <Rule Condition="IsFavorable == True"  ForeColor="#27AE60" />
+                <Rule Condition="IsFavorable == False" ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Status"         Binding="KPI.TrafficLight"      Width="70"  Alignment="Center">
+              <TrafficLightCell
+                GreenCondition="ActualMeetsTarget"
+                YellowCondition="ActualWithin5PctOfTarget"
+                RedCondition="ActualMissesTarget"
+                CircleSize="16" />
+            </Column>
+            <Column Header="Trend (12M)"    Binding="KPI.SparklineTrend"    Width="160" Alignment="Center">
+              <SparklineCell
+                TimeRange="T#RollingTwelveMonths"
+                LineWidth="2"
+                LineColorExpression="IsFavorable ? '#27AE60' : '#E74C3C'"
+                Height="28"
+                ShowLastPoint="True" />
+            </Column>
+            <Column Header="vs PY"          Binding="KPI.VsPriorYear"       Width="90"  Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="IsFavorable == True"  ForeColor="#27AE60" />
+                <Rule Condition="IsFavorable == False" ForeColor="#E74C3C" />
+              </ConditionalFormat>
+            </Column>
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: DRILL-DOWN BY PLANT/PRODUCT -->
+    <Row Index="3" Height="280" HeightUnit="Pixel">
+
+      <!-- KPIs by Plant -->
+      <Panel Row="3" Column="0" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="OEE by Plant" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="OEEByPlantChart"
+          ChartType="Bar"
+          DataAdapter="DDA_KPICockpit"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="0.0%"
+          BarWidth="0.6">
+
+          <XAxis
+            DimensionBinding="Entity"
+            MemberFilter="E#Plants.Base"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelRotation="-30"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="OEE %"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="0%"
+            MinValue="0" MaxValue="1.0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Actual"
+                  Expression="A#OEE:S#Actual:T#{POV.Time}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#3498DB" />
+          <Series Name="Target"
+                  Expression="A#OEE:S#Budget:T#{POV.Time}:UD1#{POV.UD1}:F#Periodic"
+                  Color="#E67E2260" />
+
+          <ReferenceLine Name="Company Target" Value="0.85"
+                         Color="#27AE60" LineWidth="2" LineStyle="Dashed"
+                         Label="Target 85%" LabelFontSize="9" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- KPIs by Product -->
+      <Panel Row="3" Column="6" ColumnSpan="6" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Yield by Product Line" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="YieldByProductChart"
+          ChartType="Bar"
+          DataAdapter="DDA_KPICockpit"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="0.0%"
+          BarWidth="0.6">
+
+          <XAxis
+            DimensionBinding="UD1"
+            MemberFilter="UD1#ProductLines.Base"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelRotation="-30"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Yield %"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="0%"
+            MinValue="0.85" MaxValue="1.0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Actual"
+                  Expression="A#Yield:S#Actual:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                  Color="#2ECC71" />
+          <Series Name="Target"
+                  Expression="A#Yield:S#Budget:T#{POV.Time}:E#{POV.Entity}:F#Periodic"
+                  Color="#9B59B660" />
+
+          <ReferenceLine Name="Min Acceptable" Value="0.95"
+                         Color="#E74C3C" LineWidth="1" LineStyle="Dashed"
+                         Label="Min 95%" LabelFontSize="9" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- DRILL-THROUGH -->
+  <DrillThroughDefinitions>
+    <DrillThrough
+      Name="DrillToPlantPerformance"
+      TargetDashboard="DB_PlantPerformance"
+      TriggerType="DoubleClick"
+      SourceComponent="OEEByPlantChart"
+      PassPOV="True">
+      <ParameterMappings>
+        <Mapping Source="SelectedBar.Entity" Target="POV.Entity" />
+        <Mapping Source="POV.Time"           Target="POV.Time" />
+      </ParameterMappings>
+    </DrillThrough>
+
+    <DrillThrough
+      Name="DrillToProductionVariance"
+      TargetDashboard="DB_ProductionVariance"
+      TriggerType="DoubleClick"
+      SourceComponent="YieldByProductChart"
+      PassPOV="True">
+      <ParameterMappings>
+        <Mapping Source="SelectedBar.UD1"  Target="POV.UD1" />
+        <Mapping Source="POV.Entity"       Target="POV.Entity" />
+        <Mapping Source="POV.Time"         Target="POV.Time" />
+      </ParameterMappings>
+    </DrillThrough>
+  </DrillThroughDefinitions>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Green"    Value="#27AE60" />
+      <Color Name="Yellow"   Value="#F39C12" />
+      <Color Name="Red"      Value="#E74C3C" />
+      <Color Name="Blue"     Value="#3498DB" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

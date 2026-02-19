@@ -1,0 +1,42 @@
+EmployeeID,EmployeeName,Entity,Department,Position,FTE,HireDate,BaseSalary,BonusTarget,Currency,Status
+EMP-US01-001,James Mitchell,Plant_US01_Detroit,Production,CNC Machinist Senior,1.0,2018-03-15,72000,8,USD,Active
+EMP-US01-002,Maria Rodriguez,Plant_US01_Detroit,Production,Assembly Technician,1.0,2020-06-01,58000,6,USD,Active
+EMP-US01-003,Robert Chen,Plant_US01_Detroit,Production,CNC Machinist,1.0,2021-09-12,65000,7,USD,Active
+EMP-US01-004,Sarah Williams,Plant_US01_Detroit,Production,Quality Inspector,1.0,2019-04-20,62000,7,USD,Active
+EMP-US01-005,David Thompson,Plant_US01_Detroit,Production,Finishing Operator,1.0,2022-01-10,55000,5,USD,Active
+EMP-US01-006,Jennifer Lee,Plant_US01_Detroit,Production,Production Supervisor,1.0,2016-08-22,88000,12,USD,Active
+EMP-US01-007,Michael Brown,Plant_US01_Detroit,Production,Maintenance Technician,1.0,2017-11-05,68000,8,USD,Active
+EMP-US01-008,Amanda Foster,Plant_US01_Detroit,Production,Material Handler,1.0,2023-02-14,48000,5,USD,Active
+EMP-US01-009,Thomas Anderson,Plant_US01_Detroit,Production,Warehouse Supervisor,1.0,2015-05-30,75000,10,USD,Active
+EMP-US01-010,Emily Davis,Plant_US01_Detroit,Finance,Plant Controller,1.0,2017-01-09,115000,18,USD,Active
+EMP-US01-011,Christopher Martin,Plant_US01_Detroit,Finance,Staff Accountant,1.0,2021-07-01,72000,8,USD,Active
+EMP-US01-012,Jessica Taylor,Plant_US01_Detroit,Finance,FP&A Analyst,1.0,2022-03-15,78000,10,USD,Active
+EMP-US01-013,Daniel Wilson,Plant_US01_Detroit,Engineering,Mechanical Design Engineer,1.0,2019-10-01,95000,12,USD,Active
+EMP-US01-014,Rachel Garcia,Plant_US01_Detroit,Engineering,Process Engineer,1.0,2020-08-17,92000,12,USD,Active
+EMP-US01-015,Kevin Johnson,Plant_US01_Detroit,Engineering,Automation Engineer,1.0,2021-04-05,98000,12,USD,Active
+EMP-US01-016,Laura Martinez,Plant_US01_Detroit,Sales,Regional Sales Manager,1.0,2018-06-11,105000,20,USD,Active
+EMP-US01-017,Brian White,Plant_US01_Detroit,Sales,Account Executive,1.0,2022-09-01,85000,15,USD,Active
+EMP-US01-018,Nicole Harris,Plant_US01_Detroit,HR,HR Generalist,1.0,2020-02-03,68000,8,USD,Active
+EMP-US01-019,Andrew Clark,Plant_US01_Detroit,IT,Systems Administrator,1.0,2019-12-16,82000,10,USD,Active
+EMP-US01-020,Stephanie Lewis,Plant_US01_Detroit,Production,CNC Operator Trainee,1.0,2024-11-15,45000,4,USD,Active
+EMP-DE01-001,Hans Mueller,Plant_DE01_Munich,Production,CNC Facharbeiter Senior,1.0,2014-09-01,68000,10,EUR,Active
+EMP-DE01-002,Katrin Schmidt,Plant_DE01_Munich,Production,Montagefachkraft,1.0,2018-04-15,58000,8,EUR,Active
+EMP-DE01-003,Stefan Weber,Plant_DE01_Munich,Production,Meister (Production Supervisor),1.0,2012-07-01,82000,14,EUR,Active
+EMP-DE01-004,Petra Fischer,Plant_DE01_Munich,Production,Quality Engineer (Qualitaetsingenieur),1.0,2019-01-10,72000,10,EUR,Active
+EMP-DE01-005,Klaus Wagner,Plant_DE01_Munich,Production,CNC Programmierer,1.0,2016-11-20,70000,9,EUR,Active
+EMP-DE01-006,Sabine Becker,Plant_DE01_Munich,Production,Heat Treatment Specialist,1.0,2020-03-01,62000,8,EUR,Active
+EMP-DE01-007,Markus Hoffmann,Plant_DE01_Munich,Production,Maintenance Engineer (Instandhalter),1.0,2017-06-15,65000,8,EUR,Active
+EMP-DE01-008,Claudia Zimmermann,Plant_DE01_Munich,Finance,Werkscontroller (Plant Controller),1.0,2015-02-01,105000,16,EUR,Active
+EMP-DE01-009,Juergen Koch,Plant_DE01_Munich,Finance,Bilanzbuchhalter (Senior Accountant),1.0,2018-10-01,78000,10,EUR,Active
+EMP-DE01-010,Monika Schulz,Plant_DE01_Munich,Engineering,Konstrukteur Senior (Design Engineer),1.0,2016-04-01,88000,12,EUR,Active
+EMP-DE01-011,Wolfgang Braun,Plant_DE01_Munich,Engineering,Prozessingenieur (Process Engineer),1.0,2019-08-15,85000,12,EUR,Active
+EMP-DE01-012,Andrea Richter,Plant_DE01_Munich,Sales,Vertriebsleiter EMEA (EMEA Sales Lead),1.0,2017-03-01,98000,18,EUR,Active
+EMP-DE01-013,Tobias Klein,Plant_DE01_Munich,IT,IT Administrator,1.0,2021-05-01,72000,8,EUR,Active
+EMP-CN01-001,Wei Zhang,Plant_CN01_Shanghai,Production,CNC Operator Senior,1.0,2019-07-01,180000,10,CNY,Active
+EMP-CN01-002,Li Wang,Plant_CN01_Shanghai,Production,Assembly Line Lead,1.0,2020-02-15,165000,8,CNY,Active
+EMP-CN01-003,Jing Chen,Plant_CN01_Shanghai,Production,Quality Inspector,1.0,2021-04-01,145000,8,CNY,Active
+EMP-CN01-004,Yong Liu,Plant_CN01_Shanghai,Production,Production Supervisor,1.0,2017-09-01,220000,12,CNY,Active
+EMP-CN01-005,Mei Huang,Plant_CN01_Shanghai,Finance,Plant Accountant,1.0,2020-11-01,200000,10,CNY,Active
+EMP-JP01-001,Takeshi Yamamoto,Plant_JP01_Osaka,Production,Senior Machinist,1.0,2016-04-01,6800000,12,JPY,Active
+EMP-JP01-002,Yuki Tanaka,Plant_JP01_Osaka,Production,Robotics Assembly Lead,1.0,2018-10-01,6200000,10,JPY,Active
+EMP-JP01-003,Haruto Sato,Plant_JP01_Osaka,Engineering,Robotics Engineer,1.0,2019-06-15,7500000,14,JPY,Active

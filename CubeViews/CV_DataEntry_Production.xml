@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_DataEntry_Production - Production Volume and Statistical Input
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_DataEntry_Production"
+           Description="Production volume data entry for units, machine hours, labor hours, and scrap with calculated KPIs"
+           CubeName="Statistics"
+           ViewType="DataEntry"
+           IsEnabled="true"
+           AllowDataInput="true"
+           SuppressNoData="false"
+           SuppressZeros="false"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: Account (Statistical) - Production Metrics          -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- Production Volume (Input) -->
+        <Member Name="STAT_ProductionVolume" DisplayName="Production Volume" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="STAT_UnitsProduced" DisplayName="Units Produced" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_UnitsPlanned" DisplayName="Planned Units" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_UnitsShipped" DisplayName="Units Shipped" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_WIP_Units" DisplayName="Work-In-Process Units" IsInput="true" IndentLevel="1" />
+
+        <!-- Machine Capacity (Input) -->
+        <Member Name="STAT_MachineCapacity" DisplayName="Machine Capacity" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="STAT_MachineHours" DisplayName="Machine Hours (Actual)" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_MachineHoursAvail" DisplayName="Machine Hours (Available)" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_MachineDowntime" DisplayName="Downtime Hours" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_SetupHours" DisplayName="Setup / Changeover Hours" IsInput="true" IndentLevel="1" />
+
+        <!-- Labor (Input) -->
+        <Member Name="STAT_Labor" DisplayName="Labor" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="STAT_LaborHours" DisplayName="Direct Labor Hours" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_OvertimeHours" DisplayName="Overtime Hours" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_IndirectLaborHours" DisplayName="Indirect Labor Hours" IsInput="true" IndentLevel="1" />
+
+        <!-- Quality / Scrap (Input) -->
+        <Member Name="STAT_Quality" DisplayName="Quality" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="STAT_ScrapQty" DisplayName="Scrap Quantity" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_ReworkQty" DisplayName="Rework Quantity" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_DefectsFound" DisplayName="Defects Found" IsInput="true" IndentLevel="1" />
+        <Member Name="STAT_UnitsInspected" DisplayName="Units Inspected" IsInput="true" IndentLevel="1" />
+
+        <!-- Calculated KPIs (Read-Only) -->
+        <Member Name="STAT_KPIs" DisplayName="Key Performance Indicators" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="STAT_OEE" DisplayName="OEE (Overall Equipment Effectiveness)" IsInput="false" IndentLevel="1" />
+        <Member Name="STAT_Availability" DisplayName="  Availability" IsInput="false" IndentLevel="2" />
+        <Member Name="STAT_Performance" DisplayName="  Performance" IsInput="false" IndentLevel="2" />
+        <Member Name="STAT_QualityRate" DisplayName="  Quality Rate" IsInput="false" IndentLevel="2" />
+        <Member Name="STAT_Utilization" DisplayName="Machine Utilization %" IsInput="false" IndentLevel="1" />
+        <Member Name="STAT_ScrapRate" DisplayName="Scrap Rate %" IsInput="false" IndentLevel="1" />
+        <Member Name="STAT_FirstPassYield" DisplayName="First Pass Yield %" IsInput="false" IndentLevel="1" />
+        <Member Name="STAT_LaborEfficiency" DisplayName="Labor Efficiency Ratio" IsInput="false" IndentLevel="1" />
+        <Member Name="STAT_UnitsPerLaborHour" DisplayName="Units per Labor Hour" IsInput="false" IndentLevel="1" />
+        <Member Name="STAT_PlanAttainment" DisplayName="Plan Attainment %" IsInput="false" IndentLevel="1" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Time Dimension - Monthly                         -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <Dimension Name="Time" AliasTable="Default">
+      <MemberSelections>
+        <Member Name="M1" DisplayName="Jan" IsInput="true" />
+        <Member Name="M2" DisplayName="Feb" IsInput="true" />
+        <Member Name="M3" DisplayName="Mar" IsInput="true" />
+        <Member Name="M4" DisplayName="Apr" IsInput="true" />
+        <Member Name="M5" DisplayName="May" IsInput="true" />
+        <Member Name="M6" DisplayName="Jun" IsInput="true" />
+        <Member Name="M7" DisplayName="Jul" IsInput="true" />
+        <Member Name="M8" DisplayName="Aug" IsInput="true" />
+        <Member Name="M9" DisplayName="Sep" IsInput="true" />
+        <Member Name="M10" DisplayName="Oct" IsInput="true" />
+        <Member Name="M11" DisplayName="Nov" IsInput="true" />
+        <Member Name="M12" DisplayName="Dec" IsInput="true" />
+      </MemberSelections>
+    </Dimension>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="E_NA_Plant01">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="Manufacturing" />
+        <FilterDescription>Plant-level entities only</FilterDescription>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="UD1_Product" IsSelectable="true" DefaultMember="AllProducts">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllProducts" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Scenario" IsSelectable="true" DefaultMember="Actual">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="Actual" />
+          <Member Name="Budget" />
+          <Member Name="Forecast" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Local" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="Local" />
+    <Dimension Name="View" IsSelectable="false" DefaultMember="Periodic" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Number" DecimalPlaces="0"
+                    ThousandsSeparator="true" NegativeFormat="Parentheses" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <ConditionalFormat Name="InputCells">
+      <Condition>
+        <CellProperty Property="IsInput" Value="true" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#FFF9E6</BackgroundColor>
+        <BorderColor>#D4C577</BorderColor>
+        <BorderStyle>Thin</BorderStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Percentage KPIs -->
+    <ConditionalFormat Name="PercentageKPIs">
+      <Condition>
+        <RowMember Dimension="Account" Members="STAT_OEE,STAT_Availability,STAT_Performance,STAT_QualityRate,STAT_Utilization,STAT_ScrapRate,STAT_FirstPassYield,STAT_PlanAttainment" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Percentage" DecimalPlaces="1" />
+        <BackgroundColor>#F0F0F0</BackgroundColor>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Ratio KPIs -->
+    <ConditionalFormat Name="RatioKPIs">
+      <Condition>
+        <RowMember Dimension="Account" Members="STAT_LaborEfficiency,STAT_UnitsPerLaborHour" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Number" DecimalPlaces="2" />
+        <BackgroundColor>#F0F0F0</BackgroundColor>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- OEE color coding -->
+    <ConditionalFormat Name="OEE_Good">
+      <Condition>
+        <RowMember Dimension="Account" Member="STAT_OEE" />
+        <ValueCondition Operator="GreaterThanOrEqual" Value="0.85" />
+      </Condition>
+      <Format>
+        <FontColor>#006600</FontColor>
+        <BackgroundColor>#E6F5E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="OEE_Warning">
+      <Condition>
+        <RowMember Dimension="Account" Member="STAT_OEE" />
+        <ValueCondition Operator="Between" MinValue="0.65" MaxValue="0.8499" />
+      </Condition>
+      <Format>
+        <FontColor>#CC6600</FontColor>
+        <BackgroundColor>#FFF5E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="OEE_Critical">
+      <Condition>
+        <RowMember Dimension="Account" Member="STAT_OEE" />
+        <ValueCondition Operator="LessThan" Value="0.65" />
+      </Condition>
+      <Format>
+        <FontColor>#CC0000</FontColor>
+        <BackgroundColor>#FFE6E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Scrap Rate warning threshold -->
+    <ConditionalFormat Name="ScrapRate_Warning">
+      <Condition>
+        <RowMember Dimension="Account" Member="STAT_ScrapRate" />
+        <ValueCondition Operator="GreaterThan" Value="0.03" />
+      </Condition>
+      <Format>
+        <FontColor>#CC0000</FontColor>
+        <BackgroundColor>#FFE6E6</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="SectionHeaders">
+      <Condition>
+        <RowMember Dimension="Account" Members="STAT_ProductionVolume,STAT_MachineCapacity,STAT_Labor,STAT_Quality,STAT_KPIs" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#E6F0FA</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION                                               -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <ProtectedIntersections>
+      <Intersection RowMembers="STAT_ProductionVolume,STAT_MachineCapacity,STAT_Labor,STAT_Quality,STAT_KPIs" IsProtected="true" />
+      <Intersection RowMembers="STAT_OEE,STAT_Availability,STAT_Performance,STAT_QualityRate,STAT_Utilization,STAT_ScrapRate,STAT_FirstPassYield,STAT_LaborEfficiency,STAT_UnitsPerLaborHour,STAT_PlanAttainment" IsProtected="true" />
+    </ProtectedIntersections>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- CALCULATION RULES                                             -->
+  <!-- ============================================================ -->
+  <CalculationRules>
+    <Rule Name="Availability" Description="(Available - Downtime) / Available">
+      <TargetMember>STAT_Availability</TargetMember>
+      <Formula>(MachineHoursAvail - MachineDowntime) / MachineHoursAvail</Formula>
+    </Rule>
+    <Rule Name="Performance" Description="(Units / Machine Hours) / Ideal Rate">
+      <TargetMember>STAT_Performance</TargetMember>
+      <Formula>(UnitsProduced / MachineHours) / IdealCycleRate</Formula>
+      <IdealCycleRate>25</IdealCycleRate>
+    </Rule>
+    <Rule Name="QualityRate" Description="(Units - Scrap - Rework) / Units">
+      <TargetMember>STAT_QualityRate</TargetMember>
+      <Formula>(UnitsProduced - ScrapQty - ReworkQty) / UnitsProduced</Formula>
+    </Rule>
+    <Rule Name="OEE" Description="Availability * Performance * Quality">
+      <TargetMember>STAT_OEE</TargetMember>
+      <Formula>Availability * Performance * QualityRate</Formula>
+    </Rule>
+    <Rule Name="Utilization" Description="Actual Machine Hours / Available Hours">
+      <TargetMember>STAT_Utilization</TargetMember>
+      <Formula>MachineHours / MachineHoursAvail</Formula>
+    </Rule>
+    <Rule Name="ScrapRate" Description="Scrap Quantity / Units Produced">
+      <TargetMember>STAT_ScrapRate</TargetMember>
+      <Formula>ScrapQty / UnitsProduced</Formula>
+    </Rule>
+    <Rule Name="FirstPassYield" Description="(Units - Defects) / Units Inspected">
+      <TargetMember>STAT_FirstPassYield</TargetMember>
+      <Formula>(UnitsInspected - DefectsFound) / UnitsInspected</Formula>
+    </Rule>
+    <Rule Name="LaborEfficiency" Description="Standard Hours / Actual Hours">
+      <TargetMember>STAT_LaborEfficiency</TargetMember>
+      <Formula>(UnitsProduced * StandardLaborHoursPerUnit) / LaborHours</Formula>
+      <StandardLaborHoursPerUnit>0.5</StandardLaborHoursPerUnit>
+    </Rule>
+    <Rule Name="UnitsPerLaborHour" Description="Units Produced / Direct Labor Hours">
+      <TargetMember>STAT_UnitsPerLaborHour</TargetMember>
+      <Formula>UnitsProduced / LaborHours</Formula>
+    </Rule>
+    <Rule Name="PlanAttainment" Description="Actual Units / Planned Units">
+      <TargetMember>STAT_PlanAttainment</TargetMember>
+      <Formula>UnitsProduced / UnitsPlanned</Formula>
+    </Rule>
+  </CalculationRules>
+
+  <!-- ============================================================ -->
+  <!-- DATA ENTRY OPTIONS                                            -->
+  <!-- ============================================================ -->
+  <DataEntryOptions>
+    <AllowSpreadEntry>false</AllowSpreadEntry>
+    <AllowAnnotations>true</AllowAnnotations>
+    <RequireAnnotationOnChange>false</RequireAnnotationOnChange>
+    <ValidationRule>
+      <MinValue>0</MinValue>
+      <MaxValue>9999999</MaxValue>
+      <AllowNegative>false</AllowNegative>
+    </ValidationRule>
+    <SubmitAction>SaveAndCalc</SubmitAction>
+    <AutoCalcOnSave>true</AutoCalcOnSave>
+  </DataEntryOptions>
+
+</CubeView>

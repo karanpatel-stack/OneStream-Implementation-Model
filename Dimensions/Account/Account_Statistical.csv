@@ -1,0 +1,94 @@
+MemberName,ParentName,Description,AccountType
+TotalStatistical,,Total Statistical Accounts,Statistical
+ProductionVolume,TotalStatistical,Production Volume Metrics,Statistical
+UnitsProduced,ProductionVolume,Total Units Produced,Statistical
+Units_Produced_Industrial,UnitsProduced,Units Produced - Industrial,Statistical
+Units_Produced_Consumer,UnitsProduced,Units Produced - Consumer,Statistical
+Units_Produced_Specialty,UnitsProduced,Units Produced - Specialty,Statistical
+UnitsShipped,ProductionVolume,Total Units Shipped,Statistical
+Units_Shipped_Domestic,UnitsShipped,Units Shipped - Domestic,Statistical
+Units_Shipped_Export,UnitsShipped,Units Shipped - Export,Statistical
+Units_Shipped_IC,UnitsShipped,Units Shipped - Intercompany,Statistical
+UnitsScrapped,ProductionVolume,Total Units Scrapped,Statistical
+Units_Scrapped_RawMat,UnitsScrapped,Units Scrapped - Raw Material Defect,Statistical
+Units_Scrapped_Process,UnitsScrapped,Units Scrapped - Process Defect,Statistical
+Units_Scrapped_QC,UnitsScrapped,Units Scrapped - QC Rejection,Statistical
+UnitsReworked,ProductionVolume,Units Reworked,Statistical
+MachineHours,TotalStatistical,Machine Hours Metrics,Statistical
+AvailableHours,MachineHours,Available Machine Hours,Statistical
+AH_Machining,AvailableHours,Available Hours - Machining,Statistical
+AH_Assembly,AvailableHours,Available Hours - Assembly,Statistical
+AH_Finishing,AvailableHours,Available Hours - Finishing,Statistical
+PlannedHours,MachineHours,Planned Machine Hours,Statistical
+PH_Machining,PlannedHours,Planned Hours - Machining,Statistical
+PH_Assembly,PlannedHours,Planned Hours - Assembly,Statistical
+PH_Finishing,PlannedHours,Planned Hours - Finishing,Statistical
+ActualHours,MachineHours,Actual Machine Hours,Statistical
+ACH_Machining,ActualHours,Actual Hours - Machining,Statistical
+ACH_Assembly,ActualHours,Actual Hours - Assembly,Statistical
+ACH_Finishing,ActualHours,Actual Hours - Finishing,Statistical
+DowntimeHours,MachineHours,Downtime Hours,Statistical
+DT_Planned,DowntimeHours,Planned Downtime Hours,Statistical
+DT_Unplanned,DowntimeHours,Unplanned Downtime Hours,Statistical
+DT_Changeover,DowntimeHours,Changeover Downtime Hours,Statistical
+LaborHours,TotalStatistical,Labor Hours Metrics,Statistical
+DirectLaborHours,LaborHours,Direct Labor Hours,Statistical
+DLH_Machining,DirectLaborHours,Direct Labor Hours - Machining,Statistical
+DLH_Assembly,DirectLaborHours,Direct Labor Hours - Assembly,Statistical
+DLH_Finishing,DirectLaborHours,Direct Labor Hours - Finishing,Statistical
+DLH_Packaging,DirectLaborHours,Direct Labor Hours - Packaging,Statistical
+IndirectLaborHours,LaborHours,Indirect Labor Hours,Statistical
+ILH_Supervision,IndirectLaborHours,Indirect Hours - Supervision,Statistical
+ILH_MaterialHandling,IndirectLaborHours,Indirect Hours - Material Handling,Statistical
+ILH_Maintenance,IndirectLaborHours,Indirect Hours - Maintenance,Statistical
+OvertimeHours,LaborHours,Overtime Hours,Statistical
+OTH_Scheduled,OvertimeHours,Scheduled Overtime Hours,Statistical
+OTH_Unscheduled,OvertimeHours,Unscheduled Overtime Hours,Statistical
+Headcount_FTE,TotalStatistical,Headcount and FTE Metrics,Statistical
+Headcount_Mfg,Headcount_FTE,Manufacturing Headcount,Statistical
+HC_Machining,Headcount_Mfg,Headcount - Machining,Statistical
+HC_Assembly,Headcount_Mfg,Headcount - Assembly,Statistical
+HC_Finishing,Headcount_Mfg,Headcount - Finishing,Statistical
+HC_Warehouse,Headcount_Mfg,Headcount - Warehouse,Statistical
+HC_QualityControl,Headcount_Mfg,Headcount - Quality Control,Statistical
+HC_Maintenance,Headcount_Mfg,Headcount - Maintenance,Statistical
+Headcount_Admin,Headcount_FTE,Administrative Headcount,Statistical
+HC_Finance,Headcount_Admin,Headcount - Finance,Statistical
+HC_HR,Headcount_Admin,Headcount - HR,Statistical
+HC_Legal,Headcount_Admin,Headcount - Legal,Statistical
+HC_Executive,Headcount_Admin,Headcount - Executive,Statistical
+HC_IT,Headcount_Admin,Headcount - IT,Statistical
+Headcount_RD,Headcount_FTE,R&D Headcount,Statistical
+HC_ProductDev,Headcount_RD,Headcount - Product Development,Statistical
+HC_ProcessEng,Headcount_RD,Headcount - Process Engineering,Statistical
+HC_Testing,Headcount_RD,Headcount - Testing,Statistical
+Headcount_Sales,Headcount_FTE,Sales Headcount,Statistical
+HC_DomesticSales,Headcount_Sales,Headcount - Domestic Sales,Statistical
+HC_IntlSales,Headcount_Sales,Headcount - International Sales,Statistical
+HC_KeyAccounts,Headcount_Sales,Headcount - Key Accounts,Statistical
+EfficiencyMetrics,TotalStatistical,Efficiency and Performance Metrics,Statistical
+OEE_Percentage,EfficiencyMetrics,Overall Equipment Effectiveness (%),Statistical
+OEE_Availability,OEE_Percentage,OEE Availability Component (%),Statistical
+OEE_Performance,OEE_Percentage,OEE Performance Component (%),Statistical
+OEE_Quality,OEE_Percentage,OEE Quality Component (%),Statistical
+ScrapRate,EfficiencyMetrics,Scrap Rate (%),Statistical
+Capacity_Utilization,EfficiencyMetrics,Capacity Utilization (%),Statistical
+UnitsPerHour,EfficiencyMetrics,Units Per Hour (Throughput),Statistical
+AvgSellingPrice,EfficiencyMetrics,Average Selling Price,Statistical
+ASP_Industrial,AvgSellingPrice,ASP - Industrial Products,Statistical
+ASP_Consumer,AvgSellingPrice,ASP - Consumer Products,Statistical
+ASP_Specialty,AvgSellingPrice,ASP - Specialty Products,Statistical
+Yield_Rate,EfficiencyMetrics,Yield Rate (%),Statistical
+CycleTime,EfficiencyMetrics,Average Cycle Time (Minutes),Statistical
+CT_Machining,CycleTime,Cycle Time - Machining,Statistical
+CT_Assembly,CycleTime,Cycle Time - Assembly,Statistical
+CT_Finishing,CycleTime,Cycle Time - Finishing,Statistical
+OnTimeDelivery,EfficiencyMetrics,On-Time Delivery (%),Statistical
+CustomerSatisfaction,EfficiencyMetrics,Customer Satisfaction Score,Statistical
+CostPerUnit,EfficiencyMetrics,Cost Per Unit,Statistical
+CPU_Material,CostPerUnit,Material Cost Per Unit,Statistical
+CPU_Labor,CostPerUnit,Labor Cost Per Unit,Statistical
+CPU_Overhead,CostPerUnit,Overhead Cost Per Unit,Statistical
+InventoryTurns,EfficiencyMetrics,Inventory Turns,Statistical
+DaysSalesOutstanding,EfficiencyMetrics,Days Sales Outstanding,Statistical
+DaysPayableOutstanding,EfficiencyMetrics,Days Payable Outstanding,Statistical

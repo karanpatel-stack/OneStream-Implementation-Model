@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: Workday Headcount
+  Purpose: Extract headcount and compensation data from Workday HCM via RaaS API
+  Source Connection: CONN_Workday
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>Workday_Headcount</StageName>
+      <StageDescription>Extracts headcount, compensation, and workforce data from Workday HCM via the Report-as-a-Service (RaaS) REST API. Retrieves active worker details including FTE, cost center assignment, base pay, bonus targets, and benefits costs for workforce planning and HR-related financial reporting in OneStream. Supports both point-in-time snapshots and period-based extractions.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>REST_API</StageType>
+      <SourceConnection>CONN_Workday</SourceConnection>
+      <TargetStagingTable>STG_Workday_Headcount</TargetStagingTable>
+
+      <!-- ============================================================
+           API REQUEST CONFIGURATION
+           ============================================================ -->
+      <APIRequest>
+        <!-- Workday RaaS Custom Report endpoint -->
+        <Endpoint>Headcount</Endpoint>
+        <URL>https://wd5-services.workday.com/ccx/service/customreport2/%%WORKDAY_TENANT%%/ISU_OneStream_ETL/CR_OS_Headcount</URL>
+        <Method>GET</Method>
+
+        <!-- Query parameters appended to URL -->
+        <QueryParameters>
+          <Parameter name="format" value="json" description="Response format" />
+          <Parameter name="Effective_Date" value=":EffectiveDate" description="Point-in-time date for headcount snapshot" />
+          <Parameter name="Include_Terminated" value="true" description="Include workers terminated within period" />
+        </QueryParameters>
+
+        <!-- Request headers (in addition to connection-level defaults) -->
+        <Headers>
+          <Header name="Accept">application/json</Header>
+          <Header name="Accept-Encoding">gzip</Header>
+        </Headers>
+
+        <!-- Pagination configuration for large result sets -->
+        <Pagination>
+          <Type>Offset</Type>
+          <PageSize>500</PageSize>
+          <OffsetParameter>offset</OffsetParameter>
+          <CountParameter>count</CountParameter>
+          <TotalCountPath>$.Report_Entry_Count</TotalCountPath>
+        </Pagination>
+
+        <!-- Parameters -->
+        <Parameters>
+          <Parameter name="EffectiveDate" dataType="Date" defaultValue="2026-01-31" description="Effective date for headcount snapshot (last day of reporting period)" />
+        </Parameters>
+      </APIRequest>
+
+      <!-- ============================================================
+           JSON RESPONSE MAPPING
+           Map JSON response fields to staging columns.
+           Workday RaaS returns data in $.Report_Entry[] array.
+           ============================================================ -->
+      <ResponseMapping>
+        <RootPath>$.Report_Entry</RootPath>
+        <Mappings>
+          <Field jsonPath="Worker_ID"                stagingColumn="SRC_WorkerID"         dataType="String"   maxLength="20"  nullable="false" description="Workday Worker ID (Employee/Contingent)" />
+          <Field jsonPath="Employee_ID"              stagingColumn="SRC_EmployeeID"       dataType="String"   maxLength="20"  nullable="true"  description="Employee ID (if employee type)" />
+          <Field jsonPath="Worker_Type"              stagingColumn="SRC_EmployeeType"     dataType="String"   maxLength="30"  nullable="false" description="Employee Type (Regular, Temporary, Contingent)" />
+          <Field jsonPath="Worker_Status"            stagingColumn="SRC_WorkerStatus"     dataType="String"   maxLength="20"  nullable="false" description="Worker Status (Active, Terminated, LOA)" />
+          <Field jsonPath="FTE"                      stagingColumn="SRC_FTE"              dataType="Decimal"  precision="5"  scale="2" nullable="false" description="Full-Time Equivalent (0.00-1.00)" />
+          <Field jsonPath="Headcount"                stagingColumn="SRC_Headcount"        dataType="Decimal"  precision="3"  scale="0" nullable="false" description="Headcount (typically 1 or 0)" />
+          <Field jsonPath="Cost_Center.ID"           stagingColumn="SRC_CostCenter"       dataType="String"   maxLength="20"  nullable="false" description="Cost Center ID" />
+          <Field jsonPath="Cost_Center.Name"         stagingColumn="SRC_CostCenterName"   dataType="String"   maxLength="100" nullable="true"  description="Cost Center Name" />
+          <Field jsonPath="Supervisory_Org.ID"       stagingColumn="SRC_SupervisoryOrg"   dataType="String"   maxLength="20"  nullable="true"  description="Supervisory Organization ID" />
+          <Field jsonPath="Company.ID"               stagingColumn="SRC_Company"          dataType="String"   maxLength="20"  nullable="true"  description="Company Reference ID" />
+          <Field jsonPath="Position.ID"              stagingColumn="SRC_Position"         dataType="String"   maxLength="20"  nullable="true"  description="Position ID" />
+          <Field jsonPath="Position.Title"           stagingColumn="SRC_PositionTitle"    dataType="String"   maxLength="100" nullable="true"  description="Position Title" />
+          <Field jsonPath="Job_Profile.Name"         stagingColumn="SRC_JobProfile"       dataType="String"   maxLength="100" nullable="true"  description="Job Profile Name" />
+          <Field jsonPath="Job_Family.Name"          stagingColumn="SRC_JobFamily"        dataType="String"   maxLength="100" nullable="true"  description="Job Family (for grouping)" />
+          <Field jsonPath="Location.Name"            stagingColumn="SRC_Location"         dataType="String"   maxLength="100" nullable="true"  description="Worker Location" />
+          <Field jsonPath="Base_Pay"                 stagingColumn="SRC_BasePay"          dataType="Decimal"  precision="15" scale="2" nullable="true" description="Annual Base Pay Amount" />
+          <Field jsonPath="Bonus_Target_Percent"     stagingColumn="SRC_BonusTargetPct"   dataType="Decimal"  precision="5"  scale="2" nullable="true" description="Bonus Target as Percentage of Base" />
+          <Field jsonPath="Bonus_Target_Amount"      stagingColumn="SRC_BonusTarget"      dataType="Decimal"  precision="15" scale="2" nullable="true" description="Bonus Target Amount" />
+          <Field jsonPath="Benefits_Cost"            stagingColumn="SRC_BenefitsCost"     dataType="Decimal"  precision="15" scale="2" nullable="true" description="Annual Employer Benefits Cost" />
+          <Field jsonPath="Total_Compensation"       stagingColumn="SRC_TotalComp"        dataType="Decimal"  precision="15" scale="2" nullable="true" description="Total Annual Compensation (Base + Bonus + Benefits)" />
+          <Field jsonPath="Pay_Rate_Type"            stagingColumn="SRC_PayRateType"      dataType="String"   maxLength="20"  nullable="true"  description="Pay Rate Type (Salary, Hourly)" />
+          <Field jsonPath="Currency"                 stagingColumn="SRC_Currency"         dataType="String"   maxLength="5"   nullable="false" description="Compensation Currency Code" />
+          <Field jsonPath="Hire_Date"                stagingColumn="SRC_HireDate"         dataType="Date"     nullable="true"  description="Original Hire Date" />
+          <Field jsonPath="Termination_Date"         stagingColumn="SRC_TermDate"         dataType="Date"     nullable="true"  description="Termination Date (if applicable)" />
+          <Field jsonPath="Termination_Reason"       stagingColumn="SRC_TermReason"       dataType="String"   maxLength="50"  nullable="true"  description="Termination Reason Category" />
+          <Field jsonPath="Effective_Date"           stagingColumn="SRC_EffectiveDate"    dataType="Date"     nullable="true"  description="Report Effective Date" />
+        </Mappings>
+      </ResponseMapping>
+
+      <!-- ============================================================
+           COLUMN MAPPINGS (for staging table DDL reference)
+           ============================================================ -->
+      <ColumnMappings>
+        <Column ordinal="1"  sourceName="Worker_ID"            stagingColumn="SRC_WorkerID"         dataType="String"   maxLength="20"  nullable="false" />
+        <Column ordinal="2"  sourceName="Employee_ID"          stagingColumn="SRC_EmployeeID"       dataType="String"   maxLength="20"  nullable="true" />
+        <Column ordinal="3"  sourceName="Worker_Type"          stagingColumn="SRC_EmployeeType"     dataType="String"   maxLength="30"  nullable="false" />
+        <Column ordinal="4"  sourceName="Worker_Status"        stagingColumn="SRC_WorkerStatus"     dataType="String"   maxLength="20"  nullable="false" />
+        <Column ordinal="5"  sourceName="FTE"                  stagingColumn="SRC_FTE"              dataType="Decimal"  precision="5"  scale="2" nullable="false" />
+        <Column ordinal="6"  sourceName="Headcount"            stagingColumn="SRC_Headcount"        dataType="Decimal"  precision="3"  scale="0" nullable="false" />
+        <Column ordinal="7"  sourceName="Cost_Center_ID"       stagingColumn="SRC_CostCenter"       dataType="String"   maxLength="20"  nullable="false" />
+        <Column ordinal="8"  sourceName="Cost_Center_Name"     stagingColumn="SRC_CostCenterName"   dataType="String"   maxLength="100" nullable="true" />
+        <Column ordinal="9"  sourceName="Supervisory_Org_ID"   stagingColumn="SRC_SupervisoryOrg"   dataType="String"   maxLength="20"  nullable="true" />
+        <Column ordinal="10" sourceName="Company_ID"           stagingColumn="SRC_Company"          dataType="String"   maxLength="20"  nullable="true" />
+        <Column ordinal="11" sourceName="Position_ID"          stagingColumn="SRC_Position"         dataType="String"   maxLength="20"  nullable="true" />
+        <Column ordinal="12" sourceName="Position_Title"       stagingColumn="SRC_PositionTitle"    dataType="String"   maxLength="100" nullable="true" />
+        <Column ordinal="13" sourceName="Job_Profile"          stagingColumn="SRC_JobProfile"       dataType="String"   maxLength="100" nullable="true" />
+        <Column ordinal="14" sourceName="Job_Family"           stagingColumn="SRC_JobFamily"        dataType="String"   maxLength="100" nullable="true" />
+        <Column ordinal="15" sourceName="Location"             stagingColumn="SRC_Location"         dataType="String"   maxLength="100" nullable="true" />
+        <Column ordinal="16" sourceName="Base_Pay"             stagingColumn="SRC_BasePay"          dataType="Decimal"  precision="15" scale="2" nullable="true" />
+        <Column ordinal="17" sourceName="Bonus_Target_Pct"     stagingColumn="SRC_BonusTargetPct"   dataType="Decimal"  precision="5"  scale="2" nullable="true" />
+        <Column ordinal="18" sourceName="Bonus_Target_Amt"     stagingColumn="SRC_BonusTarget"      dataType="Decimal"  precision="15" scale="2" nullable="true" />
+        <Column ordinal="19" sourceName="Benefits_Cost"        stagingColumn="SRC_BenefitsCost"     dataType="Decimal"  precision="15" scale="2" nullable="true" />
+        <Column ordinal="20" sourceName="Total_Compensation"   stagingColumn="SRC_TotalComp"        dataType="Decimal"  precision="15" scale="2" nullable="true" />
+        <Column ordinal="21" sourceName="Pay_Rate_Type"        stagingColumn="SRC_PayRateType"      dataType="String"   maxLength="20"  nullable="true" />
+        <Column ordinal="22" sourceName="Currency"             stagingColumn="SRC_Currency"         dataType="String"   maxLength="5"   nullable="false" />
+        <Column ordinal="23" sourceName="Hire_Date"            stagingColumn="SRC_HireDate"         dataType="Date"     nullable="true" />
+        <Column ordinal="24" sourceName="Termination_Date"     stagingColumn="SRC_TermDate"         dataType="Date"     nullable="true" />
+        <Column ordinal="25" sourceName="Termination_Reason"   stagingColumn="SRC_TermReason"       dataType="String"   maxLength="50"  nullable="true" />
+        <Column ordinal="26" sourceName="Effective_Date"       stagingColumn="SRC_EffectiveDate"    dataType="Date"     nullable="true" />
+      </ColumnMappings>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <Action name="ClearStagingTable" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_Workday_Headcount</SQL>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status) SELECT 'Workday_Headcount', GETDATE(), COUNT(*), 'Staged' FROM STG_Workday_Headcount</SQL>
+        </Action>
+        <Action name="ValidateHeadcount" order="2">
+          <Type>Validation</Type>
+          <Description>Validate FTE values are within expected range</Description>
+          <SQL><![CDATA[
+            SELECT COUNT(*) AS InvalidFTE
+            FROM STG_Workday_Headcount
+            WHERE SRC_FTE < 0 OR SRC_FTE > 1.5
+          ]]></SQL>
+          <OnFailure>Warn</OnFailure>
+        </Action>
+        <Action name="CalculateTotalComp" order="3">
+          <Type>SQL</Type>
+          <SQL><![CDATA[
+            /* Calculate total compensation if not provided by Workday */
+            UPDATE STG_Workday_Headcount
+            SET SRC_TotalComp = ISNULL(SRC_BasePay, 0) + ISNULL(SRC_BonusTarget, 0) + ISNULL(SRC_BenefitsCost, 0)
+            WHERE SRC_TotalComp IS NULL OR SRC_TotalComp = 0
+          ]]></SQL>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>500</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelExecution>false</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+        <!-- Respect Workday API rate limits -->
+        <ThrottleDelayMs>2000</ThrottleDelayMs>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

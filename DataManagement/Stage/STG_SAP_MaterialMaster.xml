@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: SAP Material Master
+  Purpose: Extract material master, plant-level data, and BOM structures from SAP
+  Source Connection: CONN_SAP_HANA
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>SAP_MaterialMaster</StageName>
+      <StageDescription>Extracts material master data from SAP S/4HANA including general material attributes (MARA), plant-specific data (MARC), and Bill of Materials structures (STKO header, STPO items). Provides product dimension metadata, standard costs, and BOM component relationships for manufacturing cost analysis and product hierarchy mapping in OneStream.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>DatabaseQuery</StageType>
+      <SourceConnection>CONN_SAP_HANA</SourceConnection>
+      <TargetStagingTable>STG_SAP_MaterialMaster</TargetStagingTable>
+
+      <!-- ============================================================
+           SOURCE QUERY - Material Master with Plant Data
+           ============================================================ -->
+      <SourceQuery>
+        <SQL><![CDATA[
+          /*
+            SAP Material Master Extraction
+            Source: MARA (General), MARC (Plant), MAKT (Text), MBEW (Valuation)
+            Retrieves material attributes, standard pricing, and plant assignments
+          */
+          SELECT
+            ma.MATNR                          AS MaterialNumber,
+            mt.MAKTX                          AS Description,
+            ma.MTART                          AS MaterialType,
+            ma.MATKL                          AS MaterialGroup,
+            ma.MEINS                          AS BaseUOM,
+            ma.SPART                          AS Division,
+            ma.PRDHA                          AS ProductHierarchy,
+            mc.WERKS                          AS Plant,
+            mc.DISPO                          AS MRPController,
+            mc.FEVOR                          AS ProductionScheduler,
+            mc.DISGR                          AS MRPGroup,
+            mc.BESKZ                          AS ProcurementType,
+            mc.SOBSL                          AS SpecialProcurement,
+            mc.LOSGR                          AS LotSize,
+            /* Valuation / Costing data */
+            mb.STPRS                          AS StandardPrice,
+            mb.PEINH                          AS PriceUnit,
+            mb.VPRSV                          AS PriceControl,
+            mb.VERPR                          AS MovingAvgPrice,
+            mb.BKLAS                          AS ValuationClass,
+            mb.WAERS                          AS Currency,
+            /* Material status */
+            mc.MMSTA                          AS PlantSpecificStatus,
+            ma.MSTAE                          AS CrossPlantStatus,
+            ma.ERSDA                          AS CreationDate,
+            ma.LAEDA                          AS LastChangeDate
+          FROM MARA ma
+          INNER JOIN MAKT mt
+            ON ma.MATNR = mt.MATNR
+            AND mt.MANDT = '100'
+            AND mt.SPRAS = 'E'                /* English descriptions */
+          INNER JOIN MARC mc
+            ON ma.MATNR = mc.MATNR
+            AND mc.MANDT = '100'
+            AND mc.WERKS IN ('1000','1100','2000','2100','3000','4000')
+          LEFT JOIN MBEW mb
+            ON ma.MATNR = mb.MATNR
+            AND mc.WERKS = mb.BWKEY
+            AND mb.MANDT = '100'
+          WHERE ma.MANDT = '100'
+            AND ma.MTART IN ('FERT','HALB','ROH','HIBE','ERSA')  /* Finished, Semi-finished, Raw, MRO, Spare */
+            AND (ma.MSTAE IS NULL OR ma.MSTAE NOT IN ('99'))       /* Exclude flagged-for-deletion */
+          ORDER BY
+            ma.MATNR, mc.WERKS
+        ]]></SQL>
+
+        <Parameters>
+          <!-- No parameters needed; material master is a full snapshot extraction -->
+        </Parameters>
+      </SourceQuery>
+
+      <!-- ============================================================
+           SUPPLEMENTARY QUERY - Bill of Materials Structure
+           ============================================================ -->
+      <SupplementaryQuery name="BOM_Structure">
+        <SQL><![CDATA[
+          /*
+            SAP Bill of Materials Extraction
+            Source: STKO (BOM Header), STPO (BOM Items/Components)
+            Retrieves BOM structures for manufactured materials
+          */
+          SELECT
+            sk.STLNR                          AS BOMNumber,
+            sk.STLAL                          AS BOMAlternative,
+            sk.STKOZ                          AS BOMHeaderQty,
+            sk.BMENG                          AS BaseQuantity,
+            sk.BMEIN                          AS BaseUOM,
+            sk.DATEFROM                       AS ValidFrom,
+            sk.DATETO                         AS ValidTo,
+            sk.STLST                          AS BOMStatus,
+            sp.POSNR                          AS ItemNumber,
+            sp.IDNRK                          AS ComponentMaterial,
+            sp.MENGE                          AS ComponentQty,
+            sp.MEINS                          AS ComponentUOM,
+            sp.POSTP                          AS ItemCategory,
+            sp.AUSCH                          AS ComponentScrapPct,
+            sp.FMENG                          AS FixedQtyIndicator,
+            /* Link BOM to parent material via MAST */
+            mast.MATNR                        AS ParentMaterial,
+            mast.WERKS                        AS Plant
+          FROM STKO sk
+          INNER JOIN STPO sp
+            ON sk.STLNR = sp.STLNR
+            AND sp.MANDT = '100'
+            AND sp.LKENZ <> 'X'               /* Exclude deletion indicators */
+          INNER JOIN MAST mast
+            ON sk.STLNR = mast.STLNR
+            AND mast.MANDT = '100'
+            AND mast.WERKS IN ('1000','1100','2000','2100','3000','4000')
+          WHERE sk.MANDT = '100'
+            AND sk.STLTY = 'M'                /* Material BOM type */
+            AND CURRENT_DATE BETWEEN sk.DATEFROM AND sk.DATETO  /* Currently valid BOMs */
+          ORDER BY
+            mast.MATNR, mast.WERKS, sp.POSNR
+        ]]></SQL>
+      </SupplementaryQuery>
+
+      <!-- ============================================================
+           COLUMN MAPPINGS - Material Master
+           ============================================================ -->
+      <ColumnMappings>
+        <Column ordinal="1"  sourceName="MaterialNumber"       stagingColumn="SRC_MaterialNumber"    dataType="String"   maxLength="18"  nullable="false" description="SAP Material Number (MATNR)" />
+        <Column ordinal="2"  sourceName="Description"          stagingColumn="SRC_Description"       dataType="String"   maxLength="40"  nullable="true"  description="Material Description (MAKTX)" />
+        <Column ordinal="3"  sourceName="MaterialType"         stagingColumn="SRC_MaterialType"      dataType="String"   maxLength="4"   nullable="false" description="Material Type (FERT/HALB/ROH/etc.)" />
+        <Column ordinal="4"  sourceName="MaterialGroup"        stagingColumn="SRC_MaterialGroup"     dataType="String"   maxLength="9"   nullable="true"  description="Material Group (MATKL)" />
+        <Column ordinal="5"  sourceName="BaseUOM"              stagingColumn="SRC_BaseUOM"           dataType="String"   maxLength="3"   nullable="false" description="Base Unit of Measure" />
+        <Column ordinal="6"  sourceName="Division"             stagingColumn="SRC_Division"          dataType="String"   maxLength="2"   nullable="true"  description="Division (SPART)" />
+        <Column ordinal="7"  sourceName="ProductHierarchy"     stagingColumn="SRC_ProductHierarchy"  dataType="String"   maxLength="18"  nullable="true"  description="Product Hierarchy (PRDHA)" />
+        <Column ordinal="8"  sourceName="Plant"                stagingColumn="SRC_Plant"             dataType="String"   maxLength="4"   nullable="false" description="Manufacturing Plant (WERKS)" />
+        <Column ordinal="9"  sourceName="MRPController"        stagingColumn="SRC_MRPController"     dataType="String"   maxLength="3"   nullable="true"  description="MRP Controller" />
+        <Column ordinal="10" sourceName="ProductionScheduler"  stagingColumn="SRC_ProdScheduler"     dataType="String"   maxLength="3"   nullable="true"  description="Production Supervisor/Scheduler" />
+        <Column ordinal="11" sourceName="MRPGroup"             stagingColumn="SRC_MRPGroup"          dataType="String"   maxLength="4"   nullable="true"  description="MRP Group" />
+        <Column ordinal="12" sourceName="ProcurementType"      stagingColumn="SRC_ProcurementType"   dataType="String"   maxLength="1"   nullable="true"  description="Procurement Type (E=InHouse, F=External)" />
+        <Column ordinal="13" sourceName="SpecialProcurement"   stagingColumn="SRC_SpecialProc"       dataType="String"   maxLength="2"   nullable="true"  description="Special Procurement Key" />
+        <Column ordinal="14" sourceName="LotSize"              stagingColumn="SRC_LotSize"           dataType="Decimal"  precision="13" scale="3" nullable="true" description="Fixed Lot Size" />
+        <Column ordinal="15" sourceName="StandardPrice"        stagingColumn="SRC_StandardPrice"     dataType="Decimal"  precision="23" scale="2" nullable="true" description="Standard Price per Price Unit" />
+        <Column ordinal="16" sourceName="PriceUnit"            stagingColumn="SRC_PriceUnit"         dataType="Integer"  nullable="true"  description="Price Unit (e.g., per 1, per 100)" />
+        <Column ordinal="17" sourceName="PriceControl"         stagingColumn="SRC_PriceControl"      dataType="String"   maxLength="1"   nullable="true"  description="Price Control (S=Standard, V=Moving Avg)" />
+        <Column ordinal="18" sourceName="MovingAvgPrice"       stagingColumn="SRC_MovingAvgPrice"    dataType="Decimal"  precision="23" scale="2" nullable="true" description="Moving Average Price" />
+        <Column ordinal="19" sourceName="ValuationClass"       stagingColumn="SRC_ValuationClass"    dataType="String"   maxLength="4"   nullable="true"  description="Valuation Class" />
+        <Column ordinal="20" sourceName="Currency"             stagingColumn="SRC_Currency"          dataType="String"   maxLength="5"   nullable="true"  description="Currency Key" />
+        <Column ordinal="21" sourceName="PlantSpecificStatus"  stagingColumn="SRC_PlantStatus"       dataType="String"   maxLength="2"   nullable="true"  description="Plant-Specific Material Status" />
+        <Column ordinal="22" sourceName="CrossPlantStatus"     stagingColumn="SRC_CrossPlantStatus"  dataType="String"   maxLength="2"   nullable="true"  description="Cross-Plant Material Status" />
+        <Column ordinal="23" sourceName="CreationDate"         stagingColumn="SRC_CreationDate"      dataType="Date"     nullable="true"  description="Material Creation Date" />
+        <Column ordinal="24" sourceName="LastChangeDate"       stagingColumn="SRC_LastChangeDate"    dataType="Date"     nullable="true"  description="Last Change Date" />
+      </ColumnMappings>
+
+      <!-- BOM columns are loaded into a separate staging table -->
+      <SupplementaryColumnMappings name="BOM_Structure" targetTable="STG_SAP_BOMStructure">
+        <Column ordinal="1"  sourceName="BOMNumber"            stagingColumn="SRC_BOMNumber"         dataType="String"   maxLength="8"   nullable="false" />
+        <Column ordinal="2"  sourceName="BOMAlternative"       stagingColumn="SRC_BOMAlternative"    dataType="String"   maxLength="2"   nullable="false" />
+        <Column ordinal="3"  sourceName="BOMHeaderQty"         stagingColumn="SRC_BOMHeaderQty"      dataType="Decimal"  precision="13" scale="3" nullable="true" />
+        <Column ordinal="4"  sourceName="BaseQuantity"         stagingColumn="SRC_BaseQty"           dataType="Decimal"  precision="13" scale="3" nullable="true" />
+        <Column ordinal="5"  sourceName="BaseUOM"              stagingColumn="SRC_BaseUOM"           dataType="String"   maxLength="3"   nullable="true" />
+        <Column ordinal="6"  sourceName="ValidFrom"            stagingColumn="SRC_ValidFrom"         dataType="Date"     nullable="true" />
+        <Column ordinal="7"  sourceName="ValidTo"              stagingColumn="SRC_ValidTo"           dataType="Date"     nullable="true" />
+        <Column ordinal="8"  sourceName="BOMStatus"            stagingColumn="SRC_BOMStatus"         dataType="String"   maxLength="2"   nullable="true" />
+        <Column ordinal="9"  sourceName="ItemNumber"           stagingColumn="SRC_ItemNumber"        dataType="String"   maxLength="4"   nullable="false" />
+        <Column ordinal="10" sourceName="ComponentMaterial"    stagingColumn="SRC_ComponentMaterial" dataType="String"   maxLength="18"  nullable="false" />
+        <Column ordinal="11" sourceName="ComponentQty"         stagingColumn="SRC_ComponentQty"      dataType="Decimal"  precision="13" scale="3" nullable="false" />
+        <Column ordinal="12" sourceName="ComponentUOM"         stagingColumn="SRC_ComponentUOM"      dataType="String"   maxLength="3"   nullable="true" />
+        <Column ordinal="13" sourceName="ItemCategory"         stagingColumn="SRC_ItemCategory"      dataType="String"   maxLength="1"   nullable="true" />
+        <Column ordinal="14" sourceName="ComponentScrapPct"    stagingColumn="SRC_ScrapPct"          dataType="Decimal"  precision="5"  scale="2" nullable="true" />
+        <Column ordinal="15" sourceName="FixedQtyIndicator"    stagingColumn="SRC_FixedQtyFlag"      dataType="String"   maxLength="1"   nullable="true" />
+        <Column ordinal="16" sourceName="ParentMaterial"       stagingColumn="SRC_ParentMaterial"    dataType="String"   maxLength="18"  nullable="false" />
+        <Column ordinal="17" sourceName="Plant"                stagingColumn="SRC_Plant"             dataType="String"   maxLength="4"   nullable="false" />
+      </SupplementaryColumnMappings>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <Action name="ClearStagingTables" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_SAP_MaterialMaster; TRUNCATE TABLE STG_SAP_BOMStructure;</SQL>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status) SELECT 'SAP_MaterialMaster', GETDATE(), COUNT(*), 'Staged' FROM STG_SAP_MaterialMaster</SQL>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>10000</BatchSize>
+        <CommandTimeout>300</CommandTimeout>
+        <EnableParallelExecution>true</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

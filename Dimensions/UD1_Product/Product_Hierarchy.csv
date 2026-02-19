@@ -1,0 +1,67 @@
+MemberName,ParentName,Description
+Total_Products,,Total Products
+Industrial,Total_Products,Industrial Products Division
+Ind_HeavyMachinery,Industrial,Heavy Machinery Product Line
+SKU_HM_HydPress_500T,Ind_HeavyMachinery,Hydraulic Press 500 Ton
+SKU_HM_HydPress_1000T,Ind_HeavyMachinery,Hydraulic Press 1000 Ton
+SKU_HM_CraneAssembly_25T,Ind_HeavyMachinery,Crane Assembly 25 Ton
+SKU_HM_CraneAssembly_50T,Ind_HeavyMachinery,Crane Assembly 50 Ton
+SKU_HM_IndustrialPump_L,Ind_HeavyMachinery,Industrial Pump - Large
+SKU_HM_IndustrialPump_XL,Ind_HeavyMachinery,Industrial Pump - Extra Large
+SKU_HM_Compressor_HP,Ind_HeavyMachinery,High Pressure Compressor
+Ind_Precision,Industrial,Precision Components Product Line
+SKU_PR_BearingAssembly_A,Ind_Precision,Precision Bearing Assembly Type A
+SKU_PR_BearingAssembly_B,Ind_Precision,Precision Bearing Assembly Type B
+SKU_PR_GearSet_Standard,Ind_Precision,Precision Gear Set - Standard
+SKU_PR_GearSet_Custom,Ind_Precision,Precision Gear Set - Custom
+SKU_PR_Shaft_Hardened,Ind_Precision,Hardened Shaft Assembly
+SKU_PR_Coupling_Flex,Ind_Precision,Flexible Coupling Unit
+SKU_PR_LinearGuide,Ind_Precision,Linear Guide System
+Ind_Automation,Industrial,Industrial Automation Product Line
+SKU_AU_RoboticArm_6Axis,Ind_Automation,6-Axis Robotic Arm
+SKU_AU_RoboticArm_4Axis,Ind_Automation,4-Axis Robotic Arm
+SKU_AU_ConveyorSystem,Ind_Automation,Automated Conveyor System
+SKU_AU_PLCController,Ind_Automation,PLC Controller Module
+SKU_AU_VisionSystem,Ind_Automation,Machine Vision Inspection System
+SKU_AU_ServoMotor_M,Ind_Automation,Servo Motor - Medium
+SKU_AU_ServoMotor_L,Ind_Automation,Servo Motor - Large
+Consumer,Total_Products,Consumer Products Division
+Con_PowerTools,Consumer,Power Tools Product Line
+SKU_PT_DrillPress_Bench,Con_PowerTools,Bench Drill Press
+SKU_PT_DrillPress_Floor,Con_PowerTools,Floor Drill Press
+SKU_PT_BandSaw_10,Con_PowerTools,Band Saw 10 inch
+SKU_PT_TableSaw_12,Con_PowerTools,Table Saw 12 inch
+SKU_PT_Grinder_Angle,Con_PowerTools,Angle Grinder Professional
+SKU_PT_Welder_MIG,Con_PowerTools,MIG Welder 200A
+Con_HomeAppliance,Consumer,Home Appliance Product Line
+SKU_HA_AirCompressor_S,Con_HomeAppliance,Air Compressor - Small
+SKU_HA_AirCompressor_M,Con_HomeAppliance,Air Compressor - Medium
+SKU_HA_PressureWasher,Con_HomeAppliance,Pressure Washer 3000 PSI
+SKU_HA_Generator_5KW,Con_HomeAppliance,Portable Generator 5KW
+SKU_HA_Generator_10KW,Con_HomeAppliance,Portable Generator 10KW
+Con_Outdoor,Consumer,Outdoor Equipment Product Line
+SKU_OD_Chainsaw_16,Con_Outdoor,Chainsaw 16 inch
+SKU_OD_Chainsaw_20,Con_Outdoor,Chainsaw 20 inch
+SKU_OD_Mower_Push,Con_Outdoor,Push Mower Professional
+SKU_OD_Mower_Ride,Con_Outdoor,Ride-On Mower
+SKU_OD_Trimmer_Gas,Con_Outdoor,Gas Trimmer Heavy Duty
+SKU_OD_Blower_Backpack,Con_Outdoor,Backpack Blower Commercial
+Specialty,Total_Products,Specialty Products Division
+Spec_Aerospace,Specialty,Aerospace Components
+SKU_AE_TurbineBlade_Ti,Spec_Aerospace,Titanium Turbine Blade
+SKU_AE_LandingGear_Comp,Spec_Aerospace,Landing Gear Component
+SKU_AE_ActuatorAssembly,Spec_Aerospace,Hydraulic Actuator Assembly
+SKU_AE_FuelPump_HiRel,Spec_Aerospace,High-Reliability Fuel Pump
+SKU_AE_StructuralPanel,Spec_Aerospace,Structural Panel Composite
+Spec_Medical,Specialty,Medical Device Components
+SKU_MD_SurgicalInst_Set,Spec_Medical,Surgical Instrument Set
+SKU_MD_ImplantTi_Hip,Spec_Medical,Titanium Hip Implant Component
+SKU_MD_ImplantTi_Knee,Spec_Medical,Titanium Knee Implant Component
+SKU_MD_PrecisionPump_IV,Spec_Medical,Precision IV Pump Mechanism
+SKU_MD_DiagnosticAssembly,Spec_Medical,Diagnostic Equipment Assembly
+Spec_Defense,Specialty,Defense and Security Components
+SKU_DF_ArmorPlate_L3,Spec_Defense,Level 3 Armor Plate
+SKU_DF_OpticsMount_Tac,Spec_Defense,Tactical Optics Mount
+SKU_DF_VehicleComp_Heavy,Spec_Defense,Heavy Vehicle Component
+SKU_DF_CommEnclosure,Spec_Defense,Communications Enclosure
+SKU_DF_DroneFrame_Med,Spec_Defense,Medium Drone Airframe

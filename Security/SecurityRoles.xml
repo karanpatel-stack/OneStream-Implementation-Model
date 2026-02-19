@@ -1,0 +1,754 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Security Configuration
+  SecurityRoles.xml - Role Definitions with Permissions
+  Manufacturing Implementation
+-->
+<SecurityRoles xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+               Application="MfgConsolidation"
+               LastModified="2026-02-18T00:00:00"
+               Version="1.0">
+
+  <!-- ============================================================ -->
+  <!-- ROLE: SystemAdmin                                             -->
+  <!-- Full administrative access to all application features        -->
+  <!-- ============================================================ -->
+  <Role Name="SystemAdmin"
+        Description="Full system administration access with unrestricted permissions across all dimensions, cubes, and system features"
+        IsActive="true"
+        RoleType="Administrative">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="ReadWrite" />
+      <Cube Name="Statistics" AccessLevel="ReadWrite" />
+      <Cube Name="Rates" AccessLevel="ReadWrite" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="AllEntities" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Budget" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Forecast" AccessLevel="ReadWrite" />
+        <MemberAccess Member="FlexBudget" AccessLevel="ReadWrite" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD1_Product">
+        <MemberAccess Member="AllProducts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="AllCostCenters" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD4_Project">
+        <MemberAccess Member="AllProjects" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD6_Channel">
+        <MemberAccess Member="AllChannels" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="true" />
+      <Action Name="Reject" Allowed="true" />
+      <Action Name="Lock" Allowed="true" />
+      <Action Name="Unlock" Allowed="true" />
+      <Action Name="Publish" Allowed="true" />
+      <Action Name="SignOff" Allowed="true" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ManageApplications" Granted="true" />
+      <Permission Name="ManageSecurity" Granted="true" />
+      <Permission Name="ManageDimensions" Granted="true" />
+      <Permission Name="ManageBusinessRules" Granted="true" />
+      <Permission Name="ManageCubeViews" Granted="true" />
+      <Permission Name="ManageDataManagement" Granted="true" />
+      <Permission Name="ManageWorkflow" Granted="true" />
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ManageUsers" Granted="true" />
+      <Permission Name="ExecuteDataLoad" Granted="true" />
+      <Permission Name="ClearData" Granted="true" />
+      <Permission Name="ManageConsolidation" Granted="true" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="*" AccessLevel="ReadWrite" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: CorporateController                                     -->
+  <!-- All entities R/W for Actual, read all scenarios               -->
+  <!-- ============================================================ -->
+  <Role Name="CorporateController"
+        Description="Corporate controller with full read/write access for Actual scenario and read access to all other scenarios"
+        IsActive="true"
+        RoleType="Functional">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="Read" />
+      <Cube Name="Statistics" AccessLevel="Read" />
+      <Cube Name="Rates" AccessLevel="ReadWrite" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="AllEntities" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Budget" AccessLevel="Read" />
+        <MemberAccess Member="Forecast" AccessLevel="Read" />
+        <MemberAccess Member="FlexBudget" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD1_Product">
+        <MemberAccess Member="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="true" />
+      <Action Name="Reject" Allowed="true" />
+      <Action Name="Lock" Allowed="true" />
+      <Action Name="Unlock" Allowed="true" />
+      <Action Name="Publish" Allowed="true" />
+      <Action Name="SignOff" Allowed="true" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ManageApplications" Granted="false" />
+      <Permission Name="ManageSecurity" Granted="false" />
+      <Permission Name="ManageDimensions" Granted="false" />
+      <Permission Name="ManageBusinessRules" Granted="false" />
+      <Permission Name="ManageCubeViews" Granted="true" />
+      <Permission Name="ManageDataManagement" Granted="true" />
+      <Permission Name="ManageWorkflow" Granted="true" />
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ManageUsers" Granted="false" />
+      <Permission Name="ExecuteDataLoad" Granted="true" />
+      <Permission Name="ClearData" Granted="false" />
+      <Permission Name="ManageConsolidation" Granted="true" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_*" AccessLevel="ReadWrite" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: RegionalController                                      -->
+  <!-- Regional entities R/W, other regions read-only                -->
+  <!-- ============================================================ -->
+  <Role Name="RegionalController"
+        Description="Regional controller with read/write to assigned region entities and read-only to other regions"
+        IsActive="true"
+        RoleType="Functional">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="Read" />
+      <Cube Name="Statistics" AccessLevel="Read" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <!-- Assigned region: R/W (set via DataAccessProfile) -->
+        <MemberAccess Member="{AssignedRegion}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        <!-- Other entities: read-only -->
+        <MemberAccess Member="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Budget" AccessLevel="Read" />
+        <MemberAccess Member="Forecast" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="true" />
+      <Action Name="Reject" Allowed="true" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="true" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ManageCubeViews" Granted="false" />
+      <Permission Name="ManageDataManagement" Granted="true" />
+      <Permission Name="ManageWorkflow" Granted="true" />
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ExecuteDataLoad" Granted="true" />
+      <Permission Name="ManageConsolidation" Granted="true" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_Revenue" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_OPEX" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_CAPEX" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_Production" AccessLevel="Read" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: PlantController                                         -->
+  <!-- Single plant R/W, parent entities read-only                   -->
+  <!-- ============================================================ -->
+  <Role Name="PlantController"
+        Description="Plant-level controller with read/write to a single plant entity and read-only to parent/sibling entities"
+        IsActive="true"
+        RoleType="Functional">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Statistics" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="Read" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="{AssignedPlant}" AccessLevel="ReadWrite" IncludeDescendants="false" />
+        <MemberAccess Member="{ParentRegion}" AccessLevel="Read" IncludeDescendants="false" />
+        <MemberAccess Member="E_Consolidated" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Budget" AccessLevel="Read" />
+        <MemberAccess Member="Forecast" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD1_Product">
+        <MemberAccess Member="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="false" />
+      <Action Name="Reject" Allowed="false" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="false" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ManageDataManagement" Granted="false" />
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ExecuteDataLoad" Granted="true" />
+      <Permission Name="ManageConsolidation" Granted="false" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_Revenue" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_OPEX" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_Production" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_CAPEX" AccessLevel="Read" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: FPAAnalyst                                              -->
+  <!-- All entities read, Budget/Forecast write for assigned         -->
+  <!-- ============================================================ -->
+  <Role Name="FPAAnalyst"
+        Description="FP&amp;A analyst with read access to all entities and Budget/Forecast write for assigned entities"
+        IsActive="true"
+        RoleType="Functional">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="Read" />
+      <Cube Name="Statistics" AccessLevel="Read" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+        <MemberAccess Member="{AssignedEntities}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="Read" />
+        <MemberAccess Member="Budget" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Forecast" AccessLevel="ReadWrite" />
+        <MemberAccess Member="FlexBudget" AccessLevel="ReadWrite" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD1_Product">
+        <MemberAccess Member="AllProducts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="AllCostCenters" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="false" />
+      <Action Name="Reject" Allowed="false" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="false" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ManageCubeViews" Granted="false" />
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ExecuteDataLoad" Granted="false" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_Revenue" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_OPEX" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_Headcount" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_CAPEX" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_Production" AccessLevel="Read" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: FPADirector                                             -->
+  <!-- All entities R/W for Budget/Forecast, approve capability      -->
+  <!-- ============================================================ -->
+  <Role Name="FPADirector"
+        Description="FP&amp;A director with read/write for Budget/Forecast across all entities and workflow approval authority"
+        IsActive="true"
+        RoleType="Functional">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="ReadWrite" />
+      <Cube Name="Statistics" AccessLevel="Read" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="AllEntities" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="Read" />
+        <MemberAccess Member="Budget" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Forecast" AccessLevel="ReadWrite" />
+        <MemberAccess Member="FlexBudget" AccessLevel="ReadWrite" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD1_Product">
+        <MemberAccess Member="AllProducts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="AllCostCenters" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD4_Project">
+        <MemberAccess Member="AllProjects" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="true" />
+      <Action Name="Reject" Allowed="true" />
+      <Action Name="Lock" Allowed="true" />
+      <Action Name="Unlock" Allowed="true" />
+      <Action Name="Publish" Allowed="true" />
+      <Action Name="SignOff" Allowed="true" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ManageCubeViews" Granted="true" />
+      <Permission Name="ManageWorkflow" Granted="true" />
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ExecuteDataLoad" Granted="true" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_*" AccessLevel="ReadWrite" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: HRBusinessPartner                                       -->
+  <!-- HR cube write, Finance read-only                              -->
+  <!-- ============================================================ -->
+  <Role Name="HRBusinessPartner"
+        Description="HR business partner with write access to the Workforce cube and read-only access to Finance"
+        IsActive="true"
+        RoleType="Functional">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="Read" />
+      <Cube Name="Workforce" AccessLevel="ReadWrite" />
+      <Cube Name="Statistics" AccessLevel="None" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="{AssignedEntities}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        <MemberAccess Member="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="HR_AllPositions" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        <MemberAccess Member="AllAccounts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="Read" />
+        <MemberAccess Member="Budget" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Forecast" AccessLevel="ReadWrite" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="{AssignedCostCenters}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="false" />
+      <Action Name="Reject" Allowed="false" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="false" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ViewAuditLog" Granted="false" />
+      <Permission Name="ExecuteDataLoad" Granted="false" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_PL" AccessLevel="Read" />
+      <CubeView Name="CV_Report_BvA" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_Headcount" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_Revenue" AccessLevel="None" />
+      <CubeView Name="CV_DataEntry_OPEX" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_CAPEX" AccessLevel="None" />
+      <CubeView Name="CV_DataEntry_Production" AccessLevel="None" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: DepartmentHead                                          -->
+  <!-- Assigned cost centers write for Budget, read other            -->
+  <!-- ============================================================ -->
+  <Role Name="DepartmentHead"
+        Description="Department head with Budget write access for assigned cost centers and read-only for all other data"
+        IsActive="true"
+        RoleType="Functional">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="Read" />
+      <Cube Name="Statistics" AccessLevel="Read" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="{AssignedEntity}" AccessLevel="ReadWrite" IncludeDescendants="false" />
+        <MemberAccess Member="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="OPEX" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        <MemberAccess Member="AllAccounts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="Read" />
+        <MemberAccess Member="Budget" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Forecast" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="{AssignedCostCenters}" AccessLevel="ReadWrite" IncludeDescendants="true" />
+        <MemberAccess Member="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="true" />
+      <Action Name="Approve" Allowed="false" />
+      <Action Name="Reject" Allowed="false" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="false" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ViewAuditLog" Granted="false" />
+      <Permission Name="ExecuteDataLoad" Granted="false" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_PL" AccessLevel="Read" />
+      <CubeView Name="CV_Report_BvA" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_OPEX" AccessLevel="ReadWrite" />
+      <CubeView Name="CV_DataEntry_Headcount" AccessLevel="Read" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: ExecutiveViewer                                         -->
+  <!-- Read-only all cubes, all entities, all scenarios              -->
+  <!-- ============================================================ -->
+  <Role Name="ExecutiveViewer"
+        Description="Executive-level read-only access to all cubes, entities, and scenarios for management reporting"
+        IsActive="true"
+        RoleType="Reporting">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="Read" />
+      <Cube Name="Workforce" AccessLevel="Read" />
+      <Cube Name="Statistics" AccessLevel="Read" />
+      <Cube Name="Rates" AccessLevel="Read" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="Read" />
+        <MemberAccess Member="Budget" AccessLevel="Read" />
+        <MemberAccess Member="Forecast" AccessLevel="Read" />
+        <MemberAccess Member="FlexBudget" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD1_Product">
+        <MemberAccess Member="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD4_Project">
+        <MemberAccess Member="AllProjects" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD6_Channel">
+        <MemberAccess Member="AllChannels" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="false" />
+      <Action Name="Approve" Allowed="false" />
+      <Action Name="Reject" Allowed="false" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="false" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ViewAuditLog" Granted="true" />
+    </SystemPermissions>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_*" AccessLevel="None" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: DataSteward                                             -->
+  <!-- Data management execute, staging tables access                -->
+  <!-- ============================================================ -->
+  <Role Name="DataSteward"
+        Description="Data steward with data management execution privileges, staging table access, and data load capabilities"
+        IsActive="true"
+        RoleType="Technical">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="ReadWrite" />
+      <Cube Name="Workforce" AccessLevel="ReadWrite" />
+      <Cube Name="Statistics" AccessLevel="ReadWrite" />
+      <Cube Name="Rates" AccessLevel="ReadWrite" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="AllEntities" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="ReadWrite" />
+        <MemberAccess Member="Budget" AccessLevel="Read" />
+        <MemberAccess Member="Forecast" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="ReadWrite" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="false" />
+      <Action Name="Approve" Allowed="false" />
+      <Action Name="Reject" Allowed="false" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="false" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ManageDataManagement" Granted="true" />
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ExecuteDataLoad" Granted="true" />
+      <Permission Name="ClearData" Granted="true" />
+      <Permission Name="ManageStagingTables" Granted="true" />
+      <Permission Name="ManageTransformationRules" Granted="true" />
+      <Permission Name="ViewDataQualityReports" Granted="true" />
+    </SystemPermissions>
+
+    <StagingTableAccess>
+      <StagingTable Name="GL_Import" AccessLevel="ReadWrite" />
+      <StagingTable Name="Budget_Import" AccessLevel="ReadWrite" />
+      <StagingTable Name="HR_Import" AccessLevel="ReadWrite" />
+      <StagingTable Name="Production_Import" AccessLevel="ReadWrite" />
+      <StagingTable Name="JournalEntries" AccessLevel="ReadWrite" />
+      <StagingTable Name="FX_Rates" AccessLevel="ReadWrite" />
+      <StagingTable Name="IntercompanyMatching" AccessLevel="ReadWrite" />
+    </StagingTableAccess>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_*" AccessLevel="Read" />
+    </CubeViewAccess>
+  </Role>
+
+  <!-- ============================================================ -->
+  <!-- ROLE: Auditor                                                 -->
+  <!-- Read-only all data, audit log access                          -->
+  <!-- ============================================================ -->
+  <Role Name="Auditor"
+        Description="External/internal auditor with comprehensive read-only access to all data and full audit log visibility"
+        IsActive="true"
+        RoleType="Audit">
+
+    <CubeAccess>
+      <Cube Name="Finance" AccessLevel="Read" />
+      <Cube Name="Workforce" AccessLevel="Read" />
+      <Cube Name="Statistics" AccessLevel="Read" />
+      <Cube Name="Rates" AccessLevel="Read" />
+    </CubeAccess>
+
+    <DimensionAccess>
+      <Dimension Name="Entity">
+        <MemberAccess Member="AllEntities" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Account">
+        <MemberAccess Member="AllAccounts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="Scenario">
+        <MemberAccess Member="Actual" AccessLevel="Read" />
+        <MemberAccess Member="Budget" AccessLevel="Read" />
+        <MemberAccess Member="Forecast" AccessLevel="Read" />
+        <MemberAccess Member="FlexBudget" AccessLevel="Read" />
+      </Dimension>
+      <Dimension Name="Time">
+        <MemberAccess Member="AllTime" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD1_Product">
+        <MemberAccess Member="AllProducts" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD2_CostCenter">
+        <MemberAccess Member="AllCostCenters" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD4_Project">
+        <MemberAccess Member="AllProjects" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+      <Dimension Name="UD6_Channel">
+        <MemberAccess Member="AllChannels" AccessLevel="Read" IncludeDescendants="true" />
+      </Dimension>
+    </DimensionAccess>
+
+    <WorkflowActions>
+      <Action Name="Submit" Allowed="false" />
+      <Action Name="Approve" Allowed="false" />
+      <Action Name="Reject" Allowed="false" />
+      <Action Name="Lock" Allowed="false" />
+      <Action Name="Unlock" Allowed="false" />
+      <Action Name="Publish" Allowed="false" />
+      <Action Name="SignOff" Allowed="false" />
+    </WorkflowActions>
+
+    <SystemPermissions>
+      <Permission Name="ViewAuditLog" Granted="true" />
+      <Permission Name="ViewDataChangeHistory" Granted="true" />
+      <Permission Name="ViewSecurityLog" Granted="true" />
+      <Permission Name="ViewWorkflowHistory" Granted="true" />
+      <Permission Name="ViewConsolidationLog" Granted="true" />
+      <Permission Name="ExportAuditData" Granted="true" />
+      <Permission Name="ViewDataQualityReports" Granted="true" />
+    </SystemPermissions>
+
+    <StagingTableAccess>
+      <StagingTable Name="GL_Import" AccessLevel="Read" />
+      <StagingTable Name="JournalEntries" AccessLevel="Read" />
+      <StagingTable Name="IntercompanyMatching" AccessLevel="Read" />
+    </StagingTableAccess>
+
+    <CubeViewAccess>
+      <CubeView Name="CV_Report_*" AccessLevel="Read" />
+      <CubeView Name="CV_DataEntry_*" AccessLevel="Read" />
+    </CubeViewAccess>
+  </Role>
+
+</SecurityRoles>

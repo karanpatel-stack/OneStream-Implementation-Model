@@ -1,0 +1,28 @@
+MemberName,ParentName,Description,IsInput,TimeFrequency
+AllScenarios,,All Scenarios,false,Monthly
+Actual,AllScenarios,Actual Results,true,Monthly
+Budget,AllScenarios,Annual Budget,true,Monthly
+Forecast,AllScenarios,Current Year Forecast,false,Monthly
+Forecast_Q1,Forecast,Q1 Forecast Submission,true,Monthly
+Forecast_Q2,Forecast,Q2 Forecast Submission,true,Monthly
+Forecast_Q3,Forecast,Q3 Forecast Submission,true,Monthly
+Forecast_Q4,Forecast,Q4 Forecast Submission,true,Monthly
+RollingForecast,AllScenarios,Rolling 12-Month Forecast,false,Monthly
+RF_Jan,RollingForecast,Rolling Forecast - January Start,true,Monthly
+RF_Feb,RollingForecast,Rolling Forecast - February Start,true,Monthly
+RF_Mar,RollingForecast,Rolling Forecast - March Start,true,Monthly
+RF_Apr,RollingForecast,Rolling Forecast - April Start,true,Monthly
+RF_May,RollingForecast,Rolling Forecast - May Start,true,Monthly
+RF_Jun,RollingForecast,Rolling Forecast - June Start,true,Monthly
+RF_Jul,RollingForecast,Rolling Forecast - July Start,true,Monthly
+RF_Aug,RollingForecast,Rolling Forecast - August Start,true,Monthly
+RF_Sep,RollingForecast,Rolling Forecast - September Start,true,Monthly
+RF_Oct,RollingForecast,Rolling Forecast - October Start,true,Monthly
+RF_Nov,RollingForecast,Rolling Forecast - November Start,true,Monthly
+RF_Dec,RollingForecast,Rolling Forecast - December Start,true,Monthly
+WhatIf,AllScenarios,What-If Scenario Analysis,false,Monthly
+WhatIf_01,WhatIf,What-If Scenario 1 - Supply Chain Disruption,true,Monthly
+WhatIf_02,WhatIf,What-If Scenario 2 - Demand Surge,true,Monthly
+WhatIf_03,WhatIf,What-If Scenario 3 - Raw Material Price Increase,true,Monthly
+BudgetPriorYear,AllScenarios,Prior Year Budget,false,Monthly
+ActualPriorYear,AllScenarios,Prior Year Actuals,false,Monthly

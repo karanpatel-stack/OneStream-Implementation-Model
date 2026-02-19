@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_Report_CF - Cash Flow Statement Report View
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_Report_CF"
+           Description="Cash flow statement with Operating, Investing, and Financing sections and budget comparisons"
+           CubeName="Finance"
+           ViewType="Report"
+           IsEnabled="true"
+           AllowDataInput="false"
+           SuppressNoData="true"
+           SuppressZeros="true"
+           SuppressZerosOption="SuppressRowsWithAllZeros"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: Cash Flow Hierarchy                                 -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- Opening Balance -->
+        <Member Name="CF_OpeningCash" DisplayName="Opening Cash Balance" IndentLevel="0" IsBold="true" />
+
+        <Member Name="_Separator1" DisplayName="" IsBlankRow="true" />
+
+        <!-- OPERATING ACTIVITIES -->
+        <Member Name="CF_Operating" DisplayName="CASH FROM OPERATING ACTIVITIES" IndentLevel="0" IsBold="true" IsExpanded="true" AllowExpand="true" />
+        <Member Name="CF_NetIncome" DisplayName="Net Income" IndentLevel="1" IsBold="true" />
+
+        <Member Name="CF_NonCashAdj" DisplayName="Non-Cash Adjustments" IndentLevel="1" IsBold="true" AllowExpand="true" IsExpanded="true" />
+        <Member Name="CF_Depreciation" DisplayName="Depreciation &amp; Amortization" IndentLevel="2" />
+        <Member Name="CF_StockComp" DisplayName="Stock-Based Compensation" IndentLevel="2" />
+        <Member Name="CF_DeferredTax" DisplayName="Deferred Income Taxes" IndentLevel="2" />
+        <Member Name="CF_BadDebt" DisplayName="Provision for Bad Debts" IndentLevel="2" />
+        <Member Name="CF_InventoryWriteDown" DisplayName="Inventory Write-Down" IndentLevel="2" />
+        <Member Name="CF_AssetImpairment" DisplayName="Asset Impairment Charges" IndentLevel="2" />
+        <Member Name="CF_GainLossDisposal" DisplayName="(Gain) / Loss on Disposal of Assets" IndentLevel="2" />
+        <Member Name="CF_OtherNonCash" DisplayName="Other Non-Cash Items" IndentLevel="2" />
+
+        <Member Name="CF_WorkingCapital" DisplayName="Changes in Working Capital" IndentLevel="1" IsBold="true" AllowExpand="true" IsExpanded="true" />
+        <Member Name="CF_ChgAR" DisplayName="(Increase) / Decrease in Accounts Receivable" IndentLevel="2" />
+        <Member Name="CF_ChgInventory" DisplayName="(Increase) / Decrease in Inventory" IndentLevel="2" />
+        <Member Name="CF_ChgPrepaid" DisplayName="(Increase) / Decrease in Prepaid Expenses" IndentLevel="2" />
+        <Member Name="CF_ChgOtherCA" DisplayName="(Increase) / Decrease in Other Current Assets" IndentLevel="2" />
+        <Member Name="CF_ChgAP" DisplayName="Increase / (Decrease) in Accounts Payable" IndentLevel="2" />
+        <Member Name="CF_ChgAccruedLiab" DisplayName="Increase / (Decrease) in Accrued Liabilities" IndentLevel="2" />
+        <Member Name="CF_ChgAccruedPayroll" DisplayName="Increase / (Decrease) in Accrued Payroll" IndentLevel="2" />
+        <Member Name="CF_ChgDeferredRev" DisplayName="Increase / (Decrease) in Deferred Revenue" IndentLevel="2" />
+        <Member Name="CF_ChgTaxPayable" DisplayName="Increase / (Decrease) in Taxes Payable" IndentLevel="2" />
+        <Member Name="CF_ChgOtherCL" DisplayName="Increase / (Decrease) in Other Current Liabilities" IndentLevel="2" />
+
+        <Member Name="CF_TotalOperating" DisplayName="Net Cash from Operating Activities" IndentLevel="0" IsBold="true" IsSubtotal="true" WaterfallType="Subtotal" />
+
+        <Member Name="_Separator2" DisplayName="" IsBlankRow="true" />
+
+        <!-- INVESTING ACTIVITIES -->
+        <Member Name="CF_Investing" DisplayName="CASH FROM INVESTING ACTIVITIES" IndentLevel="0" IsBold="true" IsExpanded="true" AllowExpand="true" />
+        <Member Name="CF_CapEx" DisplayName="Capital Expenditures" IndentLevel="1" />
+        <Member Name="CF_AssetDisposals" DisplayName="Proceeds from Disposal of Assets" IndentLevel="1" />
+        <Member Name="CF_Acquisitions" DisplayName="Acquisitions, Net of Cash" IndentLevel="1" />
+        <Member Name="CF_InvestmentPurchases" DisplayName="Purchases of Investments" IndentLevel="1" />
+        <Member Name="CF_InvestmentMaturities" DisplayName="Maturities of Investments" IndentLevel="1" />
+        <Member Name="CF_OtherInvesting" DisplayName="Other Investing Activities" IndentLevel="1" />
+
+        <Member Name="CF_TotalInvesting" DisplayName="Net Cash from Investing Activities" IndentLevel="0" IsBold="true" IsSubtotal="true" WaterfallType="Subtotal" />
+
+        <Member Name="_Separator3" DisplayName="" IsBlankRow="true" />
+
+        <!-- FINANCING ACTIVITIES -->
+        <Member Name="CF_Financing" DisplayName="CASH FROM FINANCING ACTIVITIES" IndentLevel="0" IsBold="true" IsExpanded="true" AllowExpand="true" />
+        <Member Name="CF_DebtProceeds" DisplayName="Proceeds from Borrowings" IndentLevel="1" />
+        <Member Name="CF_DebtRepayments" DisplayName="Repayment of Borrowings" IndentLevel="1" />
+        <Member Name="CF_LineOfCredit" DisplayName="Net Change in Line of Credit" IndentLevel="1" />
+        <Member Name="CF_Dividends" DisplayName="Dividends Paid" IndentLevel="1" />
+        <Member Name="CF_ShareRepurchase" DisplayName="Share Repurchase" IndentLevel="1" />
+        <Member Name="CF_EquityIssuance" DisplayName="Proceeds from Equity Issuance" IndentLevel="1" />
+        <Member Name="CF_OtherFinancing" DisplayName="Other Financing Activities" IndentLevel="1" />
+
+        <Member Name="CF_TotalFinancing" DisplayName="Net Cash from Financing Activities" IndentLevel="0" IsBold="true" IsSubtotal="true" WaterfallType="Subtotal" />
+
+        <Member Name="_Separator4" DisplayName="" IsBlankRow="true" />
+
+        <!-- FX Effect -->
+        <Member Name="CF_FXEffect" DisplayName="Effect of Exchange Rate Changes on Cash" IndentLevel="0" />
+
+        <Member Name="_Separator5" DisplayName="" IsBlankRow="true" />
+
+        <!-- Net Change and Closing -->
+        <Member Name="CF_NetChange" DisplayName="Net Increase / (Decrease) in Cash" IndentLevel="0" IsBold="true" IsSubtotal="true" WaterfallType="Total" />
+        <Member Name="CF_ClosingCash" DisplayName="Closing Cash Balance" IndentLevel="0" IsBold="true" IsSubtotal="true" WaterfallType="Total" />
+
+        <!-- Free Cash Flow (Memo) -->
+        <Member Name="_Separator6" DisplayName="" IsBlankRow="true" />
+        <Member Name="CF_FreeCashFlow" DisplayName="Free Cash Flow" IndentLevel="0" IsBold="true" />
+        <Member Name="CF_FCFMargin" DisplayName="Free Cash Flow Margin %" IndentLevel="0" IsRatio="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Multi-Period Comparison                          -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <ColumnGroup Name="CurrentMonth">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="Periodic" />
+      </Dimensions>
+      <DisplayName>Current Month</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="ActualYTD">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="YTD" />
+      </Dimensions>
+      <DisplayName>Actual YTD</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="BudgetYTD">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Budget" />
+        <DimensionMember Dimension="View" Member="YTD" />
+      </Dimensions>
+      <DisplayName>Budget YTD</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="VarianceDollar">
+      <CalculatedColumn>
+        <Formula>ActualYTD - BudgetYTD</Formula>
+      </CalculatedColumn>
+      <DisplayName>Variance $</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="PriorYearYTD">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="YTD" />
+        <DimensionMember Dimension="Time" Member="PriorYear" />
+      </Dimensions>
+      <DisplayName>Prior Year YTD</DisplayName>
+    </ColumnGroup>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="Consolidated">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Time" IsSelectable="true" DefaultMember="CurrentMonth">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllTime" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Elimination" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" ScaleFactor="1000"
+                    ScaleLabel="($ in thousands)" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <ConditionalFormat Name="SubtotalRows">
+      <Condition>
+        <CellProperty Property="IsSubtotal" Value="true" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Thin</BorderTopStyle>
+        <BackgroundColor>#F5F8FC</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Waterfall formatting: positive cash is green, negative is red -->
+    <ConditionalFormat Name="WaterfallPositive">
+      <Condition>
+        <ValueCondition Operator="GreaterThan" Value="0" />
+        <CellProperty Property="WaterfallType" Value="Subtotal" />
+      </Condition>
+      <Format>
+        <FontColor>#006600</FontColor>
+        <BackgroundColor>#E6F5E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="WaterfallNegative">
+      <Condition>
+        <ValueCondition Operator="LessThan" Value="0" />
+        <CellProperty Property="WaterfallType" Value="Subtotal" />
+      </Condition>
+      <Format>
+        <FontColor>#CC0000</FontColor>
+        <BackgroundColor>#FFE6E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Closing cash: prominent formatting -->
+    <ConditionalFormat Name="ClosingCashRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="CF_ClosingCash" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <FontSize>11</FontSize>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <BorderBottomStyle>Double</BorderBottomStyle>
+        <BackgroundColor>#E8F4E8</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="SectionHeaders">
+      <Condition>
+        <RowMember Dimension="Account" Members="CF_Operating,CF_Investing,CF_Financing" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BackgroundColor>#E6F0FA</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Variance positive = favorable -->
+    <ConditionalFormat Name="FavorableVariance">
+      <Condition>
+        <ColumnMember Members="VarianceDollar" />
+        <ValueCondition Operator="GreaterThan" Value="0" />
+      </Condition>
+      <Format>
+        <FontColor>#006600</FontColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="UnfavorableVariance">
+      <Condition>
+        <ColumnMember Members="VarianceDollar" />
+        <ValueCondition Operator="LessThan" Value="0" />
+      </Condition>
+      <Format>
+        <FontColor>#CC0000</FontColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="RatioRows">
+      <Condition>
+        <CellProperty Property="IsRatio" Value="true" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Percentage" DecimalPlaces="1" />
+        <FontStyle>Italic</FontStyle>
+        <FontColor>#666666</FontColor>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION - All cells read-only                         -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <AllCellsProtected>true</AllCellsProtected>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- REPORT OPTIONS                                                -->
+  <!-- ============================================================ -->
+  <ReportOptions>
+    <SuppressZeroRows>true</SuppressZeroRows>
+    <AllowDrillDown>true</AllowDrillDown>
+    <AllowMemberExpansion>true</AllowMemberExpansion>
+    <ShowRowHierarchyIndent>true</ShowRowHierarchyIndent>
+    <WaterfallChartEnabled>true</WaterfallChartEnabled>
+    <WaterfallChartColumn>ActualYTD</WaterfallChartColumn>
+    <PrintSettings>
+      <Orientation>Portrait</Orientation>
+      <PaperSize>Letter</PaperSize>
+      <FitToPage>true</FitToPage>
+      <ShowGridLines>false</ShowGridLines>
+      <HeaderLeft>Statement of Cash Flows</HeaderLeft>
+      <HeaderCenter>{Entity.Description}</HeaderCenter>
+      <HeaderRight>Period: {Time.Description}</HeaderRight>
+      <FooterLeft>Confidential</FooterLeft>
+      <FooterCenter>Page {PageNumber} of {TotalPages}</FooterCenter>
+      <FooterRight>Generated: {PrintDate}</FooterRight>
+    </PrintSettings>
+  </ReportOptions>
+
+</CubeView>

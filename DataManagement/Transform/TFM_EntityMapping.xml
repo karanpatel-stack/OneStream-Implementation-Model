@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Entity Mapping
+  Purpose: Map source system company/subsidiary codes to OneStream Entity dimension members
+  Created: 2026-02-18
+
+  Maps SAP Company Codes, Oracle EBS Segment1 Company values, and NetSuite
+  Subsidiary IDs to the OneStream Entity dimension hierarchy. The Entity
+  dimension follows a geographic/plant-based structure for this manufacturing implementation.
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>EntityMapping</TransformName>
+      <TransformDescription>Lookup-based entity mapping that translates source system company identifiers (SAP Company Code, Oracle EBS Segment1, NetSuite Subsidiary ID) to OneStream Entity dimension members. The Entity hierarchy is structured by geography and plant/facility for manufacturing consolidation. Includes intercompany elimination entity mappings.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Lookup</TransformType>
+      <ExecutionOrder>200</ExecutionOrder>
+
+      <!-- ============================================================
+           MAPPING CONFIGURATION
+           ============================================================ -->
+      <MappingConfig>
+        <SourceField>SRC_Entity</SourceField>
+        <TargetField>OS_Entity</TargetField>
+        <ContextField>SRC_SourceSystem</ContextField>
+        <CaseSensitive>false</CaseSensitive>
+        <TrimWhitespace>true</TrimWhitespace>
+      </MappingConfig>
+
+      <!-- ============================================================
+           MAPPING TABLE
+           ============================================================ -->
+      <MappingTable>
+
+        <!-- ====================== SAP COMPANY CODES ====================== -->
+        <MappingGroup name="SAP_Companies" description="SAP S/4HANA Company Code to OneStream Entity">
+
+          <!-- United States Operations -->
+          <Mapping sourceSystem="SAP" sourceEntity="1000" targetEntity="Plant_US01_Detroit"
+                   description="US Manufacturing Plant - Detroit, MI (Headquarters)"
+                   currency="USD" country="US" region="Americas" />
+          <Mapping sourceSystem="SAP" sourceEntity="1100" targetEntity="Plant_US02_Houston"
+                   description="US Manufacturing Plant - Houston, TX"
+                   currency="USD" country="US" region="Americas" />
+          <Mapping sourceSystem="SAP" sourceEntity="1200" targetEntity="Corp_US_HQ"
+                   description="US Corporate / Shared Services"
+                   currency="USD" country="US" region="Americas" />
+
+          <!-- Germany / Europe Operations -->
+          <Mapping sourceSystem="SAP" sourceEntity="2000" targetEntity="Plant_DE01_Munich"
+                   description="Germany Manufacturing Plant - Munich"
+                   currency="EUR" country="DE" region="EMEA" />
+          <Mapping sourceSystem="SAP" sourceEntity="2100" targetEntity="Plant_DE02_Hamburg"
+                   description="Germany Distribution Center - Hamburg"
+                   currency="EUR" country="DE" region="EMEA" />
+
+          <!-- China / Asia Operations -->
+          <Mapping sourceSystem="SAP" sourceEntity="3000" targetEntity="Plant_CN01_Shanghai"
+                   description="China Manufacturing Plant - Shanghai"
+                   currency="CNY" country="CN" region="APAC" />
+          <Mapping sourceSystem="SAP" sourceEntity="3100" targetEntity="Plant_CN02_Shenzhen"
+                   description="China Manufacturing Plant - Shenzhen"
+                   currency="CNY" country="CN" region="APAC" />
+
+          <!-- Mexico Operations -->
+          <Mapping sourceSystem="SAP" sourceEntity="4000" targetEntity="Plant_MX01_Monterrey"
+                   description="Mexico Manufacturing Plant - Monterrey"
+                   currency="MXN" country="MX" region="Americas" />
+
+        </MappingGroup>
+
+        <!-- ====================== ORACLE EBS SEGMENT1 ====================== -->
+        <MappingGroup name="Oracle_Companies" description="Oracle EBS Segment1 Company to OneStream Entity">
+
+          <Mapping sourceSystem="Oracle" sourceEntity="01" targetEntity="Sub_UK01_London"
+                   description="UK Subsidiary - London"
+                   currency="GBP" country="GB" region="EMEA" />
+          <Mapping sourceSystem="Oracle" sourceEntity="02" targetEntity="Sub_FR01_Paris"
+                   description="France Subsidiary - Paris"
+                   currency="EUR" country="FR" region="EMEA" />
+          <Mapping sourceSystem="Oracle" sourceEntity="03" targetEntity="Sub_IT01_Milan"
+                   description="Italy Subsidiary - Milan"
+                   currency="EUR" country="IT" region="EMEA" />
+          <Mapping sourceSystem="Oracle" sourceEntity="04" targetEntity="Sub_ES01_Madrid"
+                   description="Spain Subsidiary - Madrid"
+                   currency="EUR" country="ES" region="EMEA" />
+          <Mapping sourceSystem="Oracle" sourceEntity="05" targetEntity="Sub_JP01_Tokyo"
+                   description="Japan Subsidiary - Tokyo"
+                   currency="JPY" country="JP" region="APAC" />
+          <Mapping sourceSystem="Oracle" sourceEntity="06" targetEntity="Sub_KR01_Seoul"
+                   description="South Korea Subsidiary - Seoul"
+                   currency="KRW" country="KR" region="APAC" />
+          <Mapping sourceSystem="Oracle" sourceEntity="07" targetEntity="Sub_AU01_Sydney"
+                   description="Australia Subsidiary - Sydney"
+                   currency="AUD" country="AU" region="APAC" />
+          <Mapping sourceSystem="Oracle" sourceEntity="08" targetEntity="Sub_BR01_SaoPaulo"
+                   description="Brazil Subsidiary - Sao Paulo"
+                   currency="BRL" country="BR" region="Americas" />
+
+        </MappingGroup>
+
+        <!-- ====================== NETSUITE SUBSIDIARIES ====================== -->
+        <MappingGroup name="NetSuite_Subsidiaries" description="NetSuite Subsidiary ID to OneStream Entity">
+
+          <Mapping sourceSystem="NetSuite" sourceEntity="10" targetEntity="Sub_CA01_Toronto"
+                   description="Canada Subsidiary - Toronto"
+                   currency="CAD" country="CA" region="Americas" />
+          <Mapping sourceSystem="NetSuite" sourceEntity="11" targetEntity="Sub_IN01_Mumbai"
+                   description="India Subsidiary - Mumbai"
+                   currency="INR" country="IN" region="APAC" />
+          <Mapping sourceSystem="NetSuite" sourceEntity="12" targetEntity="Sub_SG01_Singapore"
+                   description="Singapore Subsidiary"
+                   currency="SGD" country="SG" region="APAC" />
+          <Mapping sourceSystem="NetSuite" sourceEntity="13" targetEntity="Sub_TH01_Bangkok"
+                   description="Thailand Subsidiary - Bangkok"
+                   currency="THB" country="TH" region="APAC" />
+          <Mapping sourceSystem="NetSuite" sourceEntity="14" targetEntity="Sub_PL01_Warsaw"
+                   description="Poland Subsidiary - Warsaw"
+                   currency="PLN" country="PL" region="EMEA" />
+          <Mapping sourceSystem="NetSuite" sourceEntity="15" targetEntity="Sub_CZ01_Prague"
+                   description="Czech Republic Subsidiary - Prague"
+                   currency="CZK" country="CZ" region="EMEA" />
+
+        </MappingGroup>
+
+        <!-- ====================== ELIMINATION ENTITIES ====================== -->
+        <MappingGroup name="Elimination_Entities" description="Intercompany elimination entities">
+          <Mapping sourceSystem="SAP" sourceEntity="IC_ELIM_US" targetEntity="Elim_Americas"
+                   description="Americas IC Elimination" currency="USD" />
+          <Mapping sourceSystem="SAP" sourceEntity="IC_ELIM_EU" targetEntity="Elim_EMEA"
+                   description="EMEA IC Elimination" currency="EUR" />
+          <Mapping sourceSystem="SAP" sourceEntity="IC_ELIM_AP" targetEntity="Elim_APAC"
+                   description="APAC IC Elimination" currency="USD" />
+        </MappingGroup>
+
+      </MappingTable>
+
+      <!-- ============================================================
+           UNMAPPED HANDLING
+           ============================================================ -->
+      <UnmappedHandling>
+        <DefaultEntity>UNMAPPED_ENTITY</DefaultEntity>
+        <OnUnmapped>
+          <Action>MapToDefault</Action>
+          <FlagForReview>true</FlagForReview>
+          <ReviewFlagColumn>OS_MappingFlag</ReviewFlagColumn>
+          <ReviewFlagValue>UNMAPPED_ENTITY</ReviewFlagValue>
+          <LogToTable>DM_UnmappedEntities</LogToTable>
+          <Notification>
+            <Enabled>true</Enabled>
+            <Recipients>dm_admin@company.com</Recipients>
+            <Subject>OneStream DM: Unmapped Entity Detected</Subject>
+          </Notification>
+        </OnUnmapped>
+      </UnmappedHandling>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

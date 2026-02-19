@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_DataEntry_Headcount - Headcount and Compensation Planning Input
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_DataEntry_Headcount"
+           Description="Headcount planning form for FTE counts, salary, merit increases, and benefit calculations"
+           CubeName="Workforce"
+           ViewType="DataEntry"
+           IsEnabled="true"
+           AllowDataInput="true"
+           SuppressNoData="false"
+           SuppressZeros="false"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: Account (HR Subset) - Positions / Roles             -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- ---- Executive / Management ---- -->
+        <Member Name="HR_MGMT" DisplayName="Management &amp; Executive" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+
+        <Member Name="HR_MGMT_VPOps" DisplayName="VP Operations" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_MGMT_VPOps_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_VPOps_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_VPOps_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_VPOps_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_VPOps_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_MGMT_VPOps_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_MGMT_VPOps_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <Member Name="HR_MGMT_PlantMgr" DisplayName="Plant Manager" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_MGMT_PlantMgr_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_PlantMgr_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_PlantMgr_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_PlantMgr_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_MGMT_PlantMgr_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_MGMT_PlantMgr_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_MGMT_PlantMgr_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <!-- ---- Engineering ---- -->
+        <Member Name="HR_ENG" DisplayName="Engineering" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+
+        <Member Name="HR_ENG_SrEngineer" DisplayName="Senior Engineer" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_ENG_SrEngineer_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_SrEngineer_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_SrEngineer_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_SrEngineer_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_SrEngineer_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_ENG_SrEngineer_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_ENG_SrEngineer_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <Member Name="HR_ENG_MfgEngineer" DisplayName="Manufacturing Engineer" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_ENG_MfgEngineer_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_MfgEngineer_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_MfgEngineer_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_MfgEngineer_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_MfgEngineer_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_ENG_MfgEngineer_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_ENG_MfgEngineer_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <Member Name="HR_ENG_QualityEng" DisplayName="Quality Engineer" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_ENG_QualityEng_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_QualityEng_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_QualityEng_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_QualityEng_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_ENG_QualityEng_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_ENG_QualityEng_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_ENG_QualityEng_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <!-- ---- Production / Shop Floor ---- -->
+        <Member Name="HR_PROD" DisplayName="Production" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+
+        <Member Name="HR_PROD_Supervisor" DisplayName="Production Supervisor" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_PROD_Supervisor_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Supervisor_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Supervisor_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Supervisor_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Supervisor_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Supervisor_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Supervisor_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <Member Name="HR_PROD_Operator" DisplayName="Machine Operator" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_PROD_Operator_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Operator_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Operator_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Operator_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Operator_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Operator_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Operator_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <Member Name="HR_PROD_Technician" DisplayName="Maintenance Technician" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_PROD_Technician_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Technician_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Technician_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Technician_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Technician_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Technician_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Technician_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <Member Name="HR_PROD_Assembler" DisplayName="Assembler" IsInput="false" IndentLevel="1" IsBold="true" />
+        <Member Name="HR_PROD_Assembler_FTE" DisplayName="  FTE Count" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Assembler_Salary" DisplayName="  Base Salary" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Assembler_Merit" DisplayName="  Merit Increase %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Assembler_Bonus" DisplayName="  Bonus Target %" IsInput="true" IndentLevel="2" />
+        <Member Name="HR_PROD_Assembler_TotalComp" DisplayName="  Total Compensation" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Assembler_Benefits" DisplayName="  Benefits Cost" IsInput="false" IndentLevel="2" />
+        <Member Name="HR_PROD_Assembler_Burden" DisplayName="  Fully Burdened Cost" IsInput="false" IndentLevel="2" />
+
+        <!-- Totals -->
+        <Member Name="HR_TotalFTE" DisplayName="Total FTE" IsInput="false" IndentLevel="0" IsBold="true" />
+        <Member Name="HR_TotalComp" DisplayName="Total Compensation" IsInput="false" IndentLevel="0" IsBold="true" />
+        <Member Name="HR_TotalBenefits" DisplayName="Total Benefits" IsInput="false" IndentLevel="0" IsBold="true" />
+        <Member Name="HR_TotalBurden" DisplayName="Total Fully Burdened Cost" IsInput="false" IndentLevel="0" IsBold="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Time Dimension - Monthly                         -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <Dimension Name="Time" AliasTable="Default">
+      <MemberSelections>
+        <Member Name="M1" DisplayName="Jan" IsInput="true" />
+        <Member Name="M2" DisplayName="Feb" IsInput="true" />
+        <Member Name="M3" DisplayName="Mar" IsInput="true" />
+        <Member Name="M4" DisplayName="Apr" IsInput="true" />
+        <Member Name="M5" DisplayName="May" IsInput="true" />
+        <Member Name="M6" DisplayName="Jun" IsInput="true" />
+        <Member Name="M7" DisplayName="Jul" IsInput="true" />
+        <Member Name="M8" DisplayName="Aug" IsInput="true" />
+        <Member Name="M9" DisplayName="Sep" IsInput="true" />
+        <Member Name="M10" DisplayName="Oct" IsInput="true" />
+        <Member Name="M11" DisplayName="Nov" IsInput="true" />
+        <Member Name="M12" DisplayName="Dec" IsInput="true" />
+      </MemberSelections>
+    </Dimension>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="E_NA_Plant01">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="UD2_CostCenter" IsSelectable="true" DefaultMember="AllCostCenters">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllCostCenters" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Scenario" IsSelectable="true" DefaultMember="Budget">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="Budget" />
+          <Member Name="Forecast" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <!-- Fixed POV members -->
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Local" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+    <Dimension Name="View" IsSelectable="false" DefaultMember="Periodic" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Number" DecimalPlaces="0"
+                    ThousandsSeparator="true" NegativeFormat="Parentheses" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <!-- FTE rows: no decimal, no currency symbol -->
+    <ConditionalFormat Name="FTERows">
+      <Condition>
+        <RowMemberPattern Dimension="Account" Pattern="*_FTE" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Number" DecimalPlaces="1" ThousandsSeparator="false" />
+        <BackgroundColor>#FFF9E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Salary rows: currency format -->
+    <ConditionalFormat Name="SalaryRows">
+      <Condition>
+        <RowMemberPattern Dimension="Account" Pattern="*_Salary" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Currency" DecimalPlaces="0"
+                      ThousandsSeparator="true" CurrencySymbol="$" />
+        <BackgroundColor>#FFF9E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Percentage rows -->
+    <ConditionalFormat Name="PercentageRows">
+      <Condition>
+        <RowMemberPattern Dimension="Account" Pattern="*_Merit,*_Bonus" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Percentage" DecimalPlaces="1" />
+        <BackgroundColor>#FFF9E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Calculated rows (TotalComp, Benefits, Burden) -->
+    <ConditionalFormat Name="CalculatedRows">
+      <Condition>
+        <RowMemberPattern Dimension="Account" Pattern="*_TotalComp,*_Benefits,*_Burden" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Currency" DecimalPlaces="0"
+                      ThousandsSeparator="true" CurrencySymbol="$" />
+        <BackgroundColor>#F0F0F0</BackgroundColor>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Grand total rows -->
+    <ConditionalFormat Name="GrandTotalRows">
+      <Condition>
+        <RowMember Dimension="Account" Members="HR_TotalFTE,HR_TotalComp,HR_TotalBenefits,HR_TotalBurden" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#D6E8D6</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION                                               -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <ProtectedIntersections>
+      <Intersection RowMemberPattern="*_TotalComp,*_Benefits,*_Burden" IsProtected="true" />
+      <Intersection RowMembers="HR_TotalFTE,HR_TotalComp,HR_TotalBenefits,HR_TotalBurden" IsProtected="true" />
+      <Intersection RowMembers="HR_MGMT,HR_ENG,HR_PROD" IsProtected="true" />
+    </ProtectedIntersections>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- CALCULATION RULES                                             -->
+  <!-- ============================================================ -->
+  <CalculationRules>
+    <Rule Name="TotalCompCalc" Description="Total Comp = Base Salary * (1 + Merit%) * (1 + Bonus%) * FTE">
+      <TargetPattern>*_TotalComp</TargetPattern>
+      <Formula>FTE * BaseSalary * (1 + MeritPct) * (1 + BonusPct)</Formula>
+    </Rule>
+    <Rule Name="BenefitsCalc" Description="Benefits = Total Comp * Benefits Rate (28%)">
+      <TargetPattern>*_Benefits</TargetPattern>
+      <Formula>TotalComp * 0.28</Formula>
+      <BenefitsRate>0.28</BenefitsRate>
+    </Rule>
+    <Rule Name="BurdenCalc" Description="Burden = Total Comp + Benefits + Payroll Tax (7.65%) + Workers Comp (2.5%)">
+      <TargetPattern>*_Burden</TargetPattern>
+      <Formula>TotalComp + Benefits + (TotalComp * PayrollTaxRate) + (TotalComp * WorkersCompRate)</Formula>
+      <PayrollTaxRate>0.0765</PayrollTaxRate>
+      <WorkersCompRate>0.025</WorkersCompRate>
+    </Rule>
+  </CalculationRules>
+
+  <!-- ============================================================ -->
+  <!-- DATA ENTRY OPTIONS                                            -->
+  <!-- ============================================================ -->
+  <DataEntryOptions>
+    <AllowSpreadEntry>false</AllowSpreadEntry>
+    <AllowAnnotations>true</AllowAnnotations>
+    <RequireAnnotationOnChange>false</RequireAnnotationOnChange>
+    <SubmitAction>SaveAndCalc</SubmitAction>
+    <AutoCalcOnSave>true</AutoCalcOnSave>
+  </DataEntryOptions>
+
+</CubeView>

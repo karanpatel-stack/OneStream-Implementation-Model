@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_Report_Consolidation - Consolidated Financials by Region
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_Report_Consolidation"
+           Description="Consolidated P&amp;L with regional entity hierarchy as columns showing contribution by region and eliminations"
+           CubeName="Finance"
+           ViewType="Report"
+           IsEnabled="true"
+           AllowDataInput="false"
+           SuppressNoData="true"
+           SuppressZeros="true"
+           SuppressZerosOption="SuppressRowsWithAllZeros"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: P&L Accounts                                       -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- Revenue -->
+        <Member Name="NetRevenue" DisplayName="Net Revenue" IndentLevel="0" IsBold="true" AllowExpand="true" />
+        <Member Name="REV_Domestic" DisplayName="  Domestic Revenue" IndentLevel="1" />
+        <Member Name="REV_Export" DisplayName="  Export Revenue" IndentLevel="1" />
+        <Member Name="REV_Intercompany" DisplayName="  Intercompany Revenue" IndentLevel="1" />
+        <Member Name="REV_Deductions" DisplayName="  Revenue Deductions" IndentLevel="1" />
+
+        <Member Name="_Sep1" DisplayName="" IsBlankRow="true" />
+
+        <!-- COGS -->
+        <Member Name="TotalCOGS" DisplayName="Cost of Goods Sold" IndentLevel="0" IsBold="true" AllowExpand="true" />
+        <Member Name="COGS_DirectMaterials" DisplayName="  Direct Materials" IndentLevel="1" />
+        <Member Name="COGS_DirectLabor" DisplayName="  Direct Labor" IndentLevel="1" />
+        <Member Name="COGS_MfgOverhead" DisplayName="  Manufacturing Overhead" IndentLevel="1" />
+        <Member Name="COGS_Other" DisplayName="  Other COGS" IndentLevel="1" />
+
+        <Member Name="_Sep2" DisplayName="" IsBlankRow="true" />
+        <Member Name="GrossProfit" DisplayName="Gross Profit" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="GrossMargin" DisplayName="Gross Margin %" IndentLevel="0" IsRatio="true" />
+
+        <Member Name="_Sep3" DisplayName="" IsBlankRow="true" />
+
+        <!-- OPEX -->
+        <Member Name="TotalOPEX" DisplayName="Operating Expenses" IndentLevel="0" IsBold="true" AllowExpand="true" />
+        <Member Name="OPEX_SGA" DisplayName="  SG&amp;A" IndentLevel="1" />
+        <Member Name="OPEX_RD" DisplayName="  Research &amp; Development" IndentLevel="1" />
+        <Member Name="OPEX_Marketing" DisplayName="  Marketing" IndentLevel="1" />
+        <Member Name="OPEX_CorpAlloc" DisplayName="  Corporate Allocations" IndentLevel="1" />
+
+        <Member Name="_Sep4" DisplayName="" IsBlankRow="true" />
+        <Member Name="OperatingIncome" DisplayName="Operating Income" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="OperatingMargin" DisplayName="Operating Margin %" IndentLevel="0" IsRatio="true" />
+
+        <Member Name="_Sep5" DisplayName="" IsBlankRow="true" />
+        <Member Name="TotalOtherIncExp" DisplayName="Other Income / (Expense)" IndentLevel="0" />
+
+        <Member Name="_Sep6" DisplayName="" IsBlankRow="true" />
+        <Member Name="PreTaxIncome" DisplayName="Pre-Tax Income" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="IncomeTax" DisplayName="Income Tax" IndentLevel="0" />
+
+        <Member Name="_Sep7" DisplayName="" IsBlankRow="true" />
+        <Member Name="NetIncome" DisplayName="Net Income" IndentLevel="0" IsBold="true" IsSubtotal="true" />
+        <Member Name="NetMargin" DisplayName="Net Margin %" IndentLevel="0" IsRatio="true" />
+
+        <Member Name="_Sep8" DisplayName="" IsBlankRow="true" />
+        <Member Name="EBITDA" DisplayName="EBITDA" IndentLevel="0" IsBold="true" />
+
+        <!-- Regional Contribution Analysis -->
+        <Member Name="_Sep9" DisplayName="" IsBlankRow="true" />
+        <Member Name="RevenueContribution" DisplayName="Revenue Contribution %" IndentLevel="0" IsBold="true" IsRatio="true" />
+        <Member Name="ProfitContribution" DisplayName="Net Income Contribution %" IndentLevel="0" IsBold="true" IsRatio="true" />
+        <Member Name="HeadcountByRegion" DisplayName="Headcount" IndentLevel="0" IsBold="true" />
+        <Member Name="RevenuePerEmployee" DisplayName="Revenue per Employee" IndentLevel="0" IsRatio="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Entity Hierarchy as Columns                      -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <Dimension Name="Entity" AliasTable="Default">
+      <MemberSelections>
+        <!-- Americas Region -->
+        <ColumnGroup Name="Americas">
+          <Member Name="E_Americas" DisplayName="Americas" IsBold="true" AllowExpand="true">
+            <Consolidation>Aggregation</Consolidation>
+          </Member>
+          <ExpandableChildren>
+            <Member Name="E_NA_Plant01" DisplayName="NA Plant 01 (Detroit)" />
+            <Member Name="E_NA_Plant02" DisplayName="NA Plant 02 (Houston)" />
+            <Member Name="E_NA_Plant03" DisplayName="NA Plant 03 (Chicago)" />
+            <Member Name="E_NA_Sales" DisplayName="NA Sales Office" />
+            <Member Name="E_LATAM_Plant01" DisplayName="LATAM Plant (Monterrey)" />
+            <Member Name="E_LATAM_Sales" DisplayName="LATAM Sales Office" />
+            <Member Name="E_NA_Corporate" DisplayName="NA Corporate" />
+          </ExpandableChildren>
+        </ColumnGroup>
+
+        <!-- EMEA Region -->
+        <ColumnGroup Name="EMEA">
+          <Member Name="E_EMEA" DisplayName="EMEA" IsBold="true" AllowExpand="true">
+            <Consolidation>Aggregation</Consolidation>
+          </Member>
+          <ExpandableChildren>
+            <Member Name="E_EU_Plant01" DisplayName="EU Plant 01 (Stuttgart)" />
+            <Member Name="E_EU_Plant02" DisplayName="EU Plant 02 (Birmingham)" />
+            <Member Name="E_EU_Sales" DisplayName="EU Sales Office" />
+            <Member Name="E_MEA_Sales" DisplayName="MEA Sales Office" />
+            <Member Name="E_EU_Corporate" DisplayName="EU Corporate" />
+          </ExpandableChildren>
+        </ColumnGroup>
+
+        <!-- APAC Region -->
+        <ColumnGroup Name="APAC">
+          <Member Name="E_APAC" DisplayName="APAC" IsBold="true" AllowExpand="true">
+            <Consolidation>Aggregation</Consolidation>
+          </Member>
+          <ExpandableChildren>
+            <Member Name="E_APAC_Plant01" DisplayName="APAC Plant 01 (Shanghai)" />
+            <Member Name="E_APAC_Plant02" DisplayName="APAC Plant 02 (Osaka)" />
+            <Member Name="E_APAC_Sales" DisplayName="APAC Sales Office" />
+            <Member Name="E_APAC_Corporate" DisplayName="APAC Corporate" />
+          </ExpandableChildren>
+        </ColumnGroup>
+
+        <!-- Eliminations -->
+        <ColumnGroup Name="Eliminations">
+          <Member Name="E_Eliminations" DisplayName="Eliminations" IsBold="true">
+            <Consolidation>Elimination</Consolidation>
+          </Member>
+        </ColumnGroup>
+
+        <!-- Consolidated Total -->
+        <ColumnGroup Name="Consolidated">
+          <Member Name="E_Consolidated" DisplayName="Consolidated" IsBold="true">
+            <Consolidation>Consolidated</Consolidation>
+          </Member>
+        </ColumnGroup>
+      </MemberSelections>
+    </Dimension>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Scenario" IsSelectable="true" DefaultMember="Actual">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="Actual" />
+          <Member Name="Budget" />
+          <Member Name="Forecast" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Time" IsSelectable="true" DefaultMember="CurrentMonth">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllTime" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="View" IsSelectable="true" DefaultMember="YTD">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="Periodic" />
+          <Member Name="YTD" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Currency" IsSelectable="true" DefaultMember="USD">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="USD" DisplayName="US Dollar" />
+          <Member Name="EUR" DisplayName="Euro" />
+          <Member Name="Local" DisplayName="Local Currency" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Elimination" />
+    <Dimension Name="UD1_Product" IsSelectable="false" DefaultMember="AllProducts" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" ScaleFactor="1000"
+                    ScaleLabel="($ in thousands)" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <!-- Regional subtotal columns -->
+    <ConditionalFormat Name="RegionalTotals">
+      <Condition>
+        <ColumnMember Dimension="Entity" Members="E_Americas,E_EMEA,E_APAC" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BackgroundColor>#F0F5FA</BackgroundColor>
+        <BorderRightStyle>Thin</BorderRightStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Elimination column: distinct styling -->
+    <ConditionalFormat Name="EliminationColumn">
+      <Condition>
+        <ColumnMember Dimension="Entity" Member="E_Eliminations" />
+      </Condition>
+      <Format>
+        <FontColor>#CC6600</FontColor>
+        <BackgroundColor>#FFF5E6</BackgroundColor>
+        <FontStyle>Italic</FontStyle>
+        <BorderLeftStyle>Thin</BorderLeftStyle>
+        <BorderRightStyle>Thin</BorderRightStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Consolidated column: prominent -->
+    <ConditionalFormat Name="ConsolidatedColumn">
+      <Condition>
+        <ColumnMember Dimension="Entity" Member="E_Consolidated" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BackgroundColor>#E8F4E8</BackgroundColor>
+        <BorderLeftStyle>Double</BorderLeftStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="SubtotalRows">
+      <Condition>
+        <CellProperty Property="IsSubtotal" Value="true" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Thin</BorderTopStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="RatioRows">
+      <Condition>
+        <CellProperty Property="IsRatio" Value="true" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Percentage" DecimalPlaces="1" />
+        <FontStyle>Italic</FontStyle>
+        <FontColor>#666666</FontColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="NetIncomeRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="NetIncome" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <FontSize>11</FontSize>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <BorderBottomStyle>Double</BorderBottomStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Headcount row: number format, no currency -->
+    <ConditionalFormat Name="HeadcountRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="HeadcountByRegion" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Number" DecimalPlaces="0" ThousandsSeparator="true" />
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Revenue per Employee -->
+    <ConditionalFormat Name="RevPerEmployee">
+      <Condition>
+        <RowMember Dimension="Account" Member="RevenuePerEmployee" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Currency" DecimalPlaces="0" ThousandsSeparator="true" CurrencySymbol="$" />
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION - All cells read-only                         -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <AllCellsProtected>true</AllCellsProtected>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- REPORT OPTIONS                                                -->
+  <!-- ============================================================ -->
+  <ReportOptions>
+    <SuppressZeroRows>true</SuppressZeroRows>
+    <AllowDrillDown>true</AllowDrillDown>
+    <AllowMemberExpansion>true</AllowMemberExpansion>
+    <AllowColumnExpansion>true</AllowColumnExpansion>
+    <ShowRowHierarchyIndent>true</ShowRowHierarchyIndent>
+    <ShowConsolidationStatus>true</ShowConsolidationStatus>
+    <PrintSettings>
+      <Orientation>Landscape</Orientation>
+      <PaperSize>Tabloid</PaperSize>
+      <FitToPage>true</FitToPage>
+      <ShowGridLines>false</ShowGridLines>
+      <HeaderLeft>Consolidated Financial Statements</HeaderLeft>
+      <HeaderCenter>By Region</HeaderCenter>
+      <HeaderRight>{Scenario.Description} - {Time.Description}</HeaderRight>
+      <FooterLeft>Confidential - Management Reporting</FooterLeft>
+      <FooterCenter>Page {PageNumber} of {TotalPages}</FooterCenter>
+      <FooterRight>Generated: {PrintDate}</FooterRight>
+    </PrintSettings>
+  </ReportOptions>
+
+</CubeView>

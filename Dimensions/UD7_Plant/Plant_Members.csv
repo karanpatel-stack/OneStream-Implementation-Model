@@ -1,0 +1,19 @@
+MemberName,ParentName,Description,Region,Capacity
+Total_Plants,,Total Manufacturing Plants,,
+No_Plant,Total_Plants,No Plant Specified,,0
+Americas_Plants,Total_Plants,Americas Region Plants,Americas,0
+PLT_US01_Detroit,Americas_Plants,Detroit Plant - Heavy Machinery and Industrial,Americas,450000
+PLT_US02_Houston,Americas_Plants,Houston Plant - Energy and Process Equipment,Americas,320000
+PLT_US03_Charlotte,Americas_Plants,Charlotte Plant - Consumer Products,Americas,280000
+PLT_CA01_Toronto,Americas_Plants,Toronto Plant - Precision Components,Americas,180000
+PLT_MX01_Monterrey,Americas_Plants,Monterrey Plant - Assembly Operations,Americas,350000
+EMEA_Plants,Total_Plants,EMEA Region Plants,EMEA,0
+PLT_DE01_Munich,EMEA_Plants,Munich Plant - Automotive and Precision,EMEA,380000
+PLT_DE02_Stuttgart,EMEA_Plants,Stuttgart Plant - Precision Engineering,EMEA,220000
+PLT_UK01_Birmingham,EMEA_Plants,Birmingham Plant - Aerospace Components,EMEA,150000
+PLT_FR01_Lyon,EMEA_Plants,Lyon Plant - Industrial Automation,EMEA,200000
+APAC_Plants,Total_Plants,APAC Region Plants,APAC,0
+PLT_CN01_Shanghai,APAC_Plants,Shanghai Plant - Electronics and Assembly,APAC,520000
+PLT_CN02_Shenzhen,APAC_Plants,Shenzhen Plant - Consumer Electronics,APAC,480000
+PLT_JP01_Osaka,APAC_Plants,Osaka Plant - Robotics and Specialty,APAC,160000
+PLT_IN01_Pune,APAC_Plants,Pune Plant - Cost-Effective Manufacturing,APAC,400000

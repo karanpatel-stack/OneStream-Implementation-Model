@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Workflow Definition
+  Workflow:    WF_RollingForecast
+  Description: Monthly Rolling Forecast workflow that maintains an 18-month
+               forward-looking view by seeding from actuals and prior forecasts,
+               updating assumptions, and publishing the latest outlook.
+  Timeline:    Monthly cadence, due by Day 15 of each month.
+  Owner:       FP&A
+-->
+<WorkflowDefinition
+  xmlns="http://www.intactsoft.com/OneStream/Workflows"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.intactsoft.com/OneStream/Workflows WorkflowSchema.xsd">
+
+  <!-- ================================================================== -->
+  <!-- WORKFLOW HEADER                                                    -->
+  <!-- ================================================================== -->
+  <Workflow
+    Name="WF_RollingForecast"
+    DisplayName="Monthly Rolling Forecast"
+    Description="Monthly rolling forecast workflow maintaining an 18-month forward-looking view. The process seeds from actuals and prior forecasts, allows business units to update assumptions and drivers for open periods, runs calculations and variance analysis, and publishes the approved forecast."
+    WorkflowType="Forecasting"
+    Frequency="Monthly"
+    IsActive="true"
+    Version="1.0"
+    CreatedBy="Admin"
+    CreatedDate="2026-01-15"
+    ModifiedBy="Admin"
+    ModifiedDate="2026-02-18">
+
+    <!-- ================================================================ -->
+    <!-- FORECAST CONFIGURATION                                           -->
+    <!-- ================================================================ -->
+    <ForecastConfiguration>
+      <RollingWindow>18</RollingWindow>
+      <RollingWindowUnit>Months</RollingWindowUnit>
+      <Cadence>Monthly</Cadence>
+      <DueDay>15</DueDay>
+      <SeedingStrategy>ActualsPlusPriorForecast</SeedingStrategy>
+      <ClosedPeriodsSource>Actuals</ClosedPeriodsSource>
+      <OpenPeriodsSource>PriorForecast</OpenPeriodsSource>
+    </ForecastConfiguration>
+
+    <!-- ================================================================ -->
+    <!-- STATUS TRANSITIONS                                               -->
+    <!-- ================================================================ -->
+    <StatusTransitions>
+      <Status Name="NotStarted" DisplayName="Not Started" IsInitial="true" Color="#9E9E9E" />
+      <Status Name="Seeding" DisplayName="Seeding" Color="#03A9F4" />
+      <Status Name="InProgress" DisplayName="In Progress" Color="#2196F3" />
+      <Status Name="UnderReview" DisplayName="Under Review" Color="#FF9800" />
+      <Status Name="Approved" DisplayName="Approved" Color="#4CAF50" />
+      <Status Name="Published" DisplayName="Published" IsFinal="true" Color="#7B1FA2" />
+
+      <Transition From="NotStarted" To="Seeding" TriggerType="Automatic" />
+      <Transition From="Seeding" To="InProgress" TriggerType="Automatic" />
+      <Transition From="InProgress" To="UnderReview" TriggerType="StepCompletion" />
+      <Transition From="UnderReview" To="InProgress" TriggerType="Rejection" />
+      <Transition From="UnderReview" To="Approved" TriggerType="Approval" />
+      <Transition From="Approved" To="Published" TriggerType="Publication" />
+    </StatusTransitions>
+
+    <!-- ================================================================ -->
+    <!-- GLOBAL NOTIFICATIONS                                             -->
+    <!-- ================================================================ -->
+    <Notifications>
+      <Notification
+        EventType="WorkflowStarted"
+        Template="WF_RollingForecast_Kickoff"
+        Recipients="AllParticipants"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="StepTransition"
+        Template="WF_StepTransition_Generic"
+        Recipients="NextStepAssignee"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="DeadlineApproaching"
+        Template="WF_RF_DeadlineReminder"
+        Recipients="StepAssignee"
+        Channel="Email"
+        TriggerDaysBefore="2" />
+      <Notification
+        EventType="WorkflowCompleted"
+        Template="WF_RollingForecast_Published"
+        Recipients="AllParticipants,ExecutiveTeam"
+        Channel="Email,Dashboard" />
+    </Notifications>
+
+    <!-- ================================================================ -->
+    <!-- STEPS                                                            -->
+    <!-- ================================================================ -->
+    <Steps>
+
+      <!-- ============================================================== -->
+      <!-- STEP 1: Seed Forecast                                          -->
+      <!-- ============================================================== -->
+      <Step
+        Order="1"
+        Name="SeedForecast"
+        DisplayName="Seed Forecast"
+        Description="Automatically seed the rolling forecast by copying actuals for closed periods and carrying forward the prior forecast for open periods, extending the horizon to maintain an 18-month rolling window."
+        StepType="SystemProcess"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>1</PlannedStartDay>
+          <PlannedEndDay>2</PlannedEndDay>
+          <DurationDays>2</DurationDays>
+          <DueDay>2</DueDay>
+        </Timeline>
+
+        <Assignment>
+          <Role>System</Role>
+          <AssignmentType>SystemTriggered</AssignmentType>
+          <TriggerEvent>MonthlyCloseCompleted</TriggerEvent>
+          <EscalationHours>4</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_RollingForecast"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Execute the rolling forecast calculation rule that determines the seeding logic for each period: actuals for closed months, prior forecast for open months within the existing window, and extrapolation for newly added months."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="SeedingMethod" Value="ActualsPlusPriorForecast" />
+              <Parameter Name="RollingWindow" Value="18" />
+              <Parameter Name="ExtendMethod" Value="PriorYearSeasonality" />
+              <Parameter Name="ActualsScenario" Value="Actual" />
+              <Parameter Name="PriorForecastScenario" Value="RollingForecast_Prior" />
+              <Parameter Name="TargetScenario" Value="RollingForecast" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="EX_RollingForecastSeeder"
+            RuleType="ExtenderRule"
+            ExecutionOrder="2"
+            Description="Extender business rule that handles the data movement operations for forecast seeding, including cross-scenario data copies, period mapping, and initialization of newly added forecast periods."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="SourceCube" Value="Finance" />
+              <Parameter Name="TargetCube" Value="Finance" />
+              <Parameter Name="CopyMethod" Value="Replace" />
+              <Parameter Name="ClearTargetFirst" Value="true" />
+              <Parameter Name="PreserveManualOverrides" Value="false" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="SeedingComplete"
+            Description="Forecast seeding must complete successfully for all entities and all periods in the rolling window."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>SeedingStatus = 'Success' AND SeededEntityCount = TotalEntityCount</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>false</ApprovalRequired>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_RFSeed_Started"
+            Recipients="FPADirector"
+            Channel="Dashboard" />
+          <Notification
+            EventType="SeedingFailed"
+            Template="WF_RFSeed_Failed"
+            Recipients="FPADirector,SystemAdmin"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_RFSeed_Complete"
+            Recipients="BusinessUnitLeads,FPAAnalysts"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>Seeding</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 2: Update Assumptions                                     -->
+      <!-- ============================================================== -->
+      <Step
+        Order="2"
+        Name="UpdateAssumptions"
+        DisplayName="Update Assumptions"
+        Description="Business unit leads review seeded data and update drivers, rates, volumes, and other assumptions for all open forecast periods based on the latest business intelligence and market conditions."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>2</PlannedStartDay>
+          <PlannedEndDay>8</PlannedEndDay>
+          <DurationDays>6</DurationDays>
+          <DueDay>8</DueDay>
+        </Timeline>
+
+        <Assignment>
+          <Role>BusinessUnitLead</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>48</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <!-- No automated business rules; this is a manual data entry step -->
+        </BusinessRules>
+
+        <DataEntryControls>
+          <AllowEdit>OpenPeriodsOnly</AllowEdit>
+          <ProtectActuals>true</ProtectActuals>
+          <RequireChangeJustification>true</RequireChangeJustification>
+          <TrackChanges>true</TrackChanges>
+          <HighlightChangesFromSeed>true</HighlightChangesFromSeed>
+        </DataEntryControls>
+
+        <Gates>
+          <Gate
+            Name="AllEntitiesSubmitted"
+            Description="All assigned business units must submit their updated assumptions before proceeding."
+            GateType="Submission"
+            IsBlocking="true">
+            <Condition>SubmittedEntityCount = AssignedEntityCount</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>false</ApprovalRequired>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_RFAssumptions_Started"
+            Recipients="BusinessUnitLead"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="DeadlineApproaching"
+            Template="WF_RFAssumptions_Reminder"
+            Recipients="BusinessUnitLead"
+            Channel="Email"
+            TriggerDaysBefore="2" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_RFAssumptions_Complete"
+            Recipients="FPAAnalysts"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 3: Calculate & Review                                     -->
+      <!-- ============================================================== -->
+      <Step
+        Order="3"
+        Name="CalculateAndReview"
+        DisplayName="Calculate &amp; Review"
+        Description="Run driver-based planning calculations to produce the updated forecast, then perform variance analysis comparing the forecast to budget, prior forecast, and actuals."
+        StepType="Calculation"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>8</PlannedStartDay>
+          <PlannedEndDay>11</PlannedEndDay>
+          <DurationDays>3</DurationDays>
+          <DueDay>11</DueDay>
+        </Timeline>
+
+        <Assignment>
+          <Role>FPAAnalyst</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>24</EscalationHours>
+          <EscalationTarget>FPADirector</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="CR_DriverBasedPlanning_Forecast"
+            RuleType="CalculationRule"
+            ExecutionOrder="1"
+            Description="Execute driver-based planning calculations using the updated assumptions to produce the revised forecast for all open periods across all entities."
+            IsRequired="true"
+            OnFailure="Halt">
+            <Parameters>
+              <Parameter Name="PlanningModel" Value="FullPL" />
+              <Parameter Name="CalculationScope" Value="OpenPeriods" />
+              <Parameter Name="RecalculateAll" Value="true" />
+              <Parameter Name="IncludeBalanceSheet" Value="true" />
+              <Parameter Name="IncludeCashFlow" Value="true" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="CR_VarianceAnalysis_Forecast"
+            RuleType="CalculationRule"
+            ExecutionOrder="2"
+            Description="Generate variance analysis comparing the updated rolling forecast against budget, prior forecast, and year-to-date actuals. Flag material variances for management review."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="CompareTo" Value="Budget,PriorForecast,Actuals" />
+              <Parameter Name="VarianceThresholdPercent" Value="5" />
+              <Parameter Name="VarianceThresholdAmount" Value="25000" />
+              <Parameter Name="FlagMaterialVariances" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="CalculationsComplete"
+            Description="All calculations must run successfully before variance analysis can be reviewed."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>CalculationStatus = 'Success' AND ErrorCount = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>FPADirector</ApproverRole>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_RFCalc_Started"
+            Recipients="FPAAnalyst"
+            Channel="Dashboard" />
+          <Notification
+            EventType="CalculationComplete"
+            Template="WF_RFCalc_Results"
+            Recipients="FPAAnalyst,FPADirector"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_RFCalc_Complete"
+            Recipients="FPADirector"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>UnderReview</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 4: Management Review                                      -->
+      <!-- ============================================================== -->
+      <Step
+        Order="4"
+        Name="ManagementReview"
+        DisplayName="Management Review"
+        Description="FP&amp;A Director reviews the rolling forecast versus budget and prior forecast, evaluates variance explanations, and provides management commentary on the outlook."
+        StepType="Review"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>11</PlannedStartDay>
+          <PlannedEndDay>14</PlannedEndDay>
+          <DurationDays>3</DurationDays>
+          <DueDay>14</DueDay>
+        </Timeline>
+
+        <Assignment>
+          <Role>FPADirector</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>24</EscalationHours>
+          <EscalationTarget>CFO</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <!-- No automated business rules; this is a review/commentary step -->
+        </BusinessRules>
+
+        <ReviewRequirements>
+          <RequireCommentary>true</RequireCommentary>
+          <CommentaryScope>MaterialVariances</CommentaryScope>
+          <CommentaryMinLength>50</CommentaryMinLength>
+          <CompareScenarios>RollingForecast,Budget,PriorForecast</CompareScenarios>
+          <ReviewDashboard>RF_ManagementReviewDashboard</ReviewDashboard>
+        </ReviewRequirements>
+
+        <Gates>
+          <Gate
+            Name="CommentaryProvided"
+            Description="Commentary must be provided for all material variances before the forecast can be approved."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>MaterialVariancesWithoutCommentary = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>FPADirector</ApproverRole>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_RFReview_Started"
+            Recipients="FPADirector"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="CommentaryRequired"
+            Template="WF_RFReview_CommentaryNeeded"
+            Recipients="FPADirector,BusinessUnitLeads"
+            Channel="Email" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_RFReview_Complete"
+            Recipients="FPADirector"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>UnderReview</StatusOnEntry>
+        <StatusOnCompletion>Approved</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 5: Publish                                                -->
+      <!-- ============================================================== -->
+      <Step
+        Order="5"
+        Name="Publish"
+        DisplayName="Publish"
+        Description="Lock the current rolling forecast version, archive it as the official forecast for this cycle, and notify all stakeholders that the updated forecast is available."
+        StepType="Publication"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>14</PlannedStartDay>
+          <PlannedEndDay>15</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+          <DueDay>15</DueDay>
+        </Timeline>
+
+        <Assignment>
+          <Role>FPADirector</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>12</EscalationHours>
+          <EscalationTarget>CFO</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EH_NotificationDispatcher"
+            RuleType="EventHandler"
+            ExecutionOrder="1"
+            Description="Dispatch notifications to all stakeholders that the rolling forecast has been published, including links to dashboards, variance reports, and the forecast commentary package."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="NotificationScope" Value="AllStakeholders" />
+              <Parameter Name="IncludeDashboardLink" Value="true" />
+              <Parameter Name="IncludeVarianceReport" Value="true" />
+              <Parameter Name="IncludeCommentaryPackage" Value="true" />
+              <Parameter Name="ArchivePriorVersion" Value="true" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="ForecastApproved"
+            Description="Forecast must be approved by the FP&amp;A Director before it can be published."
+            GateType="WorkflowStatus"
+            IsBlocking="true">
+            <Condition>ForecastStatus = 'Approved'</Condition>
+          </Gate>
+        </Gates>
+
+        <PublicationControls>
+          <LockVersion>true</LockVersion>
+          <ArchiveAsCycle>true</ArchiveAsCycle>
+          <ArchiveNamingPattern>RF_{Year}_{Month}</ArchiveNamingPattern>
+          <PreventDataEntry>true</PreventDataEntry>
+          <SnapshotData>true</SnapshotData>
+        </PublicationControls>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>false</ApprovalRequired>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="Published"
+            Template="WF_RollingForecast_Published"
+            Recipients="AllParticipants,ExecutiveTeam,BoardMembers"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="VersionLocked"
+            Template="WF_RollingForecast_Locked"
+            Recipients="FPADirector,FPAAnalysts"
+            Channel="Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>Approved</StatusOnEntry>
+        <StatusOnCompletion>Published</StatusOnCompletion>
+      </Step>
+
+    </Steps>
+
+    <!-- ================================================================ -->
+    <!-- TIMELINE SUMMARY                                                 -->
+    <!-- ================================================================ -->
+    <TimelineSummary>
+      <Cadence>Monthly</Cadence>
+      <DueDay>15</DueDay>
+      <RollingWindow>18 Months</RollingWindow>
+      <TotalDuration>15</TotalDuration>
+      <DurationUnit>Days</DurationUnit>
+      <Milestones>
+        <Milestone Day="2" Name="SeedingComplete" Description="Forecast seeded from actuals and prior forecast" />
+        <Milestone Day="8" Name="AssumptionsUpdated" Description="Business unit assumptions updated for open periods" />
+        <Milestone Day="11" Name="CalculationsComplete" Description="Forecast calculated and variance analysis generated" />
+        <Milestone Day="14" Name="ReviewComplete" Description="Management review and commentary finalized" />
+        <Milestone Day="15" Name="ForecastPublished" Description="Rolling forecast locked and published" />
+      </Milestones>
+    </TimelineSummary>
+
+  </Workflow>
+</WorkflowDefinition>

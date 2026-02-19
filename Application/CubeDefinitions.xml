@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CubeDefinitions>
+
+  <!-- ============================================================ -->
+  <!-- Cube 1: Finance - Financial Consolidation and Reporting       -->
+  <!-- ============================================================ -->
+  <Cube Name="Finance" Description="Financial Consolidation and Reporting" IsPrimary="true">
+    <CubeType>Consolidation</CubeType>
+    <AllowDataInput>true</AllowDataInput>
+    <CalculationEnabled>true</CalculationEnabled>
+    <ConsolidationEnabled>true</ConsolidationEnabled>
+    <CurrencyTranslationEnabled>true</CurrencyTranslationEnabled>
+    <IntercompanyEnabled>true</IntercompanyEnabled>
+
+    <DimensionAssignments>
+      <Dimension Name="Account" DimensionType="Account" IsRequired="true" SortOrder="1">
+        <Description>Chart of Accounts - Full P&amp;L, Balance Sheet, Cash Flow, Statistical</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Entity" DimensionType="Entity" IsRequired="true" SortOrder="2">
+        <Description>Legal entities, plants, and shared services</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Scenario" DimensionType="Scenario" IsRequired="true" SortOrder="3">
+        <Description>Actual, Budget, Forecast, What-If scenarios</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Time" DimensionType="Time" IsRequired="true" SortOrder="4">
+        <Description>Calendar periods CY2024 through CY2027</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Flow" DimensionType="Flow" IsRequired="true" SortOrder="5">
+        <Description>Movement analysis - Opening, Movements, Closing, FX</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Consolidation" DimensionType="Consolidation" IsRequired="true" SortOrder="6">
+        <Description>Consolidation processing - Local, Translated, Elimination, Consolidated</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD1_Product" DimensionType="UserDefined" IsRequired="false" SortOrder="7">
+        <Description>Product hierarchy - Industrial, Consumer, Specialty</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD2_CostCenter" DimensionType="UserDefined" IsRequired="false" SortOrder="8">
+        <Description>Cost center hierarchy - Production, Warehouse, Admin, R&amp;D, Sales</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD3_Intercompany" DimensionType="UserDefined" IsRequired="false" SortOrder="9">
+        <Description>Intercompany partner matching dimension</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD4_Project" DimensionType="UserDefined" IsRequired="false" SortOrder="10">
+        <Description>Capital and R&amp;D project tracking</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD5_CustomerSegment" DimensionType="UserDefined" IsRequired="false" SortOrder="11">
+        <Description>Customer segment analysis</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD6_Channel" DimensionType="UserDefined" IsRequired="false" SortOrder="12">
+        <Description>Sales channel analysis</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+    </DimensionAssignments>
+
+    <CalculationRules>
+      <Rule Name="GrossProfitCalc" Description="Net Revenue minus Total COGS" />
+      <Rule Name="EBITDACalc" Description="Gross Profit minus Operating Expenses" />
+      <Rule Name="EBITCalc" Description="EBITDA minus Depreciation and Amortization" />
+      <Rule Name="EBTCalc" Description="EBIT minus Interest plus Other Income" />
+      <Rule Name="NetIncomeCalc" Description="EBT minus Income Tax" />
+      <Rule Name="StandardCostVariance" Description="Standard vs Actual cost variance analysis" />
+      <Rule Name="OverheadAllocation" Description="Manufacturing overhead allocation by machine hours" />
+    </CalculationRules>
+  </Cube>
+
+  <!-- ============================================================ -->
+  <!-- Cube 2: Planning - Operational and Financial Planning          -->
+  <!-- ============================================================ -->
+  <Cube Name="Planning" Description="Operational and Financial Planning" IsPrimary="false">
+    <CubeType>Planning</CubeType>
+    <AllowDataInput>true</AllowDataInput>
+    <CalculationEnabled>true</CalculationEnabled>
+    <ConsolidationEnabled>false</ConsolidationEnabled>
+    <CurrencyTranslationEnabled>true</CurrencyTranslationEnabled>
+    <IntercompanyEnabled>false</IntercompanyEnabled>
+
+    <DimensionAssignments>
+      <Dimension Name="Account" DimensionType="Account" IsRequired="true" SortOrder="1">
+        <Description>Planning accounts - P&amp;L, Operational KPIs, Drivers</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Entity" DimensionType="Entity" IsRequired="true" SortOrder="2">
+        <Description>Planning entities - Plants and cost centers</Description>
+        <MemberFilter>LeafOnly</MemberFilter>
+      </Dimension>
+      <Dimension Name="Scenario" DimensionType="Scenario" IsRequired="true" SortOrder="3">
+        <Description>Budget, Forecast, and What-If</Description>
+        <MemberFilter>PlanningScenarios</MemberFilter>
+      </Dimension>
+      <Dimension Name="Time" DimensionType="Time" IsRequired="true" SortOrder="4">
+        <Description>Monthly planning periods</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD1_Product" DimensionType="UserDefined" IsRequired="false" SortOrder="5">
+        <Description>Product-level planning</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD2_CostCenter" DimensionType="UserDefined" IsRequired="false" SortOrder="6">
+        <Description>Cost center budgeting</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD3_Intercompany" DimensionType="UserDefined" IsRequired="false" SortOrder="7">
+        <Description>Intercompany planning</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD4_Project" DimensionType="UserDefined" IsRequired="false" SortOrder="8">
+        <Description>Project-based planning</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD6_Channel" DimensionType="UserDefined" IsRequired="false" SortOrder="9">
+        <Description>Channel-level revenue planning</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD8_Version" DimensionType="UserDefined" IsRequired="true" SortOrder="10">
+        <Description>Planning version control</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+    </DimensionAssignments>
+
+    <PlanningFeatures>
+      <SeederEnabled>true</SeederEnabled>
+      <SpreadingEnabled>true</SpreadingEnabled>
+      <SpreadingMethods>Even,Trend,Manual,SeasonalProfile</SpreadingMethods>
+      <DriverBasedPlanningEnabled>true</DriverBasedPlanningEnabled>
+      <TopDownAllocationEnabled>true</TopDownAllocationEnabled>
+      <BottomUpInputEnabled>true</BottomUpInputEnabled>
+    </PlanningFeatures>
+  </Cube>
+
+  <!-- ============================================================ -->
+  <!-- Cube 3: HR - Workforce Planning and Headcount                 -->
+  <!-- ============================================================ -->
+  <Cube Name="HR" Description="Workforce Planning and Headcount" IsPrimary="false">
+    <CubeType>Planning</CubeType>
+    <AllowDataInput>true</AllowDataInput>
+    <CalculationEnabled>true</CalculationEnabled>
+    <ConsolidationEnabled>false</ConsolidationEnabled>
+    <CurrencyTranslationEnabled>true</CurrencyTranslationEnabled>
+    <IntercompanyEnabled>false</IntercompanyEnabled>
+
+    <DimensionAssignments>
+      <Dimension Name="Account" DimensionType="Account" IsRequired="true" SortOrder="1">
+        <Description>HR-specific accounts - Compensation, Benefits, Headcount</Description>
+        <MemberFilter>HR_Subset</MemberFilter>
+      </Dimension>
+      <Dimension Name="Entity" DimensionType="Entity" IsRequired="true" SortOrder="2">
+        <Description>HR entities</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Scenario" DimensionType="Scenario" IsRequired="true" SortOrder="3">
+        <Description>HR planning scenarios</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Time" DimensionType="Time" IsRequired="true" SortOrder="4">
+        <Description>Monthly HR periods</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD2_CostCenter" DimensionType="UserDefined" IsRequired="false" SortOrder="5">
+        <Description>Department and cost center assignment</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD8_Version" DimensionType="UserDefined" IsRequired="true" SortOrder="6">
+        <Description>HR planning version control</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+    </DimensionAssignments>
+
+    <HRFeatures>
+      <HeadcountPlanningEnabled>true</HeadcountPlanningEnabled>
+      <CompensationModelingEnabled>true</CompensationModelingEnabled>
+      <BenefitsCostModelingEnabled>true</BenefitsCostModelingEnabled>
+      <MeritIncreaseModelingEnabled>true</MeritIncreaseModelingEnabled>
+      <AttritionModelingEnabled>true</AttritionModelingEnabled>
+      <NewHirePlanningEnabled>true</NewHirePlanningEnabled>
+    </HRFeatures>
+  </Cube>
+
+  <!-- ============================================================ -->
+  <!-- Cube 4: Reconciliation - Account Reconciliation and Matching  -->
+  <!-- ============================================================ -->
+  <Cube Name="Reconciliation" Description="Account Reconciliation and Matching" IsPrimary="false">
+    <CubeType>Reconciliation</CubeType>
+    <AllowDataInput>true</AllowDataInput>
+    <CalculationEnabled>true</CalculationEnabled>
+    <ConsolidationEnabled>false</ConsolidationEnabled>
+    <CurrencyTranslationEnabled>false</CurrencyTranslationEnabled>
+    <IntercompanyEnabled>false</IntercompanyEnabled>
+
+    <DimensionAssignments>
+      <Dimension Name="Account" DimensionType="Account" IsRequired="true" SortOrder="1">
+        <Description>Reconciliation accounts - Balance Sheet focus</Description>
+        <MemberFilter>BS_Reconciliation</MemberFilter>
+      </Dimension>
+      <Dimension Name="Entity" DimensionType="Entity" IsRequired="true" SortOrder="2">
+        <Description>Entity for reconciliation scope</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="Time" DimensionType="Time" IsRequired="true" SortOrder="3">
+        <Description>Reconciliation periods</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+      <Dimension Name="UD8_Version" DimensionType="UserDefined" IsRequired="true" SortOrder="4">
+        <Description>Reconciliation version - Working, Submitted, Approved</Description>
+        <MemberFilter>All</MemberFilter>
+      </Dimension>
+    </DimensionAssignments>
+
+    <ReconciliationFeatures>
+      <AutoMatchEnabled>true</AutoMatchEnabled>
+      <MatchingToleranceAmount>0.01</MatchingToleranceAmount>
+      <MatchingTolerancePercent>0.001</MatchingTolerancePercent>
+      <CertificationWorkflowEnabled>true</CertificationWorkflowEnabled>
+      <RiskRatingEnabled>true</RiskRatingEnabled>
+      <AgingAnalysisEnabled>true</AgingAnalysisEnabled>
+    </ReconciliationFeatures>
+  </Cube>
+
+</CubeDefinitions>

@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_DataEntry_CAPEX - Capital Expenditure Input Form
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_DataEntry_CAPEX"
+           Description="Capital expenditure planning by project across a three-year horizon with depreciation impact"
+           CubeName="Finance"
+           ViewType="DataEntry"
+           IsEnabled="true"
+           AllowDataInput="true"
+           SuppressNoData="false"
+           SuppressZeros="true"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: UD4_Project Dimension - Capital Projects            -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="UD4_Project" AliasTable="Default">
+      <MemberSelections>
+        <!-- Plant Expansion Projects -->
+        <Member Name="CAPEX_PlantExpansion" DisplayName="Plant Expansion" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="PRJ_PE_NewLine" DisplayName="New Assembly Line - Building B" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_PE_Warehouse" DisplayName="Warehouse Expansion - Phase II" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_PE_LoadingDock" DisplayName="Loading Dock Renovation" IsInput="true" IndentLevel="1" />
+
+        <!-- Manufacturing Equipment -->
+        <Member Name="CAPEX_MfgEquipment" DisplayName="Manufacturing Equipment" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="PRJ_ME_CNCMachines" DisplayName="CNC Machines (5-Axis)" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_ME_RoboticWeld" DisplayName="Robotic Welding Cell" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_ME_PaintBooth" DisplayName="Automated Paint Booth" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_ME_Conveyor" DisplayName="Conveyor System Upgrade" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_ME_QualityInsp" DisplayName="Automated Quality Inspection" IsInput="true" IndentLevel="1" />
+
+        <!-- IT & Technology -->
+        <Member Name="CAPEX_IT" DisplayName="IT &amp; Technology" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="PRJ_IT_MES" DisplayName="MES System Implementation" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_IT_ERPUpgrade" DisplayName="ERP Upgrade Module" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_IT_Network" DisplayName="Plant Network Infrastructure" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_IT_IoTSensors" DisplayName="IoT Sensor Deployment" IsInput="true" IndentLevel="1" />
+
+        <!-- Environmental & Safety -->
+        <Member Name="CAPEX_EnvSafety" DisplayName="Environmental &amp; Safety" IsInput="false" IndentLevel="0" IsBold="true" IsExpanded="true" />
+        <Member Name="PRJ_ES_WasteWater" DisplayName="Wastewater Treatment Upgrade" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_ES_AirFiltration" DisplayName="Air Filtration System" IsInput="true" IndentLevel="1" />
+        <Member Name="PRJ_ES_FireSuppress" DisplayName="Fire Suppression System" IsInput="true" IndentLevel="1" />
+
+        <!-- Calculated Summary Rows -->
+        <Member Name="CAPEX_TotalSpend" DisplayName="Total Capital Spend" IsInput="false" IndentLevel="0" IsBold="true" />
+        <Member Name="CAPEX_CumulativeSpend" DisplayName="Cumulative Spend" IsInput="false" IndentLevel="0" IsBold="true" />
+        <Member Name="CAPEX_DepreciationImpact" DisplayName="Depreciation Impact" IsInput="false" IndentLevel="0" IsBold="true" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Time - 3-Year Monthly Horizon                    -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <Dimension Name="Time" AliasTable="Default">
+      <MemberSelections>
+        <!-- Current Year (FY2026) -->
+        <Member Name="FY2026_M1" DisplayName="Jan-26" IsInput="true" />
+        <Member Name="FY2026_M2" DisplayName="Feb-26" IsInput="true" />
+        <Member Name="FY2026_M3" DisplayName="Mar-26" IsInput="true" />
+        <Member Name="FY2026_M4" DisplayName="Apr-26" IsInput="true" />
+        <Member Name="FY2026_M5" DisplayName="May-26" IsInput="true" />
+        <Member Name="FY2026_M6" DisplayName="Jun-26" IsInput="true" />
+        <Member Name="FY2026_M7" DisplayName="Jul-26" IsInput="true" />
+        <Member Name="FY2026_M8" DisplayName="Aug-26" IsInput="true" />
+        <Member Name="FY2026_M9" DisplayName="Sep-26" IsInput="true" />
+        <Member Name="FY2026_M10" DisplayName="Oct-26" IsInput="true" />
+        <Member Name="FY2026_M11" DisplayName="Nov-26" IsInput="true" />
+        <Member Name="FY2026_M12" DisplayName="Dec-26" IsInput="true" />
+        <Member Name="FY2026_Total" DisplayName="FY2026 Total" IsInput="false" IsBold="true" />
+
+        <!-- Year 2 (FY2027) -->
+        <Member Name="FY2027_M1" DisplayName="Jan-27" IsInput="true" />
+        <Member Name="FY2027_M2" DisplayName="Feb-27" IsInput="true" />
+        <Member Name="FY2027_M3" DisplayName="Mar-27" IsInput="true" />
+        <Member Name="FY2027_M4" DisplayName="Apr-27" IsInput="true" />
+        <Member Name="FY2027_M5" DisplayName="May-27" IsInput="true" />
+        <Member Name="FY2027_M6" DisplayName="Jun-27" IsInput="true" />
+        <Member Name="FY2027_M7" DisplayName="Jul-27" IsInput="true" />
+        <Member Name="FY2027_M8" DisplayName="Aug-27" IsInput="true" />
+        <Member Name="FY2027_M9" DisplayName="Sep-27" IsInput="true" />
+        <Member Name="FY2027_M10" DisplayName="Oct-27" IsInput="true" />
+        <Member Name="FY2027_M11" DisplayName="Nov-27" IsInput="true" />
+        <Member Name="FY2027_M12" DisplayName="Dec-27" IsInput="true" />
+        <Member Name="FY2027_Total" DisplayName="FY2027 Total" IsInput="false" IsBold="true" />
+
+        <!-- Year 3 (FY2028) -->
+        <Member Name="FY2028_M1" DisplayName="Jan-28" IsInput="true" />
+        <Member Name="FY2028_M2" DisplayName="Feb-28" IsInput="true" />
+        <Member Name="FY2028_M3" DisplayName="Mar-28" IsInput="true" />
+        <Member Name="FY2028_M4" DisplayName="Apr-28" IsInput="true" />
+        <Member Name="FY2028_M5" DisplayName="May-28" IsInput="true" />
+        <Member Name="FY2028_M6" DisplayName="Jun-28" IsInput="true" />
+        <Member Name="FY2028_M7" DisplayName="Jul-28" IsInput="true" />
+        <Member Name="FY2028_M8" DisplayName="Aug-28" IsInput="true" />
+        <Member Name="FY2028_M9" DisplayName="Sep-28" IsInput="true" />
+        <Member Name="FY2028_M10" DisplayName="Oct-28" IsInput="true" />
+        <Member Name="FY2028_M11" DisplayName="Nov-28" IsInput="true" />
+        <Member Name="FY2028_M12" DisplayName="Dec-28" IsInput="true" />
+        <Member Name="FY2028_Total" DisplayName="FY2028 Total" IsInput="false" IsBold="true" />
+
+        <!-- Grand Total -->
+        <Member Name="CAPEX_GrandTotal" DisplayName="3-Year Total" IsInput="false" IsBold="true" />
+      </MemberSelections>
+    </Dimension>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="E_NA_Plant01">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Scenario" IsSelectable="true" DefaultMember="Budget">
+      <SelectionFilter>
+        <AllowedMembers>
+          <Member Name="Budget" />
+          <Member Name="Forecast" />
+        </AllowedMembers>
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Account" IsSelectable="false" DefaultMember="CAPEX" />
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Local" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+    <Dimension Name="View" IsSelectable="false" DefaultMember="Periodic" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <ConditionalFormat Name="InputCells">
+      <Condition>
+        <CellProperty Property="IsInput" Value="true" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#FFF9E6</BackgroundColor>
+        <BorderColor>#D4C577</BorderColor>
+        <BorderStyle>Thin</BorderStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="CategoryHeaders">
+      <Condition>
+        <RowMember Dimension="UD4_Project" Members="CAPEX_PlantExpansion,CAPEX_MfgEquipment,CAPEX_IT,CAPEX_EnvSafety" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#E6F0FA</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="TotalSpendRow">
+      <Condition>
+        <RowMember Dimension="UD4_Project" Member="CAPEX_TotalSpend" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#D6E8D6</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="CumulativeRow">
+      <Condition>
+        <RowMember Dimension="UD4_Project" Member="CAPEX_CumulativeSpend" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#F0F0F0</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="DepreciationRow">
+      <Condition>
+        <RowMember Dimension="UD4_Project" Member="CAPEX_DepreciationImpact" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#FAE6E6</BackgroundColor>
+        <FontStyle>Italic</FontStyle>
+        <IsProtected>true</IsProtected>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="YearTotalColumns">
+      <Condition>
+        <ColumnMember Dimension="Time" Members="FY2026_Total,FY2027_Total,FY2028_Total,CAPEX_GrandTotal" />
+      </Condition>
+      <Format>
+        <BackgroundColor>#E0E8F0</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+        <IsProtected>true</IsProtected>
+        <BorderLeftStyle>Thin</BorderLeftStyle>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION                                               -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <ProtectedIntersections>
+      <Intersection ColumnMembers="FY2026_Total,FY2027_Total,FY2028_Total,CAPEX_GrandTotal" IsProtected="true" />
+      <Intersection RowMembers="CAPEX_PlantExpansion,CAPEX_MfgEquipment,CAPEX_IT,CAPEX_EnvSafety" IsProtected="true" />
+      <Intersection RowMembers="CAPEX_TotalSpend,CAPEX_CumulativeSpend,CAPEX_DepreciationImpact" IsProtected="true" />
+    </ProtectedIntersections>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- DEPRECIATION CALCULATION PARAMETERS                           -->
+  <!-- ============================================================ -->
+  <CalculationRules>
+    <Rule Name="CumulativeSpend" Description="Running total of all CAPEX spend from project inception">
+      <TargetMember>CAPEX_CumulativeSpend</TargetMember>
+      <Formula>CumulativeSum(CAPEX_TotalSpend)</Formula>
+    </Rule>
+    <Rule Name="DepreciationImpact" Description="Monthly straight-line depreciation on placed-in-service assets">
+      <TargetMember>CAPEX_DepreciationImpact</TargetMember>
+      <Method>StraightLine</Method>
+      <DefaultUsefulLifeYears>7</DefaultUsefulLifeYears>
+      <DepreciationStartRule>MonthAfterPlacement</DepreciationStartRule>
+      <ProjectDepreciationOverrides>
+        <Override Project="PRJ_PE_NewLine" UsefulLifeYears="20" />
+        <Override Project="PRJ_PE_Warehouse" UsefulLifeYears="20" />
+        <Override Project="PRJ_PE_LoadingDock" UsefulLifeYears="15" />
+        <Override Project="PRJ_ME_CNCMachines" UsefulLifeYears="10" />
+        <Override Project="PRJ_ME_RoboticWeld" UsefulLifeYears="10" />
+        <Override Project="PRJ_ME_PaintBooth" UsefulLifeYears="10" />
+        <Override Project="PRJ_ME_Conveyor" UsefulLifeYears="10" />
+        <Override Project="PRJ_ME_QualityInsp" UsefulLifeYears="7" />
+        <Override Project="PRJ_IT_MES" UsefulLifeYears="5" />
+        <Override Project="PRJ_IT_ERPUpgrade" UsefulLifeYears="5" />
+        <Override Project="PRJ_IT_Network" UsefulLifeYears="5" />
+        <Override Project="PRJ_IT_IoTSensors" UsefulLifeYears="5" />
+        <Override Project="PRJ_ES_WasteWater" UsefulLifeYears="15" />
+        <Override Project="PRJ_ES_AirFiltration" UsefulLifeYears="10" />
+        <Override Project="PRJ_ES_FireSuppress" UsefulLifeYears="15" />
+      </ProjectDepreciationOverrides>
+    </Rule>
+  </CalculationRules>
+
+  <!-- ============================================================ -->
+  <!-- DATA ENTRY OPTIONS                                            -->
+  <!-- ============================================================ -->
+  <DataEntryOptions>
+    <AllowSpreadEntry>false</AllowSpreadEntry>
+    <AllowAnnotations>true</AllowAnnotations>
+    <RequireAnnotationOnChange>true</RequireAnnotationOnChange>
+    <ValidationRule>
+      <MinValue>0</MinValue>
+      <MaxValue>999999999</MaxValue>
+      <AllowNegative>false</AllowNegative>
+    </ValidationRule>
+    <SubmitAction>SaveAndCalc</SubmitAction>
+    <AutoCalcOnSave>true</AutoCalcOnSave>
+    <ApprovalRequired>true</ApprovalRequired>
+    <ApprovalThreshold>500000</ApprovalThreshold>
+  </DataEntryOptions>
+
+</CubeView>

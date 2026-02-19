@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_DataQualityScorecard"
+  Description="Data Quality Metrics Scorecard Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual"               DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                    DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants" DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Workflow"  MemberFilter="W#*"                    DefaultMember="W#Default" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_DataQualityScorecard"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="DataQuality"
+      CubeName="MainCube"
+      SuppressNoData="False"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeValidationRules"  Value="True" />
+        <Parameter Name="IncludeTrendHistory"     Value="True" />
+        <Parameter Name="TrendPeriods"            Value="12" />
+        <Parameter Name="MaxRows"                 Value="20000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Data Quality Scorecard"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+        <LabelComponent
+          Name="PeriodLabel"
+          Text="Period: {POV.Time.MemberDescription}"
+          FontFamily="Segoe UI" FontSize="12" ForeColor="#A0B4D0" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="EntityFilter"
+          FilterType="DropDown"
+          Dimension="Entity"
+          MemberFilter="E#TopEntity,E#TopEntity.Children"
+          DefaultMember="E#TopEntity"
+          Label="Entity" Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="WorkflowFilter"
+          FilterType="DropDown"
+          Dimension="Workflow"
+          MemberFilter="W#Default,W#Supplemental"
+          DefaultMember="W#Default"
+          Label="Workflow" Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: OVERALL GAUGE + ENTITY HEATMAP -->
+    <Row Index="1" Height="300" HeightUnit="Pixel">
+
+      <!-- Overall DQ Score Gauge -->
+      <Panel Row="1" Column="0" ColumnSpan="3" RowSpan="1"
+             PanelType="GaugePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Overall Data Quality Score" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GaugeComponent
+          Name="OverallDQGauge"
+          GaugeType="Radial"
+          DataAdapter="DDA_DataQualityScorecard"
+          ValueExpression="DQ.OverallScore:E#{POV.Entity}:T#{POV.Time}"
+          MinValue="0" MaxValue="100"
+          StartAngle="180" EndAngle="0"
+          ValueFontSize="36" ValueFontWeight="Bold" ValueForeColor="#FFFFFF"
+          ValueFormat="0"
+          ValueSuffix="%"
+          Width="220" Height="180"
+          NeedleColor="#FFFFFF" NeedleWidth="3"
+          CenterCircleRadius="8" CenterCircleColor="#FFFFFF">
+
+          <GaugeRanges>
+            <Range Start="0"  End="60"  Color="#E74C3C" Label="Poor" />
+            <Range Start="60" End="80"  Color="#F39C12" Label="Fair" />
+            <Range Start="80" End="90"  Color="#3498DB" Label="Good" />
+            <Range Start="90" End="100" Color="#27AE60" Label="Excellent" />
+          </GaugeRanges>
+
+          <SubLabel
+            Text="Target: 95%"
+            FontSize="11" ForeColor="#8CA8CC"
+            VerticalAlignment="Bottom" />
+        </GaugeComponent>
+      </Panel>
+
+      <!-- Entity-Level DQ Scores Heatmap -->
+      <Panel Row="1" Column="3" ColumnSpan="5" RowSpan="1"
+             PanelType="HeatmapPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Entity-Level DQ Scores" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <HeatmapComponent
+          Name="EntityDQHeatmap"
+          DataAdapter="DDA_DataQualityScorecard"
+          ShowValues="True"
+          ValueFontSize="10" ValueForeColor="#FFFFFF"
+          ValueFormat="0"
+          CellBorderColor="#1B2A4A" CellBorderWidth="2"
+          CellWidth="70" CellHeight="32"
+          TooltipEnabled="True">
+
+          <RowDimension Dimension="Entity" MemberFilter="E#TopEntity.Base"
+                        LabelFontSize="10" LabelForeColor="#D0D8E8" />
+
+          <ColumnMetrics>
+            <Metric Name="Completeness"   Expression="DQ.CompletenessScore"   LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="60" MidValue="80" HighValue="95" />
+            <Metric Name="Accuracy"       Expression="DQ.AccuracyScore"       LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="60" MidValue="80" HighValue="95" />
+            <Metric Name="Timeliness"     Expression="DQ.TimelinessScore"     LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="60" MidValue="80" HighValue="95" />
+            <Metric Name="Consistency"    Expression="DQ.ConsistencyScore"    LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="60" MidValue="80" HighValue="95" />
+            <Metric Name="Overall"        Expression="DQ.OverallScore"        LowColor="#E74C3C" MidColor="#F39C12" HighColor="#27AE60" LowValue="60" MidValue="80" HighValue="95" />
+          </ColumnMetrics>
+        </HeatmapComponent>
+      </Panel>
+
+      <!-- Validation Rule Pass/Fail Breakdown -->
+      <Panel Row="1" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Validation Rule Results" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="ValidationBreakdownChart"
+          ChartType="Doughnut"
+          DataAdapter="DDA_DataQualityScorecard"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="#,##0"
+          InnerRadius="0.55">
+
+          <Slices>
+            <Slice Name="Passed"
+                   Expression="DQ.RulesPassed:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#27AE60" />
+            <Slice Name="Warning"
+                   Expression="DQ.RulesWarning:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#F39C12" />
+            <Slice Name="Failed"
+                   Expression="DQ.RulesFailed:E#{POV.Entity}:T#{POV.Time}"
+                   Color="#E74C3C" />
+          </Slices>
+
+          <CenterLabel Text="Total Rules" FontSize="9" ForeColor="#8CA8CC"
+                       ValueExpression="DQ.TotalRules:E#{POV.Entity}:T#{POV.Time}"
+                       ValueFormat="#,##0"
+                       ValueFontSize="20" ValueForeColor="#FFFFFF" ValueFontWeight="Bold" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: DQ TREND + CATEGORY BREAKDOWN -->
+    <Row Index="2" Height="260" HeightUnit="Pixel">
+
+      <!-- DQ Score Trend Over Time -->
+      <Panel Row="2" Column="0" ColumnSpan="7" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="DQ Score Trend (12 Months)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="DQTrendChart"
+          ChartType="Line"
+          DataAdapter="DDA_DataQualityScorecard"
+          AnimationEnabled="True" AnimationDuration="700"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True" TooltipFormat="0">
+
+          <XAxis
+            DimensionBinding="Time"
+            MemberFilter="T#RollingTwelveMonths"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelRotation="-45"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="DQ Score"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            MinValue="50" MaxValue="100"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Overall"
+                  Expression="DQ.OverallScore:E#{POV.Entity}"
+                  Color="#3498DB" LineWidth="3"
+                  MarkerType="Circle" MarkerSize="6" />
+          <Series Name="Completeness"
+                  Expression="DQ.CompletenessScore:E#{POV.Entity}"
+                  Color="#2ECC71" LineWidth="2"
+                  MarkerType="Diamond" MarkerSize="4" />
+          <Series Name="Accuracy"
+                  Expression="DQ.AccuracyScore:E#{POV.Entity}"
+                  Color="#E67E22" LineWidth="2"
+                  MarkerType="Square" MarkerSize="4" />
+          <Series Name="Timeliness"
+                  Expression="DQ.TimelinessScore:E#{POV.Entity}"
+                  Color="#9B59B6" LineWidth="2"
+                  MarkerType="Triangle" MarkerSize="4" />
+
+          <ReferenceLine Name="Target" Value="95"
+                         Color="#27AE60" LineWidth="2" LineStyle="Dashed"
+                         Label="Target (95)" LabelFontSize="9" LabelForeColor="#27AE60" />
+        </ChartComponent>
+      </Panel>
+
+      <!-- Category Score Bars -->
+      <Panel Row="2" Column="7" ColumnSpan="5" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="DQ Score by Category" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="DQCategoryChart"
+          ChartType="HorizontalBar"
+          DataAdapter="DDA_DataQualityScorecard"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="False"
+          TooltipEnabled="True" TooltipFormat="0"
+          BarWidth="0.5">
+
+          <XAxis
+            Title="Score"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            MinValue="0" MaxValue="100"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="Custom"
+            Labels="Completeness,Accuracy,Timeliness,Consistency,Validity"
+            LabelFontSize="11" LabelForeColor="#D0D8E8" />
+
+          <Series Name="DQ Scores">
+            <DataPoints>
+              <Point Label="Completeness" Expression="DQ.CompletenessScore:E#{POV.Entity}:T#{POV.Time}" ColorExpression="Value >= 90 ? '#27AE60' : (Value >= 80 ? '#3498DB' : (Value >= 60 ? '#F39C12' : '#E74C3C'))" />
+              <Point Label="Accuracy"     Expression="DQ.AccuracyScore:E#{POV.Entity}:T#{POV.Time}"     ColorExpression="Value >= 90 ? '#27AE60' : (Value >= 80 ? '#3498DB' : (Value >= 60 ? '#F39C12' : '#E74C3C'))" />
+              <Point Label="Timeliness"   Expression="DQ.TimelinessScore:E#{POV.Entity}:T#{POV.Time}"   ColorExpression="Value >= 90 ? '#27AE60' : (Value >= 80 ? '#3498DB' : (Value >= 60 ? '#F39C12' : '#E74C3C'))" />
+              <Point Label="Consistency"  Expression="DQ.ConsistencyScore:E#{POV.Entity}:T#{POV.Time}"  ColorExpression="Value >= 90 ? '#27AE60' : (Value >= 80 ? '#3498DB' : (Value >= 60 ? '#F39C12' : '#E74C3C'))" />
+              <Point Label="Validity"     Expression="DQ.ValidityScore:E#{POV.Entity}:T#{POV.Time}"     ColorExpression="Value >= 90 ? '#27AE60' : (Value >= 80 ? '#3498DB' : (Value >= 60 ? '#F39C12' : '#E74C3C'))" />
+            </DataPoints>
+          </Series>
+
+          <ReferenceLine Name="Target" Value="95" Orientation="Vertical"
+                         Color="#27AE6080" LineWidth="2" LineStyle="Dashed" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: DETAILED RULE RESULTS GRID -->
+    <Row Index="3" Height="280" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Detailed Validation Rule Results" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="RuleResultsGrid"
+          DataAdapter="DDA_DataQualityScorecard"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="30"
+          EnableSorting="True"
+          EnableFiltering="True"
+          DefaultSortColumn="Status"
+          DefaultSortDirection="Ascending"
+          MaxVisibleRows="8">
+
+          <Columns>
+            <Column Header="Rule ID"         Binding="Rule.ID"             Width="80"  Alignment="Left" FontWeight="Bold" />
+            <Column Header="Rule Name"       Binding="Rule.Name"           Width="200" Alignment="Left" />
+            <Column Header="Category"        Binding="Rule.Category"       Width="110" Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="Completeness" BackgroundColor="#2ECC7130" ForeColor="#2ECC71" BorderRadius="10" />
+                <Badge Value="Accuracy"     BackgroundColor="#E67E2230" ForeColor="#E67E22" BorderRadius="10" />
+                <Badge Value="Timeliness"   BackgroundColor="#9B59B630" ForeColor="#9B59B6" BorderRadius="10" />
+                <Badge Value="Consistency"  BackgroundColor="#3498DB30" ForeColor="#3498DB" BorderRadius="10" />
+                <Badge Value="Validity"     BackgroundColor="#1ABC9C30" ForeColor="#1ABC9C" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+            <Column Header="Severity"        Binding="Rule.Severity"       Width="80"  Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="Critical" BackgroundColor="#E74C3C30" ForeColor="#E74C3C" BorderRadius="10" />
+                <Badge Value="Warning"  BackgroundColor="#F39C1230" ForeColor="#F39C12" BorderRadius="10" />
+                <Badge Value="Info"     BackgroundColor="#3498DB30" ForeColor="#3498DB" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+            <Column Header="Status"          Binding="Rule.Status"         Width="80"  Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="Value == 'Pass'" ForeColor="#27AE60" FontWeight="Bold" />
+                <Rule Condition="Value == 'Warn'" ForeColor="#F39C12" FontWeight="Bold" />
+                <Rule Condition="Value == 'Fail'" ForeColor="#E74C3C" FontWeight="Bold" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Entities Affected" Binding="Rule.EntitiesAffected" Width="120" Alignment="Center" />
+            <Column Header="Expected"        Binding="Rule.ExpectedValue"  Width="100" Alignment="Right" />
+            <Column Header="Actual"          Binding="Rule.ActualValue"    Width="100" Alignment="Right" />
+            <Column Header="Description"     Binding="Rule.Description"    Width="250" Alignment="Left" FontStyle="Italic" ForeColor="#8CA8CC" />
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Excellent" Value="#27AE60" />
+      <Color Name="Good"      Value="#3498DB" />
+      <Color Name="Fair"       Value="#F39C12" />
+      <Color Name="Poor"       Value="#E74C3C" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

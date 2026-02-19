@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Transform Rule
+  Transform: Currency Conversion / Standardization
+  Purpose: Standardize currency codes from source systems to ISO 4217 format
+           and handle currency-specific decimal precision
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <TransformRule>
+
+      <!-- ============================================================
+           TRANSFORM IDENTITY
+           ============================================================ -->
+      <TransformName>CurrencyConversion</TransformName>
+      <TransformDescription>Standardizes currency codes from all source systems to ISO 4217 three-letter format for consistent loading into OneStream. Handles variant representations (full names, legacy codes, symbols) and applies currency-specific decimal precision rules. Also validates that currency codes are recognized and supported in the OneStream application metadata.</TransformDescription>
+      <IsActive>true</IsActive>
+      <TransformType>Lookup</TransformType>
+      <ExecutionOrder>150</ExecutionOrder>
+
+      <!-- ============================================================
+           MAPPING CONFIGURATION
+           ============================================================ -->
+      <MappingConfig>
+        <SourceField>SRC_Currency</SourceField>
+        <TargetField>OS_Currency</TargetField>
+        <CaseSensitive>false</CaseSensitive>
+        <TrimWhitespace>true</TrimWhitespace>
+      </MappingConfig>
+
+      <!-- ============================================================
+           CURRENCY CODE STANDARDIZATION TABLE
+           Maps variant currency representations to ISO 4217 codes.
+           ============================================================ -->
+      <MappingTable>
+
+        <!-- ====================== US DOLLAR ====================== -->
+        <MappingGroup name="USD" description="US Dollar variants">
+          <Mapping sourceCode="USD"           targetCode="USD" description="ISO standard" />
+          <Mapping sourceCode="US Dollar"     targetCode="USD" description="Full name" />
+          <Mapping sourceCode="US Dollars"    targetCode="USD" description="Full name plural" />
+          <Mapping sourceCode="U.S. Dollar"   targetCode="USD" description="Abbreviated name" />
+          <Mapping sourceCode="$"             targetCode="USD" description="Symbol (ambiguous, defaults to USD)" />
+          <Mapping sourceCode="US$"           targetCode="USD" description="Qualified symbol" />
+          <Mapping sourceCode="Dollar"        targetCode="USD" description="Unqualified (defaults to USD)" />
+        </MappingGroup>
+
+        <!-- ====================== EURO ====================== -->
+        <MappingGroup name="EUR" description="Euro variants">
+          <Mapping sourceCode="EUR"           targetCode="EUR" description="ISO standard" />
+          <Mapping sourceCode="Euro"          targetCode="EUR" description="Full name" />
+          <Mapping sourceCode="Euros"         targetCode="EUR" description="Full name plural" />
+          <Mapping sourceCode="EURO"          targetCode="EUR" description="Uppercase full" />
+        </MappingGroup>
+
+        <!-- ====================== BRITISH POUND ====================== -->
+        <MappingGroup name="GBP" description="British Pound variants">
+          <Mapping sourceCode="GBP"           targetCode="GBP" description="ISO standard" />
+          <Mapping sourceCode="British Pound" targetCode="GBP" description="Full name" />
+          <Mapping sourceCode="Pound Sterling" targetCode="GBP" description="Sterling name" />
+          <Mapping sourceCode="STG"           targetCode="GBP" description="Legacy code" />
+        </MappingGroup>
+
+        <!-- ====================== JAPANESE YEN ====================== -->
+        <MappingGroup name="JPY" description="Japanese Yen variants">
+          <Mapping sourceCode="JPY"           targetCode="JPY" description="ISO standard" />
+          <Mapping sourceCode="Japanese Yen"  targetCode="JPY" description="Full name" />
+          <Mapping sourceCode="Yen"           targetCode="JPY" description="Short name" />
+          <Mapping sourceCode="YEN"           targetCode="JPY" description="Uppercase short" />
+        </MappingGroup>
+
+        <!-- ====================== CHINESE YUAN ====================== -->
+        <MappingGroup name="CNY" description="Chinese Yuan/Renminbi variants">
+          <Mapping sourceCode="CNY"           targetCode="CNY" description="ISO standard" />
+          <Mapping sourceCode="RMB"           targetCode="CNY" description="Renminbi abbreviation" />
+          <Mapping sourceCode="Chinese Yuan"  targetCode="CNY" description="Full name" />
+          <Mapping sourceCode="Renminbi"      targetCode="CNY" description="Alternative name" />
+          <Mapping sourceCode="CNH"           targetCode="CNY" description="Offshore Yuan (mapped to CNY for consolidation)" />
+        </MappingGroup>
+
+        <!-- ====================== OTHER MAJOR CURRENCIES ====================== -->
+        <MappingGroup name="OtherMajor" description="Other major currencies used across subsidiaries">
+          <Mapping sourceCode="CAD"           targetCode="CAD" description="Canadian Dollar" />
+          <Mapping sourceCode="Canadian Dollar" targetCode="CAD" description="Full name" />
+          <Mapping sourceCode="AUD"           targetCode="AUD" description="Australian Dollar" />
+          <Mapping sourceCode="Australian Dollar" targetCode="AUD" description="Full name" />
+          <Mapping sourceCode="BRL"           targetCode="BRL" description="Brazilian Real" />
+          <Mapping sourceCode="Brazilian Real" targetCode="BRL" description="Full name" />
+          <Mapping sourceCode="MXN"           targetCode="MXN" description="Mexican Peso" />
+          <Mapping sourceCode="Mexican Peso"  targetCode="MXN" description="Full name" />
+          <Mapping sourceCode="INR"           targetCode="INR" description="Indian Rupee" />
+          <Mapping sourceCode="Indian Rupee"  targetCode="INR" description="Full name" />
+          <Mapping sourceCode="KRW"           targetCode="KRW" description="South Korean Won" />
+          <Mapping sourceCode="Korean Won"    targetCode="KRW" description="Short name" />
+          <Mapping sourceCode="SGD"           targetCode="SGD" description="Singapore Dollar" />
+          <Mapping sourceCode="THB"           targetCode="THB" description="Thai Baht" />
+          <Mapping sourceCode="PLN"           targetCode="PLN" description="Polish Zloty" />
+          <Mapping sourceCode="CZK"           targetCode="CZK" description="Czech Koruna" />
+          <Mapping sourceCode="CHF"           targetCode="CHF" description="Swiss Franc" />
+          <Mapping sourceCode="SEK"           targetCode="SEK" description="Swedish Krona" />
+          <Mapping sourceCode="NOK"           targetCode="NOK" description="Norwegian Krone" />
+          <Mapping sourceCode="DKK"           targetCode="DKK" description="Danish Krone" />
+        </MappingGroup>
+
+        <!-- ====================== SPECIAL CODES ====================== -->
+        <MappingGroup name="Special" description="Statistical and special currency codes">
+          <Mapping sourceCode="STAT"          targetCode="local"  description="Statistical (use local currency placeholder)" />
+          <Mapping sourceCode="XXX"           targetCode="local"  description="No currency (statistical data)" />
+          <Mapping sourceCode=""              targetCode="local"  description="Blank currency (default to local)" />
+        </MappingGroup>
+
+      </MappingTable>
+
+      <!-- ============================================================
+           DECIMAL PRECISION BY CURRENCY
+           Different currencies have different standard decimal places.
+           This controls rounding during data loading.
+           ============================================================ -->
+      <DecimalPrecision>
+        <PrecisionRule currency="JPY"  decimals="0" description="Japanese Yen: no decimal places" />
+        <PrecisionRule currency="KRW"  decimals="0" description="Korean Won: no decimal places" />
+        <PrecisionRule currency="CLP"  decimals="0" description="Chilean Peso: no decimal places" />
+        <PrecisionRule currency="HUF"  decimals="0" description="Hungarian Forint: no decimal places" />
+        <PrecisionRule currency="BHD"  decimals="3" description="Bahraini Dinar: 3 decimal places" />
+        <PrecisionRule currency="KWD"  decimals="3" description="Kuwaiti Dinar: 3 decimal places" />
+        <PrecisionRule currency="OMR"  decimals="3" description="Omani Rial: 3 decimal places" />
+        <!-- Default: 2 decimal places for all other currencies -->
+        <PrecisionRule currency="*"    decimals="2" description="Default: 2 decimal places" />
+      </DecimalPrecision>
+
+      <!-- ============================================================
+           ROUNDING RULES
+           ============================================================ -->
+      <RoundingRules>
+        <RoundingMethod>BankersRounding</RoundingMethod>
+        <ApplyAfterConversion>true</ApplyAfterConversion>
+        <ApplyToAmountFields>SRC_DebitLC,SRC_CreditLC,SRC_NetAmountLC,SRC_Amount</ApplyToAmountFields>
+      </RoundingRules>
+
+      <!-- ============================================================
+           UNMAPPED HANDLING
+           ============================================================ -->
+      <UnmappedHandling>
+        <DefaultCurrency>UNKNOWN</DefaultCurrency>
+        <OnUnmapped>
+          <Action>Reject</Action>
+          <FlagForReview>true</FlagForReview>
+          <ReviewFlagColumn>OS_MappingFlag</ReviewFlagColumn>
+          <ReviewFlagValue>UNKNOWN_CURRENCY</ReviewFlagValue>
+          <LogToTable>DM_UnmappedCurrencies</LogToTable>
+          <Notification>
+            <Enabled>true</Enabled>
+            <Recipients>dm_admin@company.com</Recipients>
+            <Subject>OneStream DM: Unknown Currency Code Detected</Subject>
+          </Notification>
+        </OnUnmapped>
+      </UnmappedHandling>
+
+    </TransformRule>
+  </DataManagement>
+</OneStreamXF>

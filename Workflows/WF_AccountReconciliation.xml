@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Workflow Definition
+  Workflow:    WF_AccountReconciliation
+  Description: Account Reconciliation workflow managing the process of matching
+               GL balances to sub-ledger and source system balances, handling
+               exceptions, and certifying reconciliation completeness.
+  Schedule:    Risk-based: High=Monthly, Medium=Quarterly, Low=Annually.
+  Owner:       Corporate Accounting / Controller
+-->
+<WorkflowDefinition
+  xmlns="http://www.intactsoft.com/OneStream/Workflows"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.intactsoft.com/OneStream/Workflows WorkflowSchema.xsd">
+
+  <!-- ================================================================== -->
+  <!-- WORKFLOW HEADER                                                    -->
+  <!-- ================================================================== -->
+  <Workflow
+    Name="WF_AccountReconciliation"
+    DisplayName="Account Reconciliation"
+    Description="Account reconciliation workflow that automates the matching of general ledger balances to sub-ledger and source system balances, manages exception handling and documentation, provides supervisory review and approval, and certifies reconciliation completeness with aging tracking and escalation rules."
+    WorkflowType="Reconciliation"
+    Frequency="RiskBased"
+    IsActive="true"
+    Version="1.0"
+    CreatedBy="Admin"
+    CreatedDate="2026-01-15"
+    ModifiedBy="Admin"
+    ModifiedDate="2026-02-18">
+
+    <!-- ================================================================ -->
+    <!-- RISK-BASED SCHEDULING                                            -->
+    <!-- ================================================================ -->
+    <RiskBasedScheduling>
+      <RiskCategory Name="High" Frequency="Monthly" Description="Material accounts, high transaction volume, complex estimates, history of adjustments">
+        <Criteria>
+          <Criterion Type="MaterialityThreshold" Value="500000" />
+          <Criterion Type="TransactionVolume" Value="High" />
+          <Criterion Type="AccountType" Value="Cash,Receivables,Payables,Revenue,Inventory" />
+          <Criterion Type="HistoricalAdjustments" Value="true" />
+        </Criteria>
+      </RiskCategory>
+      <RiskCategory Name="Medium" Frequency="Quarterly" Description="Moderate balances, standard transactions, some judgment required">
+        <Criteria>
+          <Criterion Type="MaterialityThreshold" Value="100000" />
+          <Criterion Type="TransactionVolume" Value="Medium" />
+          <Criterion Type="AccountType" Value="Prepaid,Accruals,FixedAssets" />
+        </Criteria>
+      </RiskCategory>
+      <RiskCategory Name="Low" Frequency="Annually" Description="Immaterial balances, low activity, stable accounts">
+        <Criteria>
+          <Criterion Type="MaterialityThreshold" Value="10000" />
+          <Criterion Type="TransactionVolume" Value="Low" />
+          <Criterion Type="AccountType" Value="Equity,LongTermDebt,OtherAssets" />
+        </Criteria>
+      </RiskCategory>
+    </RiskBasedScheduling>
+
+    <!-- ================================================================ -->
+    <!-- AGING AND ESCALATION RULES                                       -->
+    <!-- ================================================================ -->
+    <AgingAndEscalation>
+      <AgingCategories>
+        <Category Name="Current" MinDays="0" MaxDays="30" Color="#4CAF50" />
+        <Category Name="Aging30" MinDays="31" MaxDays="60" Color="#FFC107" />
+        <Category Name="Aging60" MinDays="61" MaxDays="90" Color="#FF9800" />
+        <Category Name="Aging90Plus" MinDays="91" MaxDays="999" Color="#F44336" />
+      </AgingCategories>
+      <EscalationRules>
+        <EscalationRule
+          TriggerDays="30"
+          Action="NotifyManager"
+          Recipient="AccountingManager"
+          Template="WF_Recon_AgingAlert_30" />
+        <EscalationRule
+          TriggerDays="60"
+          Action="NotifyDirector"
+          Recipient="Controller"
+          Template="WF_Recon_AgingAlert_60" />
+        <EscalationRule
+          TriggerDays="90"
+          Action="EscalateToExecutive"
+          Recipient="CFO"
+          Template="WF_Recon_AgingAlert_90" />
+      </EscalationRules>
+    </AgingAndEscalation>
+
+    <!-- ================================================================ -->
+    <!-- STATUS TRANSITIONS                                               -->
+    <!-- ================================================================ -->
+    <StatusTransitions>
+      <Status Name="NotStarted" DisplayName="Not Started" IsInitial="true" Color="#9E9E9E" />
+      <Status Name="AutoReconciling" DisplayName="Auto-Reconciling" Color="#03A9F4" />
+      <Status Name="InProgress" DisplayName="In Progress" Color="#2196F3" />
+      <Status Name="PendingReview" DisplayName="Pending Review" Color="#FF9800" />
+      <Status Name="PendingCertification" DisplayName="Pending Certification" Color="#8BC34A" />
+      <Status Name="Certified" DisplayName="Certified" IsFinal="true" Color="#4CAF50" />
+      <Status Name="Exception" DisplayName="Exception" Color="#F44336" />
+
+      <Transition From="NotStarted" To="AutoReconciling" TriggerType="Automatic" />
+      <Transition From="AutoReconciling" To="InProgress" TriggerType="Automatic" />
+      <Transition From="AutoReconciling" To="PendingReview" TriggerType="AutoReconcileComplete" />
+      <Transition From="InProgress" To="PendingReview" TriggerType="StepCompletion" />
+      <Transition From="PendingReview" To="InProgress" TriggerType="Rejection" />
+      <Transition From="PendingReview" To="PendingCertification" TriggerType="Approval" />
+      <Transition From="PendingCertification" To="Certified" TriggerType="Certification" />
+      <Transition From="PendingCertification" To="InProgress" TriggerType="Rejection" />
+      <Transition From="InProgress" To="Exception" TriggerType="ExceptionRaised" />
+      <Transition From="Exception" To="InProgress" TriggerType="ExceptionResolved" />
+    </StatusTransitions>
+
+    <!-- ================================================================ -->
+    <!-- GLOBAL NOTIFICATIONS                                             -->
+    <!-- ================================================================ -->
+    <Notifications>
+      <Notification
+        EventType="WorkflowStarted"
+        Template="WF_AccountRecon_Kickoff"
+        Recipients="StaffAccountant,AccountingManager"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="StepTransition"
+        Template="WF_StepTransition_Generic"
+        Recipients="NextStepAssignee"
+        Channel="Email,Dashboard" />
+      <Notification
+        EventType="ExceptionRaised"
+        Template="WF_Recon_Exception"
+        Recipients="StaffAccountant,AccountingManager"
+        Channel="Email" />
+      <Notification
+        EventType="WorkflowCompleted"
+        Template="WF_AccountRecon_Certified"
+        Recipients="StaffAccountant,AccountingManager,Controller"
+        Channel="Email,Dashboard" />
+    </Notifications>
+
+    <!-- ================================================================ -->
+    <!-- STEPS                                                            -->
+    <!-- ================================================================ -->
+    <Steps>
+
+      <!-- ============================================================== -->
+      <!-- STEP 1: Auto-Reconcile                                         -->
+      <!-- ============================================================== -->
+      <Step
+        Order="1"
+        Name="AutoReconcile"
+        DisplayName="Auto-Reconcile"
+        Description="System automatically matches general ledger balances to sub-ledger and source system balances using configurable matching rules. Flags unmatched items as exceptions requiring manual review."
+        StepType="SystemProcess"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>1</PlannedStartDay>
+          <PlannedEndDay>1</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>System</Role>
+          <AssignmentType>SystemTriggered</AssignmentType>
+          <TriggerEvent>PeriodCloseDataAvailable</TriggerEvent>
+          <EscalationHours>4</EscalationHours>
+          <EscalationTarget>AccountingManager</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EX_ReconciliationEngine"
+            RuleType="ExtenderRule"
+            ExecutionOrder="1"
+            Description="Execute the automated reconciliation engine that matches GL account balances to sub-ledger totals, bank statements, third-party confirmations, and other source data using configurable matching rules and tolerance thresholds."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="MatchingMethod" Value="ExactAndTolerance" />
+              <Parameter Name="ToleranceAmount" Value="1.00" />
+              <Parameter Name="TolerancePercent" Value="0.01" />
+              <Parameter Name="MatchingFields" Value="AccountID,Amount,Currency" />
+              <Parameter Name="SourceSystems" Value="ERP_GL,BankStatements,SubLedgers" />
+              <Parameter Name="AutoCertifyMatched" Value="false" />
+              <Parameter Name="FlagExceptions" Value="true" />
+              <Parameter Name="ExceptionThreshold" Value="100" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="AutoReconcileExecuted"
+            Description="The auto-reconciliation engine must execute successfully, even if exceptions are found."
+            GateType="Execution"
+            IsBlocking="true">
+            <Condition>ReconciliationEngineStatus = 'Completed'</Condition>
+          </Gate>
+        </Gates>
+
+        <ReconciliationMetrics>
+          <Metric Name="TotalAccounts" Description="Total number of accounts in scope" />
+          <Metric Name="AutoMatchedCount" Description="Number of accounts automatically matched" />
+          <Metric Name="ExceptionCount" Description="Number of accounts with exceptions requiring manual review" />
+          <Metric Name="AutoMatchRate" Description="Percentage of accounts automatically reconciled" />
+        </ReconciliationMetrics>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>false</ApprovalRequired>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_AutoRecon_Started"
+            Recipients="AccountingManager"
+            Channel="Dashboard" />
+          <Notification
+            EventType="ExceptionsFound"
+            Template="WF_AutoRecon_Exceptions"
+            Recipients="StaffAccountant,AccountingManager"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_AutoRecon_Complete"
+            Recipients="StaffAccountant"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>AutoReconciling</StatusOnEntry>
+        <StatusOnCompletion>InProgress</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 2: Prepare Reconciliation                                 -->
+      <!-- ============================================================== -->
+      <Step
+        Order="2"
+        Name="PrepareReconciliation"
+        DisplayName="Prepare Reconciliation"
+        Description="Staff accountant manually reviews exception items from auto-reconciliation, researches discrepancies, attaches supporting documentation, enters explanations, and resolves or escalates each exception."
+        StepType="DataEntry"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>2</PlannedStartDay>
+          <PlannedEndDay>5</PlannedEndDay>
+          <DurationDays>4</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>StaffAccountant</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>48</EscalationHours>
+          <EscalationTarget>AccountingManager</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <!-- No automated business rules; this is a manual preparation step -->
+        </BusinessRules>
+
+        <ReconciliationRequirements>
+          <RequireExplanation>true</RequireExplanation>
+          <ExplanationMinLength>25</ExplanationMinLength>
+          <RequireSupportingDocs>true</RequireSupportingDocs>
+          <AllowedDocTypes>PDF,XLSX,DOCX,PNG,JPG</AllowedDocTypes>
+          <MaxAttachmentSizeMB>25</MaxAttachmentSizeMB>
+          <RequireReconcilingItems>true</RequireReconcilingItems>
+          <TrackReconcilingItemAging>true</TrackReconcilingItemAging>
+        </ReconciliationRequirements>
+
+        <Gates>
+          <Gate
+            Name="AllExceptionsAddressed"
+            Description="All exception items must have explanations and supporting documentation before the reconciliation can be submitted for review."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>UnresolvedExceptionCount = 0 AND ExceptionsWithoutDocumentation = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>false</ApprovalRequired>
+          <AutoAdvance>true</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_PrepRecon_Started"
+            Recipients="StaffAccountant"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="DeadlineApproaching"
+            Template="WF_PrepRecon_Reminder"
+            Recipients="StaffAccountant"
+            Channel="Email"
+            TriggerDaysBefore="1" />
+          <Notification
+            EventType="StepCompleted"
+            Template="WF_PrepRecon_Complete"
+            Recipients="AccountingManager"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>InProgress</StatusOnEntry>
+        <StatusOnCompletion>PendingReview</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 3: Review Reconciliation                                  -->
+      <!-- ============================================================== -->
+      <Step
+        Order="3"
+        Name="ReviewReconciliation"
+        DisplayName="Review Reconciliation"
+        Description="Accounting manager reviews the prepared reconciliation, validates explanations and supporting documentation, and either approves or returns the reconciliation for further work."
+        StepType="Review"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>5</PlannedStartDay>
+          <PlannedEndDay>7</PlannedEndDay>
+          <DurationDays>2</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>AccountingManager</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>24</EscalationHours>
+          <EscalationTarget>Controller</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <!-- No automated business rules; this is a manual review step -->
+        </BusinessRules>
+
+        <ReviewChecklist>
+          <ChecklistItem Name="BalanceAgreement" Description="Verify GL balance agrees to sub-ledger/source system" Required="true" />
+          <ChecklistItem Name="ReconcilingItemsValid" Description="Review all reconciling items for validity and completeness" Required="true" />
+          <ChecklistItem Name="DocumentationAdequate" Description="Confirm supporting documentation is adequate and relevant" Required="true" />
+          <ChecklistItem Name="AgingReviewed" Description="Review aging of reconciling items, flag stale items" Required="true" />
+          <ChecklistItem Name="PolicyCompliance" Description="Confirm reconciliation complies with accounting policy" Required="true" />
+        </ReviewChecklist>
+
+        <Gates>
+          <Gate
+            Name="ReviewChecklistComplete"
+            Description="All review checklist items must be addressed before the reconciliation can be approved."
+            GateType="Checklist"
+            IsBlocking="true">
+            <Condition>AllChecklistItemsComplete = true</Condition>
+          </Gate>
+        </Gates>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>SingleApprover</ApprovalType>
+          <ApproverRole>AccountingManager</ApproverRole>
+          <AllowReject>true</AllowReject>
+          <RejectReturnToStep>PrepareReconciliation</RejectReturnToStep>
+          <RequireRejectionReason>true</RequireRejectionReason>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_ReviewRecon_Started"
+            Recipients="AccountingManager"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="Approved"
+            Template="WF_ReviewRecon_Approved"
+            Recipients="StaffAccountant,Controller"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="Rejected"
+            Template="WF_ReviewRecon_Rejected"
+            Recipients="StaffAccountant"
+            Channel="Email" />
+        </Notifications>
+
+        <StatusOnEntry>PendingReview</StatusOnEntry>
+        <StatusOnCompletion>PendingCertification</StatusOnCompletion>
+      </Step>
+
+      <!-- ============================================================== -->
+      <!-- STEP 4: Certify                                                -->
+      <!-- ============================================================== -->
+      <Step
+        Order="4"
+        Name="Certify"
+        DisplayName="Certify"
+        Description="Controller performs final certification of the reconciliation, reviews overall reconciliation quality metrics, escalates any aged items that remain unresolved, and formally certifies the account."
+        StepType="Certification"
+        IsRequired="true">
+
+        <Timeline>
+          <PlannedStartDay>7</PlannedStartDay>
+          <PlannedEndDay>8</PlannedEndDay>
+          <DurationDays>1</DurationDays>
+        </Timeline>
+
+        <Assignment>
+          <Role>Controller</Role>
+          <AssignmentType>RoleBased</AssignmentType>
+          <EscalationHours>24</EscalationHours>
+          <EscalationTarget>CFO</EscalationTarget>
+        </Assignment>
+
+        <BusinessRules>
+          <Rule
+            Name="EH_AgingEscalation"
+            RuleType="EventHandler"
+            ExecutionOrder="1"
+            Description="Evaluate all reconciling items against aging thresholds and automatically escalate items exceeding the configured aging limits to the appropriate management level."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="EscalationThreshold30" Value="AccountingManager" />
+              <Parameter Name="EscalationThreshold60" Value="Controller" />
+              <Parameter Name="EscalationThreshold90" Value="CFO" />
+              <Parameter Name="GenerateAgingReport" Value="true" />
+              <Parameter Name="FlagOverdueItems" Value="true" />
+            </Parameters>
+          </Rule>
+          <Rule
+            Name="EH_ReconciliationAuditLog"
+            RuleType="EventHandler"
+            ExecutionOrder="2"
+            Description="Generate audit log entry for the reconciliation certification event, recording certifier, timestamp, account details, and reconciliation quality metrics."
+            IsRequired="true"
+            OnFailure="Continue">
+            <Parameters>
+              <Parameter Name="LogLevel" Value="Full" />
+              <Parameter Name="IncludeMetrics" Value="true" />
+              <Parameter Name="RetentionYears" Value="7" />
+            </Parameters>
+          </Rule>
+        </BusinessRules>
+
+        <Gates>
+          <Gate
+            Name="ReviewApproved"
+            Description="Reconciliation must be approved by the Accounting Manager before certification."
+            GateType="WorkflowStatus"
+            IsBlocking="true">
+            <Condition>ReviewStepStatus = 'Approved'</Condition>
+          </Gate>
+          <Gate
+            Name="AgedItemsEscalated"
+            Description="All reconciling items exceeding 90 days must be escalated and acknowledged before certification."
+            GateType="Validation"
+            IsBlocking="true">
+            <Condition>AgedItems90Plus_Unescalated = 0</Condition>
+          </Gate>
+        </Gates>
+
+        <CertificationControls>
+          <RequireDigitalSignature>true</RequireDigitalSignature>
+          <CertificationStatement>I certify that this account reconciliation is complete, accurate, and all reconciling items have been properly documented and escalated as required.</CertificationStatement>
+          <LockOnCertification>true</LockOnCertification>
+          <PreventModification>true</PreventModification>
+        </CertificationControls>
+
+        <ApprovalRequirements>
+          <ApprovalRequired>true</ApprovalRequired>
+          <ApprovalType>Certification</ApprovalType>
+          <CertifierRole>Controller</CertifierRole>
+          <RequireDigitalSignature>true</RequireDigitalSignature>
+          <AutoAdvance>false</AutoAdvance>
+        </ApprovalRequirements>
+
+        <Notifications>
+          <Notification
+            EventType="StepStarted"
+            Template="WF_CertifyRecon_Ready"
+            Recipients="Controller"
+            Channel="Email,Dashboard" />
+          <Notification
+            EventType="AgedItemsEscalated"
+            Template="WF_Recon_AgingEscalation"
+            Recipients="Controller,CFO"
+            Channel="Email" />
+          <Notification
+            EventType="Certified"
+            Template="WF_AccountRecon_Certified"
+            Recipients="StaffAccountant,AccountingManager,Controller"
+            Channel="Email,Dashboard" />
+        </Notifications>
+
+        <StatusOnEntry>PendingCertification</StatusOnEntry>
+        <StatusOnCompletion>Certified</StatusOnCompletion>
+      </Step>
+
+    </Steps>
+
+    <!-- ================================================================ -->
+    <!-- TIMELINE SUMMARY                                                 -->
+    <!-- ================================================================ -->
+    <TimelineSummary>
+      <TotalDuration>8</TotalDuration>
+      <DurationUnit>Days</DurationUnit>
+      <ScheduleType>RiskBased</ScheduleType>
+      <Milestones>
+        <Milestone Day="1" Name="AutoReconcileComplete" Description="Automated matching engine executed and exceptions flagged" />
+        <Milestone Day="5" Name="PreparationComplete" Description="All exceptions reviewed, documented, and explained" />
+        <Milestone Day="7" Name="ReviewComplete" Description="Supervisor review and approval obtained" />
+        <Milestone Day="8" Name="Certified" Description="Controller certification and period lock" />
+      </Milestones>
+    </TimelineSummary>
+
+  </Workflow>
+</WorkflowDefinition>

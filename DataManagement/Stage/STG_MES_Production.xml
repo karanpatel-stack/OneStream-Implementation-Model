@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: MES Production Data
+  Purpose: Ingest production statistics from Manufacturing Execution System CSV exports
+  Source Connection: CONN_FileShare
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>MES_Production</StageName>
+      <StageDescription>Ingests daily production statistics from the Manufacturing Execution System (MES) via CSV file exports. Files are deposited on the shared file server by the MES nightly batch process. Data includes production volumes, scrap rates, machine utilization, downtime tracking, and quality defects by production line and product. Used for manufacturing KPI reporting and standard cost variance analysis in OneStream.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>FileImport</StageType>
+      <SourceConnection>CONN_FileShare</SourceConnection>
+      <TargetStagingTable>STG_MES_Production</TargetStagingTable>
+
+      <!-- ============================================================
+           FILE SOURCE CONFIGURATION
+           ============================================================ -->
+      <FileSource>
+        <!-- File location and pattern -->
+        <SourcePath>\\fileserver\OneStream\DataExchange\Inbound\MES\</SourcePath>
+        <FilePattern>MES_Production_*.csv</FilePattern>
+        <!-- Expected filename format: MES_Production_YYYYMMDD.csv -->
+        <FileNameDatePattern>MES_Production_{yyyyMMdd}.csv</FileNameDatePattern>
+
+        <!-- File format specifications -->
+        <FileFormat>
+          <Type>CSV</Type>
+          <Delimiter>,</Delimiter>
+          <TextQualifier>"</TextQualifier>
+          <HasHeaderRow>true</HasHeaderRow>
+          <HeaderRowNumber>1</HeaderRowNumber>
+          <DataStartRow>2</DataStartRow>
+          <Encoding>UTF-8</Encoding>
+          <LineTerminator>CRLF</LineTerminator>
+          <DateFormat>yyyy-MM-dd</DateFormat>
+          <TimeFormat>HH:mm:ss</TimeFormat>
+          <DecimalSeparator>.</DecimalSeparator>
+          <ThousandsSeparator></ThousandsSeparator>
+          <!-- Handle trailing commas and inconsistent field counts -->
+          <TrimWhitespace>true</TrimWhitespace>
+          <IgnoreBlankLines>true</IgnoreBlankLines>
+          <AllowJaggedRows>false</AllowJaggedRows>
+        </FileFormat>
+
+        <!-- File pickup behavior -->
+        <PickupBehavior>
+          <!-- Process all matching files in order (oldest first) -->
+          <ProcessOrder>OldestFirst</ProcessOrder>
+          <!-- Process multiple files in single run if available -->
+          <ProcessAllFiles>true</ProcessAllFiles>
+          <!-- Maximum number of files per execution -->
+          <MaxFilesPerRun>31</MaxFilesPerRun>
+          <!-- Skip files already processed (tracked by filename in load log) -->
+          <SkipAlreadyProcessed>true</SkipAlreadyProcessed>
+        </PickupBehavior>
+
+        <!-- File validation before processing -->
+        <FileValidation>
+          <MinimumFileSizeBytes>100</MinimumFileSizeBytes>
+          <MaximumFileSizeMB>50</MaximumFileSizeMB>
+          <MinimumRowCount>1</MinimumRowCount>
+          <ExpectedColumnCount>8</ExpectedColumnCount>
+          <!-- Validate header row matches expected columns -->
+          <ValidateHeaders>true</ValidateHeaders>
+          <ExpectedHeaders>ProductionLine,ProductCode,ProductionDate,UnitsProduced,UnitsScrapped,MachineHours,DowntimeHours,QualityDefects</ExpectedHeaders>
+        </FileValidation>
+      </FileSource>
+
+      <!-- ============================================================
+           COLUMN MAPPINGS
+           Map CSV columns to staging table columns.
+           ============================================================ -->
+      <ColumnMappings>
+        <Column ordinal="1" sourceName="ProductionLine"   stagingColumn="SRC_ProductionLine"   dataType="String"   maxLength="20"  nullable="false" description="Production Line ID (e.g., LINE_A01, LINE_B02)">
+          <Validation>
+            <Pattern>^LINE_[A-Z]\d{2}$</Pattern>
+            <ErrorMessage>Production Line must match pattern LINE_X99</ErrorMessage>
+          </Validation>
+        </Column>
+        <Column ordinal="2" sourceName="ProductCode"      stagingColumn="SRC_ProductCode"      dataType="String"   maxLength="18"  nullable="false" description="Product/Material Code (maps to SAP Material Number)">
+          <Validation>
+            <Required>true</Required>
+          </Validation>
+        </Column>
+        <Column ordinal="3" sourceName="ProductionDate"   stagingColumn="SRC_ProductionDate"   dataType="Date"     nullable="false" description="Date of production (YYYY-MM-DD)">
+          <Validation>
+            <DateRange>
+              <MinDate>2025-01-01</MinDate>
+              <MaxDate>2026-12-31</MaxDate>
+            </DateRange>
+          </Validation>
+        </Column>
+        <Column ordinal="4" sourceName="UnitsProduced"    stagingColumn="SRC_UnitsProduced"    dataType="Decimal"  precision="15" scale="3" nullable="false" description="Number of units produced (good units)">
+          <Validation>
+            <MinValue>0</MinValue>
+            <MaxValue>999999</MaxValue>
+          </Validation>
+        </Column>
+        <Column ordinal="5" sourceName="UnitsScrapped"    stagingColumn="SRC_UnitsScrapped"    dataType="Decimal"  precision="15" scale="3" nullable="true"  description="Number of units scrapped/rejected">
+          <Validation>
+            <MinValue>0</MinValue>
+          </Validation>
+        </Column>
+        <Column ordinal="6" sourceName="MachineHours"     stagingColumn="SRC_MachineHours"     dataType="Decimal"  precision="10" scale="2" nullable="true"  description="Total machine hours for production run">
+          <Validation>
+            <MinValue>0</MinValue>
+            <MaxValue>24</MaxValue>
+          </Validation>
+        </Column>
+        <Column ordinal="7" sourceName="DowntimeHours"    stagingColumn="SRC_DowntimeHours"    dataType="Decimal"  precision="10" scale="2" nullable="true"  description="Unplanned downtime hours">
+          <Validation>
+            <MinValue>0</MinValue>
+            <MaxValue>24</MaxValue>
+          </Validation>
+        </Column>
+        <Column ordinal="8" sourceName="QualityDefects"   stagingColumn="SRC_QualityDefects"   dataType="Integer"  nullable="true"  description="Count of quality defects detected">
+          <Validation>
+            <MinValue>0</MinValue>
+          </Validation>
+        </Column>
+      </ColumnMappings>
+
+      <!-- ============================================================
+           DERIVED COLUMNS
+           Computed columns added during staging.
+           ============================================================ -->
+      <DerivedColumns>
+        <DerivedColumn name="SRC_TotalUnits" expression="SRC_UnitsProduced + ISNULL(SRC_UnitsScrapped, 0)" dataType="Decimal" description="Total units (produced + scrapped)" />
+        <DerivedColumn name="SRC_ScrapRate" expression="CASE WHEN (SRC_UnitsProduced + ISNULL(SRC_UnitsScrapped,0)) > 0 THEN ISNULL(SRC_UnitsScrapped,0) / (SRC_UnitsProduced + ISNULL(SRC_UnitsScrapped,0)) * 100 ELSE 0 END" dataType="Decimal" description="Scrap rate as percentage" />
+        <DerivedColumn name="SRC_Utilization" expression="CASE WHEN SRC_MachineHours > 0 THEN (SRC_MachineHours - ISNULL(SRC_DowntimeHours,0)) / SRC_MachineHours * 100 ELSE 0 END" dataType="Decimal" description="Machine utilization percentage" />
+        <DerivedColumn name="SRC_OEE" expression="CASE WHEN SRC_MachineHours > 0 AND (SRC_UnitsProduced + ISNULL(SRC_UnitsScrapped,0)) > 0 THEN ((SRC_MachineHours - ISNULL(SRC_DowntimeHours,0)) / SRC_MachineHours) * (SRC_UnitsProduced / (SRC_UnitsProduced + ISNULL(SRC_UnitsScrapped,0))) * 100 ELSE 0 END" dataType="Decimal" description="Overall Equipment Effectiveness (simplified)" />
+        <DerivedColumn name="SRC_SourceFile" expression="@@SourceFileName" dataType="String" description="Source CSV filename for audit trail" />
+        <DerivedColumn name="SRC_LoadTimestamp" expression="GETDATE()" dataType="DateTime" description="Staging load timestamp" />
+      </DerivedColumns>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <Action name="ClearStagingTable" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_MES_Production</SQL>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status, SourceFile) SELECT 'MES_Production', GETDATE(), COUNT(*), 'Staged', MAX(SRC_SourceFile) FROM STG_MES_Production</SQL>
+        </Action>
+        <Action name="ValidateScrapRate" order="2">
+          <Type>Validation</Type>
+          <Description>Alert if scrap rate exceeds 10% threshold</Description>
+          <SQL><![CDATA[
+            SELECT SRC_ProductionLine, SRC_ProductionDate,
+                   SRC_ScrapRate
+            FROM STG_MES_Production
+            WHERE SRC_ScrapRate > 10
+          ]]></SQL>
+          <OnFailure>Warn</OnFailure>
+          <Message>High scrap rate detected on production lines. Review quality data before loading.</Message>
+        </Action>
+        <Action name="ArchiveFile" order="3">
+          <Type>FileMove</Type>
+          <DestinationPath>\\fileserver\OneStream\DataExchange\Archive\{Year}\{Month}\</DestinationPath>
+          <AppendTimestamp>true</AppendTimestamp>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>10000</BatchSize>
+        <CommandTimeout>120</CommandTimeout>
+        <EnableParallelExecution>false</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

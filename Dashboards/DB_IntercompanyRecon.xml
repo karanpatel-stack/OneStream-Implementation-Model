@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_IntercompanyRecon"
+  Description="Intercompany Reconciliation Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual"               DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                    DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Descendants" DefaultMember="E#TopEntity" />
+    <POVBinding Dimension="Account"   MemberFilter="A#ICAccounts.Descendants" DefaultMember="A#ICAccounts" />
+    <POVBinding Dimension="Flow"      MemberFilter="F#EndBal"               DefaultMember="F#EndBal" />
+    <POVBinding Dimension="IC"        MemberFilter="IC#*"                   DefaultMember="IC#AllPartners" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_IntercompanyRecon"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="Cube"
+      CubeName="MainCube"
+      SuppressNoData="False"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeICMatching"  Value="True" />
+        <Parameter Name="ToleranceAmount"    Value="1000" />
+        <Parameter Name="TolerancePercent"   Value="0.01" />
+        <Parameter Name="MaxRows"            Value="20000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="4" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Intercompany Reconciliation"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF" />
+      </Panel>
+      <Panel Row="0" Column="5" ColumnSpan="7" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="AccountFilter"
+          FilterType="DropDown"
+          Dimension="Account"
+          MemberFilter="A#ICAccounts.Children"
+          DefaultMember="A#ICAccounts"
+          Label="IC Account" Width="200"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+        <FilterComponent
+          Name="PeriodFilter"
+          FilterType="DropDown"
+          Dimension="Time"
+          MemberFilter="T#CurrentYear.Base"
+          DefaultMember="T#CurrentMonth"
+          Label="Period" Width="160"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF" BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: STATUS SUMMARY + IC MATRIX -->
+    <Row Index="1" Height="140" HeightUnit="Pixel">
+
+      <!-- Status Counts -->
+      <Panel Row="1" Column="0" ColumnSpan="4" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_Matched"
+          Title="Matched"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="30" ValueFontWeight="Bold" ValueForeColor="#27AE60"
+          ValueFormat="#,##0"
+          DataAdapter="DDA_IntercompanyRecon"
+          ValueExpression="Count(ICPairs WHERE Status='Matched')">
+          <SubValue Label="pairs" FontSize="11" ForeColor="#8CA8CC" />
+          <Icon IconType="FontAwesome" IconName="fa-check-circle" IconColor="#27AE60" IconSize="22" />
+        </KPITileComponent>
+      </Panel>
+
+      <Panel Row="1" Column="4" ColumnSpan="4" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_Tolerance"
+          Title="Within Tolerance"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="30" ValueFontWeight="Bold" ValueForeColor="#F39C12"
+          ValueFormat="#,##0"
+          DataAdapter="DDA_IntercompanyRecon"
+          ValueExpression="Count(ICPairs WHERE Status='Tolerance')">
+          <SubValue Label="pairs" FontSize="11" ForeColor="#8CA8CC" />
+          <Icon IconType="FontAwesome" IconName="fa-exclamation-circle" IconColor="#F39C12" IconSize="22" />
+        </KPITileComponent>
+      </Panel>
+
+      <Panel Row="1" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="KPITile" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True">
+        <KPITileComponent
+          Name="KPI_Unmatched"
+          Title="Unmatched"
+          TitleFontSize="11" TitleForeColor="#8CA8CC"
+          ValueFontSize="30" ValueFontWeight="Bold" ValueForeColor="#E74C3C"
+          ValueFormat="#,##0"
+          DataAdapter="DDA_IntercompanyRecon"
+          ValueExpression="Count(ICPairs WHERE Status='Unmatched')">
+          <SubValue Label="pairs" FontSize="11" ForeColor="#8CA8CC" />
+          <Icon IconType="FontAwesome" IconName="fa-times-circle" IconColor="#E74C3C" IconSize="22" />
+        </KPITileComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: IC PAIRS MATRIX -->
+    <Row Index="2" Height="350" HeightUnit="Pixel">
+      <Panel Row="2" Column="0" ColumnSpan="8" RowSpan="1"
+             PanelType="MatrixPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="IC Pairs Matrix (Balances and Differences)" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <MatrixComponent
+          Name="ICPairsMatrix"
+          DataAdapter="DDA_IntercompanyRecon"
+          CellWidth="90" CellHeight="32"
+          CellFontSize="9" CellForeColor="#D0D8E8"
+          CellBorderColor="#2D4470" CellBorderWidth="1"
+          HeaderBackgroundColor="#243B67" HeaderForeColor="#FFFFFF" HeaderFontSize="9"
+          RowHeaderWidth="120"
+          ShowDifferences="True"
+          DifferenceFormat="#,##0"
+          TooltipEnabled="True"
+          EnableCellClick="True">
+
+          <RowDimension Dimension="Entity"    MemberFilter="E#TopEntity.Base" Label="From Entity" />
+          <ColumnDimension Dimension="IC"     MemberFilter="IC#Partners.Base" Label="To Partner" />
+
+          <ValueExpression>A#ICBalance:F#EndBal</ValueExpression>
+          <DifferenceExpression>A#ICDifference:F#EndBal</DifferenceExpression>
+
+          <CellColorRules>
+            <Rule Condition="Difference == 0"                            BackgroundColor="#27AE6020" />
+            <Rule Condition="ABS(Difference) &lt;= ToleranceAmount"         BackgroundColor="#F39C1220" />
+            <Rule Condition="ABS(Difference) > ToleranceAmount"          BackgroundColor="#E74C3C20" />
+          </CellColorRules>
+
+          <DiagonalCell BackgroundColor="#1B2A4A" ForeColor="#6B7FA0" Text="-" />
+        </MatrixComponent>
+      </Panel>
+
+      <!-- Aging of Unresolved Differences -->
+      <Panel Row="2" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Aging of Unresolved Differences" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="AgingChart"
+          ChartType="Bar"
+          DataAdapter="DDA_IntercompanyRecon"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="False"
+          TooltipEnabled="True" TooltipFormat="#,##0"
+          BarWidth="0.6">
+
+          <XAxis
+            DimensionBinding="Custom"
+            Labels="0-30 Days,31-60 Days,61-90 Days,90+ Days"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            GridLineColor="#2D4470" />
+
+          <YAxis
+            Title="Count of Pairs"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="10" LabelForeColor="#8CA8CC"
+            LabelFormat="#,##0"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <Series Name="Aging">
+            <DataPoints>
+              <Point Label="0-30 Days"  Expression="Count(ICUnresolved WHERE AgeBucket='0-30')"  Color="#3498DB" />
+              <Point Label="31-60 Days" Expression="Count(ICUnresolved WHERE AgeBucket='31-60')" Color="#F39C12" />
+              <Point Label="61-90 Days" Expression="Count(ICUnresolved WHERE AgeBucket='61-90')" Color="#E67E22" />
+              <Point Label="90+ Days"   Expression="Count(ICUnresolved WHERE AgeBucket='90+')"   Color="#E74C3C" />
+            </DataPoints>
+          </Series>
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 3: EXCEPTION LIST (OUT-OF-TOLERANCE) -->
+    <Row Index="3" Height="280" HeightUnit="Pixel">
+      <Panel Row="3" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Exception List: Out-of-Tolerance IC Pairs" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="ExceptionListGrid"
+          DataAdapter="DDA_IntercompanyRecon"
+          DataFilter="ICMatchStatus IN ('Tolerance','Unmatched')"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#4A1525" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="30"
+          EnableSorting="True"
+          EnableFiltering="True"
+          DefaultSortColumn="AbsDifference"
+          DefaultSortDirection="Descending">
+
+          <Columns>
+            <Column Header="From Entity"      Binding="Entity.Description"       Width="140" Alignment="Left" FontWeight="Bold" />
+            <Column Header="To Partner"       Binding="IC.Description"           Width="140" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Account"          Binding="Account.Description"      Width="140" Alignment="Left" />
+            <Column Header="Entity Balance"   Binding="EntityBalance"            Width="120" Alignment="Right" Format="#,##0" />
+            <Column Header="Partner Balance"  Binding="PartnerBalance"           Width="120" Alignment="Right" Format="#,##0" />
+            <Column Header="Difference"       Binding="Difference"               Width="110" Alignment="Right" Format="+#,##0;-#,##0">
+              <ConditionalFormat>
+                <Rule Condition="ABS(Value) > ToleranceAmount" ForeColor="#E74C3C" FontWeight="Bold" BackgroundColor="#E74C3C15" />
+                <Rule Condition="ABS(Value) > 0"               ForeColor="#F39C12" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Status"           Binding="MatchStatus"              Width="100" Alignment="Center">
+              <BadgeFormat>
+                <Badge Value="Matched"    BackgroundColor="#27AE6030" ForeColor="#27AE60" BorderRadius="10" />
+                <Badge Value="Tolerance"  BackgroundColor="#F39C1230" ForeColor="#F39C12" BorderRadius="10" />
+                <Badge Value="Unmatched"  BackgroundColor="#E74C3C30" ForeColor="#E74C3C" BorderRadius="10" />
+              </BadgeFormat>
+            </Column>
+            <Column Header="Age (Days)"       Binding="AgeDays"                  Width="90"  Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 90" ForeColor="#E74C3C" FontWeight="Bold" />
+                <Rule Condition="Value >= 60" ForeColor="#E67E22" />
+                <Rule Condition="Value >= 30" ForeColor="#F39C12" />
+                <Rule Condition="Value &lt; 30"  ForeColor="#3498DB" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Assigned To"      Binding="AssignedUser"             Width="130" Alignment="Left" />
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="Matched"     Value="#27AE60" />
+      <Color Name="Tolerance"   Value="#F39C12" />
+      <Color Name="Unmatched"   Value="#E74C3C" />
+      <Color Name="Aging_0_30"  Value="#3498DB" />
+      <Color Name="Aging_31_60" Value="#F39C12" />
+      <Color Name="Aging_61_90" Value="#E67E22" />
+      <Color Name="Aging_90Plus" Value="#E74C3C" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

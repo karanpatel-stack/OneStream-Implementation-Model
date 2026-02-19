@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: Excel Budget Templates
+  Purpose: Import budget data from standardized Excel templates submitted by budget owners
+  Source Connection: CONN_FileShare
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>Excel_Budget</StageName>
+      <StageDescription>Imports budget and forecast data from standardized Excel templates (Budget_Template_*.xlsx) submitted by business unit budget owners. Each template contains multiple sheets for Revenue, COGS, OPEX, Headcount, and CAPEX with named ranges defining the data areas. Data feeds the Finance cube under the Budget scenario for annual planning and monthly forecasting cycles.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>FileImport</StageType>
+      <SourceConnection>CONN_FileShare</SourceConnection>
+      <TargetStagingTable>STG_Excel_Budget</TargetStagingTable>
+
+      <!-- ============================================================
+           FILE SOURCE CONFIGURATION
+           ============================================================ -->
+      <FileSource>
+        <SourcePath>\\fileserver\OneStream\DataExchange\Inbound\Budget\</SourcePath>
+        <FilePattern>Budget_Template_*.xlsx</FilePattern>
+        <!-- Expected filename: Budget_Template_{EntityCode}_{BudgetYear}.xlsx -->
+        <FileNamePattern>Budget_Template_{EntityCode}_{Year}.xlsx</FileNamePattern>
+
+        <FileFormat>
+          <Type>Excel</Type>
+          <ExcelFormat>XLSX</ExcelFormat>
+          <HasHeaderRow>true</HasHeaderRow>
+          <ImportFormulasAsValues>true</ImportFormulasAsValues>
+          <TrimWhitespace>true</TrimWhitespace>
+          <TreatEmptyRowAsEndOfData>true</TreatEmptyRowAsEndOfData>
+          <DateFormat>yyyy-MM-dd</DateFormat>
+        </FileFormat>
+
+        <PickupBehavior>
+          <ProcessOrder>Alphabetical</ProcessOrder>
+          <ProcessAllFiles>true</ProcessAllFiles>
+          <MaxFilesPerRun>50</MaxFilesPerRun>
+          <SkipAlreadyProcessed>false</SkipAlreadyProcessed>
+        </PickupBehavior>
+
+        <FileValidation>
+          <MinimumFileSizeBytes>5000</MinimumFileSizeBytes>
+          <MaximumFileSizeMB>100</MaximumFileSizeMB>
+          <!-- Validate that required sheets exist -->
+          <RequiredSheets>Revenue,COGS,OPEX,Headcount,CAPEX</RequiredSheets>
+        </FileValidation>
+      </FileSource>
+
+      <!-- ============================================================
+           SHEET MAPPINGS
+           Each Excel sheet has its own structure and named ranges.
+           All sheets feed into a common staging table with a SheetType column.
+           ============================================================ -->
+      <SheetMappings>
+
+        <!-- REVENUE SHEET -->
+        <Sheet name="Revenue" order="1">
+          <SheetName>Revenue</SheetName>
+          <NamedRange>BudgetData_Revenue</NamedRange>
+          <FallbackRange>A5:P500</FallbackRange>
+          <HeaderRow>4</HeaderRow>
+          <DataStartRow>5</DataStartRow>
+          <SheetTypeTag>Revenue</SheetTypeTag>
+          <Columns>
+            <Column excelColumn="A" stagingColumn="SRC_Entity"       dataType="String"  description="Entity/Business Unit Code" />
+            <Column excelColumn="B" stagingColumn="SRC_Account"      dataType="String"  description="Revenue Account Code" />
+            <Column excelColumn="C" stagingColumn="SRC_Product"      dataType="String"  description="Product Line Code" />
+            <Column excelColumn="D" stagingColumn="SRC_Customer"     dataType="String"  description="Customer Segment" />
+            <Column excelColumn="E" stagingColumn="SRC_Jan"          dataType="Decimal" description="January Amount" />
+            <Column excelColumn="F" stagingColumn="SRC_Feb"          dataType="Decimal" description="February Amount" />
+            <Column excelColumn="G" stagingColumn="SRC_Mar"          dataType="Decimal" description="March Amount" />
+            <Column excelColumn="H" stagingColumn="SRC_Apr"          dataType="Decimal" description="April Amount" />
+            <Column excelColumn="I" stagingColumn="SRC_May"          dataType="Decimal" description="May Amount" />
+            <Column excelColumn="J" stagingColumn="SRC_Jun"          dataType="Decimal" description="June Amount" />
+            <Column excelColumn="K" stagingColumn="SRC_Jul"          dataType="Decimal" description="July Amount" />
+            <Column excelColumn="L" stagingColumn="SRC_Aug"          dataType="Decimal" description="August Amount" />
+            <Column excelColumn="M" stagingColumn="SRC_Sep"          dataType="Decimal" description="September Amount" />
+            <Column excelColumn="N" stagingColumn="SRC_Oct"          dataType="Decimal" description="October Amount" />
+            <Column excelColumn="O" stagingColumn="SRC_Nov"          dataType="Decimal" description="November Amount" />
+            <Column excelColumn="P" stagingColumn="SRC_Dec"          dataType="Decimal" description="December Amount" />
+          </Columns>
+        </Sheet>
+
+        <!-- COGS SHEET -->
+        <Sheet name="COGS" order="2">
+          <SheetName>COGS</SheetName>
+          <NamedRange>BudgetData_COGS</NamedRange>
+          <FallbackRange>A5:P500</FallbackRange>
+          <HeaderRow>4</HeaderRow>
+          <DataStartRow>5</DataStartRow>
+          <SheetTypeTag>COGS</SheetTypeTag>
+          <Columns>
+            <Column excelColumn="A" stagingColumn="SRC_Entity"       dataType="String"  description="Entity/Plant Code" />
+            <Column excelColumn="B" stagingColumn="SRC_Account"      dataType="String"  description="COGS Account Code" />
+            <Column excelColumn="C" stagingColumn="SRC_Product"      dataType="String"  description="Product Line Code" />
+            <Column excelColumn="D" stagingColumn="SRC_CostElement"  dataType="String"  description="Cost Element (Materials, Labor, Overhead)" />
+            <Column excelColumn="E" stagingColumn="SRC_Jan"          dataType="Decimal" description="January Amount" />
+            <Column excelColumn="F" stagingColumn="SRC_Feb"          dataType="Decimal" description="February Amount" />
+            <Column excelColumn="G" stagingColumn="SRC_Mar"          dataType="Decimal" description="March Amount" />
+            <Column excelColumn="H" stagingColumn="SRC_Apr"          dataType="Decimal" description="April Amount" />
+            <Column excelColumn="I" stagingColumn="SRC_May"          dataType="Decimal" description="May Amount" />
+            <Column excelColumn="J" stagingColumn="SRC_Jun"          dataType="Decimal" description="June Amount" />
+            <Column excelColumn="K" stagingColumn="SRC_Jul"          dataType="Decimal" description="July Amount" />
+            <Column excelColumn="L" stagingColumn="SRC_Aug"          dataType="Decimal" description="August Amount" />
+            <Column excelColumn="M" stagingColumn="SRC_Sep"          dataType="Decimal" description="September Amount" />
+            <Column excelColumn="N" stagingColumn="SRC_Oct"          dataType="Decimal" description="October Amount" />
+            <Column excelColumn="O" stagingColumn="SRC_Nov"          dataType="Decimal" description="November Amount" />
+            <Column excelColumn="P" stagingColumn="SRC_Dec"          dataType="Decimal" description="December Amount" />
+          </Columns>
+        </Sheet>
+
+        <!-- OPEX SHEET -->
+        <Sheet name="OPEX" order="3">
+          <SheetName>OPEX</SheetName>
+          <NamedRange>BudgetData_OPEX</NamedRange>
+          <FallbackRange>A5:P500</FallbackRange>
+          <HeaderRow>4</HeaderRow>
+          <DataStartRow>5</DataStartRow>
+          <SheetTypeTag>OPEX</SheetTypeTag>
+          <Columns>
+            <Column excelColumn="A" stagingColumn="SRC_Entity"       dataType="String"  description="Entity Code" />
+            <Column excelColumn="B" stagingColumn="SRC_Account"      dataType="String"  description="OPEX Account Code" />
+            <Column excelColumn="C" stagingColumn="SRC_CostCenter"   dataType="String"  description="Cost Center/Department" />
+            <Column excelColumn="D" stagingColumn="SRC_ExpenseType"  dataType="String"  description="Expense Category" />
+            <Column excelColumn="E" stagingColumn="SRC_Jan"          dataType="Decimal" description="January Amount" />
+            <Column excelColumn="F" stagingColumn="SRC_Feb"          dataType="Decimal" description="February Amount" />
+            <Column excelColumn="G" stagingColumn="SRC_Mar"          dataType="Decimal" description="March Amount" />
+            <Column excelColumn="H" stagingColumn="SRC_Apr"          dataType="Decimal" description="April Amount" />
+            <Column excelColumn="I" stagingColumn="SRC_May"          dataType="Decimal" description="May Amount" />
+            <Column excelColumn="J" stagingColumn="SRC_Jun"          dataType="Decimal" description="June Amount" />
+            <Column excelColumn="K" stagingColumn="SRC_Jul"          dataType="Decimal" description="July Amount" />
+            <Column excelColumn="L" stagingColumn="SRC_Aug"          dataType="Decimal" description="August Amount" />
+            <Column excelColumn="M" stagingColumn="SRC_Sep"          dataType="Decimal" description="September Amount" />
+            <Column excelColumn="N" stagingColumn="SRC_Oct"          dataType="Decimal" description="October Amount" />
+            <Column excelColumn="O" stagingColumn="SRC_Nov"          dataType="Decimal" description="November Amount" />
+            <Column excelColumn="P" stagingColumn="SRC_Dec"          dataType="Decimal" description="December Amount" />
+          </Columns>
+        </Sheet>
+
+        <!-- HEADCOUNT SHEET -->
+        <Sheet name="Headcount" order="4">
+          <SheetName>Headcount</SheetName>
+          <NamedRange>BudgetData_Headcount</NamedRange>
+          <FallbackRange>A5:P500</FallbackRange>
+          <HeaderRow>4</HeaderRow>
+          <DataStartRow>5</DataStartRow>
+          <SheetTypeTag>Headcount</SheetTypeTag>
+          <Columns>
+            <Column excelColumn="A" stagingColumn="SRC_Entity"       dataType="String"  description="Entity Code" />
+            <Column excelColumn="B" stagingColumn="SRC_Account"      dataType="String"  description="Headcount Account (STAT_HC, STAT_FTE)" />
+            <Column excelColumn="C" stagingColumn="SRC_CostCenter"   dataType="String"  description="Cost Center/Department" />
+            <Column excelColumn="D" stagingColumn="SRC_JobLevel"     dataType="String"  description="Job Level/Grade" />
+            <Column excelColumn="E" stagingColumn="SRC_Jan"          dataType="Decimal" description="January Headcount/FTE" />
+            <Column excelColumn="F" stagingColumn="SRC_Feb"          dataType="Decimal" description="February Headcount/FTE" />
+            <Column excelColumn="G" stagingColumn="SRC_Mar"          dataType="Decimal" description="March Headcount/FTE" />
+            <Column excelColumn="H" stagingColumn="SRC_Apr"          dataType="Decimal" description="April Headcount/FTE" />
+            <Column excelColumn="I" stagingColumn="SRC_May"          dataType="Decimal" description="May Headcount/FTE" />
+            <Column excelColumn="J" stagingColumn="SRC_Jun"          dataType="Decimal" description="June Headcount/FTE" />
+            <Column excelColumn="K" stagingColumn="SRC_Jul"          dataType="Decimal" description="July Headcount/FTE" />
+            <Column excelColumn="L" stagingColumn="SRC_Aug"          dataType="Decimal" description="August Headcount/FTE" />
+            <Column excelColumn="M" stagingColumn="SRC_Sep"          dataType="Decimal" description="September Headcount/FTE" />
+            <Column excelColumn="N" stagingColumn="SRC_Oct"          dataType="Decimal" description="October Headcount/FTE" />
+            <Column excelColumn="O" stagingColumn="SRC_Nov"          dataType="Decimal" description="November Headcount/FTE" />
+            <Column excelColumn="P" stagingColumn="SRC_Dec"          dataType="Decimal" description="December Headcount/FTE" />
+          </Columns>
+        </Sheet>
+
+        <!-- CAPEX SHEET -->
+        <Sheet name="CAPEX" order="5">
+          <SheetName>CAPEX</SheetName>
+          <NamedRange>BudgetData_CAPEX</NamedRange>
+          <FallbackRange>A5:P500</FallbackRange>
+          <HeaderRow>4</HeaderRow>
+          <DataStartRow>5</DataStartRow>
+          <SheetTypeTag>CAPEX</SheetTypeTag>
+          <Columns>
+            <Column excelColumn="A" stagingColumn="SRC_Entity"       dataType="String"  description="Entity Code" />
+            <Column excelColumn="B" stagingColumn="SRC_Account"      dataType="String"  description="CAPEX Account Code" />
+            <Column excelColumn="C" stagingColumn="SRC_Project"      dataType="String"  description="Capital Project ID" />
+            <Column excelColumn="D" stagingColumn="SRC_AssetClass"   dataType="String"  description="Asset Classification" />
+            <Column excelColumn="E" stagingColumn="SRC_Jan"          dataType="Decimal" description="January Amount" />
+            <Column excelColumn="F" stagingColumn="SRC_Feb"          dataType="Decimal" description="February Amount" />
+            <Column excelColumn="G" stagingColumn="SRC_Mar"          dataType="Decimal" description="March Amount" />
+            <Column excelColumn="H" stagingColumn="SRC_Apr"          dataType="Decimal" description="April Amount" />
+            <Column excelColumn="I" stagingColumn="SRC_May"          dataType="Decimal" description="May Amount" />
+            <Column excelColumn="J" stagingColumn="SRC_Jun"          dataType="Decimal" description="June Amount" />
+            <Column excelColumn="K" stagingColumn="SRC_Jul"          dataType="Decimal" description="July Amount" />
+            <Column excelColumn="L" stagingColumn="SRC_Aug"          dataType="Decimal" description="August Amount" />
+            <Column excelColumn="M" stagingColumn="SRC_Sep"          dataType="Decimal" description="September Amount" />
+            <Column excelColumn="N" stagingColumn="SRC_Oct"          dataType="Decimal" description="October Amount" />
+            <Column excelColumn="O" stagingColumn="SRC_Nov"          dataType="Decimal" description="November Amount" />
+            <Column excelColumn="P" stagingColumn="SRC_Dec"          dataType="Decimal" description="December Amount" />
+          </Columns>
+        </Sheet>
+
+      </SheetMappings>
+
+      <!-- ============================================================
+           COMMON DERIVED COLUMNS
+           Added to all rows regardless of source sheet.
+           ============================================================ -->
+      <DerivedColumns>
+        <DerivedColumn name="SRC_SheetType" expression="@@SheetTypeTag" dataType="String" description="Budget category (Revenue/COGS/OPEX/Headcount/CAPEX)" />
+        <DerivedColumn name="SRC_AnnualTotal" expression="ISNULL(SRC_Jan,0)+ISNULL(SRC_Feb,0)+ISNULL(SRC_Mar,0)+ISNULL(SRC_Apr,0)+ISNULL(SRC_May,0)+ISNULL(SRC_Jun,0)+ISNULL(SRC_Jul,0)+ISNULL(SRC_Aug,0)+ISNULL(SRC_Sep,0)+ISNULL(SRC_Oct,0)+ISNULL(SRC_Nov,0)+ISNULL(SRC_Dec,0)" dataType="Decimal" description="Calculated annual total" />
+        <DerivedColumn name="SRC_SourceFile" expression="@@SourceFileName" dataType="String" description="Source Excel filename" />
+        <DerivedColumn name="SRC_BudgetYear" expression="@@FileNameParam_Year" dataType="String" description="Budget year extracted from filename" />
+        <DerivedColumn name="SRC_SubmittedEntity" expression="@@FileNameParam_EntityCode" dataType="String" description="Entity code extracted from filename" />
+        <DerivedColumn name="SRC_LoadTimestamp" expression="GETDATE()" dataType="DateTime" description="Staging load timestamp" />
+      </DerivedColumns>
+
+      <!-- ============================================================
+           UNPIVOT CONFIGURATION
+           Budget templates use wide format (months as columns).
+           Optionally unpivot to normalized format for loading.
+           ============================================================ -->
+      <UnpivotConfig>
+        <Enabled>true</Enabled>
+        <UnpivotColumns>SRC_Jan,SRC_Feb,SRC_Mar,SRC_Apr,SRC_May,SRC_Jun,SRC_Jul,SRC_Aug,SRC_Sep,SRC_Oct,SRC_Nov,SRC_Dec</UnpivotColumns>
+        <PeriodColumn>SRC_Period</PeriodColumn>
+        <AmountColumn>SRC_Amount</AmountColumn>
+        <PeriodMapping>
+          <Map from="SRC_Jan" to="2026M1" />
+          <Map from="SRC_Feb" to="2026M2" />
+          <Map from="SRC_Mar" to="2026M3" />
+          <Map from="SRC_Apr" to="2026M4" />
+          <Map from="SRC_May" to="2026M5" />
+          <Map from="SRC_Jun" to="2026M6" />
+          <Map from="SRC_Jul" to="2026M7" />
+          <Map from="SRC_Aug" to="2026M8" />
+          <Map from="SRC_Sep" to="2026M9" />
+          <Map from="SRC_Oct" to="2026M10" />
+          <Map from="SRC_Nov" to="2026M11" />
+          <Map from="SRC_Dec" to="2026M12" />
+        </PeriodMapping>
+        <!-- Skip zero/null amounts after unpivot -->
+        <ExcludeZeros>true</ExcludeZeros>
+        <ExcludeNulls>true</ExcludeNulls>
+      </UnpivotConfig>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <Action name="ClearStagingTable" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_Excel_Budget</SQL>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status, SourceFile) SELECT 'Excel_Budget', GETDATE(), COUNT(*), 'Staged', MAX(SRC_SourceFile) FROM STG_Excel_Budget</SQL>
+        </Action>
+        <Action name="ValidateTotals" order="2">
+          <Type>Validation</Type>
+          <Description>Verify budget totals by entity match expected cross-foot</Description>
+          <SQL><![CDATA[
+            SELECT SRC_Entity, SRC_SheetType,
+                   SUM(SRC_Amount) AS TotalAmount,
+                   COUNT(*) AS LineCount
+            FROM STG_Excel_Budget
+            GROUP BY SRC_Entity, SRC_SheetType
+          ]]></SQL>
+          <OnFailure>Log</OnFailure>
+        </Action>
+        <Action name="ArchiveFile" order="3">
+          <Type>FileMove</Type>
+          <DestinationPath>\\fileserver\OneStream\DataExchange\Archive\{Year}\{Month}\</DestinationPath>
+          <AppendTimestamp>true</AppendTimestamp>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>5000</BatchSize>
+        <CommandTimeout>120</CommandTimeout>
+        <EnableParallelExecution>false</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

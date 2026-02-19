@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF CubeView Definition
+  CV_Report_BvA - Budget vs Actual Variance Analysis
+  Manufacturing Implementation
+-->
+<CubeView xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+           Name="CV_Report_BvA"
+           Description="Budget vs Actual variance analysis with flex budget and color-coded variances with drill-through"
+           CubeName="Finance"
+           ViewType="Report"
+           IsEnabled="true"
+           AllowDataInput="false"
+           SuppressNoData="true"
+           SuppressZeros="false"
+           RefreshOnOpen="true"
+           LastModified="2026-02-18T00:00:00">
+
+  <!-- ============================================================ -->
+  <!-- ROW AXIS: P&L Accounts at Summary Level                      -->
+  <!-- ============================================================ -->
+  <RowAxis>
+    <Dimension Name="Account" AliasTable="Default">
+      <MemberSelections>
+        <!-- Revenue -->
+        <Member Name="NetRevenue" DisplayName="Net Revenue" IndentLevel="0" IsBold="true" AllowExpand="true" VarianceType="Revenue" />
+        <Member Name="REV_Domestic" DisplayName="  Domestic Revenue" IndentLevel="1" VarianceType="Revenue" />
+        <Member Name="REV_Export" DisplayName="  Export Revenue" IndentLevel="1" VarianceType="Revenue" />
+        <Member Name="REV_Intercompany" DisplayName="  Intercompany Revenue" IndentLevel="1" VarianceType="Revenue" />
+        <Member Name="REV_Deductions" DisplayName="  Revenue Deductions" IndentLevel="1" VarianceType="Expense" />
+
+        <Member Name="_Sep1" DisplayName="" IsBlankRow="true" />
+
+        <!-- COGS -->
+        <Member Name="TotalCOGS" DisplayName="Cost of Goods Sold" IndentLevel="0" IsBold="true" AllowExpand="true" VarianceType="Expense" />
+        <Member Name="COGS_DirectMaterials" DisplayName="  Direct Materials" IndentLevel="1" VarianceType="Expense" />
+        <Member Name="COGS_DirectLabor" DisplayName="  Direct Labor" IndentLevel="1" VarianceType="Expense" />
+        <Member Name="COGS_MfgOverhead" DisplayName="  Manufacturing Overhead" IndentLevel="1" VarianceType="Expense" />
+        <Member Name="COGS_Depreciation" DisplayName="  Production Depreciation" IndentLevel="1" VarianceType="Expense" />
+        <Member Name="COGS_Freight" DisplayName="  Freight &amp; Logistics" IndentLevel="1" VarianceType="Expense" />
+        <Member Name="COGS_Warranty" DisplayName="  Warranty Costs" IndentLevel="1" VarianceType="Expense" />
+
+        <Member Name="_Sep2" DisplayName="" IsBlankRow="true" />
+
+        <Member Name="GrossProfit" DisplayName="Gross Profit" IndentLevel="0" IsBold="true" IsSubtotal="true" VarianceType="Revenue" />
+        <Member Name="GrossMargin" DisplayName="Gross Margin %" IndentLevel="0" IsRatio="true" />
+
+        <Member Name="_Sep3" DisplayName="" IsBlankRow="true" />
+
+        <!-- OPEX -->
+        <Member Name="TotalOPEX" DisplayName="Total Operating Expenses" IndentLevel="0" IsBold="true" AllowExpand="true" VarianceType="Expense" />
+        <Member Name="OPEX_SGA" DisplayName="  SG&amp;A" IndentLevel="1" VarianceType="Expense" AllowExpand="true" />
+        <Member Name="OPEX_RD" DisplayName="  Research &amp; Development" IndentLevel="1" VarianceType="Expense" AllowExpand="true" />
+        <Member Name="OPEX_Marketing" DisplayName="  Marketing" IndentLevel="1" VarianceType="Expense" AllowExpand="true" />
+        <Member Name="OPEX_CorpAlloc" DisplayName="  Corporate Allocations" IndentLevel="1" VarianceType="Expense" />
+
+        <Member Name="_Sep4" DisplayName="" IsBlankRow="true" />
+
+        <Member Name="OperatingIncome" DisplayName="Operating Income" IndentLevel="0" IsBold="true" IsSubtotal="true" VarianceType="Revenue" />
+        <Member Name="OperatingMargin" DisplayName="Operating Margin %" IndentLevel="0" IsRatio="true" />
+
+        <Member Name="_Sep5" DisplayName="" IsBlankRow="true" />
+
+        <Member Name="TotalOtherIncExp" DisplayName="Other Income / (Expense)" IndentLevel="0" IsBold="true" VarianceType="Revenue" />
+
+        <Member Name="_Sep6" DisplayName="" IsBlankRow="true" />
+
+        <Member Name="PreTaxIncome" DisplayName="Pre-Tax Income" IndentLevel="0" IsBold="true" IsSubtotal="true" VarianceType="Revenue" />
+        <Member Name="IncomeTax" DisplayName="Income Tax" IndentLevel="0" VarianceType="Expense" />
+
+        <Member Name="_Sep7" DisplayName="" IsBlankRow="true" />
+
+        <Member Name="NetIncome" DisplayName="Net Income" IndentLevel="0" IsBold="true" IsSubtotal="true" VarianceType="Revenue" />
+        <Member Name="NetMargin" DisplayName="Net Margin %" IndentLevel="0" IsRatio="true" />
+
+        <Member Name="_Sep8" DisplayName="" IsBlankRow="true" />
+
+        <Member Name="EBITDA" DisplayName="EBITDA" IndentLevel="0" IsBold="true" VarianceType="Revenue" />
+      </MemberSelections>
+    </Dimension>
+  </RowAxis>
+
+  <!-- ============================================================ -->
+  <!-- COLUMN AXIS: Actual, Budget, Flex, Variances                  -->
+  <!-- ============================================================ -->
+  <ColumnAxis>
+    <ColumnGroup Name="Actual">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Actual" />
+        <DimensionMember Dimension="View" Member="YTD" />
+      </Dimensions>
+      <DisplayName>Actual</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="Budget">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="Budget" />
+        <DimensionMember Dimension="View" Member="YTD" />
+      </Dimensions>
+      <DisplayName>Budget</DisplayName>
+    </ColumnGroup>
+
+    <ColumnGroup Name="VarianceDollar">
+      <CalculatedColumn>
+        <Formula>
+          CASE
+            WHEN VarianceType = 'Revenue' THEN Actual - Budget
+            WHEN VarianceType = 'Expense' THEN Budget - Actual
+            ELSE Actual - Budget
+          END
+        </Formula>
+      </CalculatedColumn>
+      <DisplayName>Variance $</DisplayName>
+      <Description>Favorable / (Unfavorable) - positive is favorable for both revenue and expense</Description>
+    </ColumnGroup>
+
+    <ColumnGroup Name="VariancePercent">
+      <CalculatedColumn>
+        <Formula>IF(Budget = 0, 0, VarianceDollar / ABS(Budget))</Formula>
+      </CalculatedColumn>
+      <DisplayName>Variance %</DisplayName>
+      <NumberFormat Type="Percentage" DecimalPlaces="1" />
+    </ColumnGroup>
+
+    <ColumnGroup Name="FlexBudget">
+      <Dimensions>
+        <DimensionMember Dimension="Scenario" Member="FlexBudget" />
+        <DimensionMember Dimension="View" Member="YTD" />
+      </Dimensions>
+      <DisplayName>Flex Budget</DisplayName>
+      <Description>Budget adjusted for actual volume levels</Description>
+    </ColumnGroup>
+
+    <ColumnGroup Name="FlexVariance">
+      <CalculatedColumn>
+        <Formula>
+          CASE
+            WHEN VarianceType = 'Revenue' THEN Actual - FlexBudget
+            WHEN VarianceType = 'Expense' THEN FlexBudget - Actual
+            ELSE Actual - FlexBudget
+          END
+        </Formula>
+      </CalculatedColumn>
+      <DisplayName>Flex Variance $</DisplayName>
+      <Description>Variance after adjusting for volume differences</Description>
+    </ColumnGroup>
+  </ColumnAxis>
+
+  <!-- ============================================================ -->
+  <!-- PAGE / POV DIMENSIONS                                         -->
+  <!-- ============================================================ -->
+  <PageDimensions>
+    <Dimension Name="Entity" IsSelectable="true" DefaultMember="Consolidated">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllEntities" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Time" IsSelectable="true" DefaultMember="CurrentMonth">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllTime" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="UD1_Product" IsSelectable="true" DefaultMember="AllProducts">
+      <SelectionFilter>
+        <IncludeDescendants ParentMember="AllProducts" />
+      </SelectionFilter>
+    </Dimension>
+
+    <Dimension Name="Consolidation" IsSelectable="false" DefaultMember="Elimination" />
+    <Dimension Name="Currency" IsSelectable="false" DefaultMember="USD" />
+  </PageDimensions>
+
+  <!-- ============================================================ -->
+  <!-- CELL FORMATTING                                               -->
+  <!-- ============================================================ -->
+  <CellFormatting>
+    <DefaultFormat>
+      <NumberFormat Type="Currency" DecimalPlaces="0"
+                    ThousandsSeparator="true" CurrencySymbol="$"
+                    NegativeFormat="Parentheses" ScaleFactor="1000"
+                    ScaleLabel="($ in thousands)" />
+      <Font Name="Segoe UI" Size="10" />
+      <Alignment Horizontal="Right" Vertical="Center" />
+    </DefaultFormat>
+
+    <!-- Favorable variance: green -->
+    <ConditionalFormat Name="FavorableVariance">
+      <Condition>
+        <ColumnMember Members="VarianceDollar,VariancePercent,FlexVariance" />
+        <ValueCondition Operator="GreaterThan" Value="0" />
+      </Condition>
+      <Format>
+        <FontColor>#006600</FontColor>
+        <BackgroundColor>#E6F5E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Unfavorable variance: red -->
+    <ConditionalFormat Name="UnfavorableVariance">
+      <Condition>
+        <ColumnMember Members="VarianceDollar,VariancePercent,FlexVariance" />
+        <ValueCondition Operator="LessThan" Value="0" />
+      </Condition>
+      <Format>
+        <FontColor>#CC0000</FontColor>
+        <BackgroundColor>#FFE6E6</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Significant unfavorable (worse than -10%) -->
+    <ConditionalFormat Name="SignificantUnfavorable">
+      <Condition>
+        <ColumnMember Members="VariancePercent" />
+        <ValueCondition Operator="LessThan" Value="-0.10" />
+      </Condition>
+      <Format>
+        <FontColor>#FFFFFF</FontColor>
+        <BackgroundColor>#CC0000</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <!-- Significant favorable (better than +10%) -->
+    <ConditionalFormat Name="SignificantFavorable">
+      <Condition>
+        <ColumnMember Members="VariancePercent" />
+        <ValueCondition Operator="GreaterThan" Value="0.10" />
+      </Condition>
+      <Format>
+        <FontColor>#FFFFFF</FontColor>
+        <BackgroundColor>#006600</BackgroundColor>
+        <FontStyle>Bold</FontStyle>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="SubtotalRows">
+      <Condition>
+        <CellProperty Property="IsSubtotal" Value="true" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <BorderTopStyle>Thin</BorderTopStyle>
+        <BackgroundColor>#F5F8FC</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="RatioRows">
+      <Condition>
+        <CellProperty Property="IsRatio" Value="true" />
+      </Condition>
+      <Format>
+        <NumberFormat Type="Percentage" DecimalPlaces="1" />
+        <FontStyle>Italic</FontStyle>
+        <FontColor>#666666</FontColor>
+      </Format>
+    </ConditionalFormat>
+
+    <ConditionalFormat Name="NetIncomeRow">
+      <Condition>
+        <RowMember Dimension="Account" Member="NetIncome" />
+      </Condition>
+      <Format>
+        <FontStyle>Bold</FontStyle>
+        <FontSize>11</FontSize>
+        <BorderTopStyle>Double</BorderTopStyle>
+        <BorderBottomStyle>Double</BorderBottomStyle>
+        <BackgroundColor>#E8F4E8</BackgroundColor>
+      </Format>
+    </ConditionalFormat>
+  </CellFormatting>
+
+  <!-- ============================================================ -->
+  <!-- CELL PROTECTION - All cells read-only                         -->
+  <!-- ============================================================ -->
+  <CellProtection>
+    <AllCellsProtected>true</AllCellsProtected>
+  </CellProtection>
+
+  <!-- ============================================================ -->
+  <!-- DRILL-THROUGH CONFIGURATION                                   -->
+  <!-- ============================================================ -->
+  <DrillThrough>
+    <Enabled>true</Enabled>
+    <DrillThroughDefinitions>
+      <Definition Name="DrillToDetail">
+        <Description>Drill to account detail by cost center</Description>
+        <TargetCubeView>CV_DataEntry_OPEX</TargetCubeView>
+        <PassDimensions>
+          <PassDimension Source="Entity" Target="Entity" />
+          <PassDimension Source="Time" Target="Time" />
+          <PassDimension Source="Account" Target="Account" ExpandToChildren="true" />
+        </PassDimensions>
+      </Definition>
+      <Definition Name="DrillToRevDetail">
+        <Description>Drill to revenue detail by product and channel</Description>
+        <TargetCubeView>CV_DataEntry_Revenue</TargetCubeView>
+        <ApplicableMembers Dimension="Account" Members="NetRevenue,REV_Domestic,REV_Export,REV_Intercompany" />
+        <PassDimensions>
+          <PassDimension Source="Entity" Target="Entity" />
+          <PassDimension Source="Time" Target="Time" />
+        </PassDimensions>
+      </Definition>
+      <Definition Name="DrillToJournalEntries">
+        <Description>Drill to source journal entries</Description>
+        <TargetType>StagingTable</TargetType>
+        <StagingTableName>JournalEntries</StagingTableName>
+        <FilterColumns>
+          <FilterColumn StageName="EntityID" DimensionSource="Entity" />
+          <FilterColumn StageName="AccountID" DimensionSource="Account" />
+          <FilterColumn StageName="PeriodKey" DimensionSource="Time" />
+        </FilterColumns>
+      </Definition>
+    </DrillThroughDefinitions>
+  </DrillThrough>
+
+  <!-- ============================================================ -->
+  <!-- REPORT OPTIONS                                                -->
+  <!-- ============================================================ -->
+  <ReportOptions>
+    <SuppressZeroRows>false</SuppressZeroRows>
+    <AllowDrillDown>true</AllowDrillDown>
+    <AllowMemberExpansion>true</AllowMemberExpansion>
+    <ShowRowHierarchyIndent>true</ShowRowHierarchyIndent>
+    <PrintSettings>
+      <Orientation>Landscape</Orientation>
+      <PaperSize>Letter</PaperSize>
+      <FitToPage>true</FitToPage>
+      <ShowGridLines>false</ShowGridLines>
+      <HeaderLeft>Budget vs Actual Variance Analysis</HeaderLeft>
+      <HeaderCenter>{Entity.Description}</HeaderCenter>
+      <HeaderRight>Period: {Time.Description}</HeaderRight>
+      <FooterLeft>Confidential - Internal Use Only</FooterLeft>
+      <FooterCenter>Page {PageNumber} of {TotalPages}</FooterCenter>
+      <FooterRight>Generated: {PrintDate}</FooterRight>
+    </PrintSettings>
+  </ReportOptions>
+
+</CubeView>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  OneStream XF Data Management - Stage Definition
+  Stage: NetSuite General Ledger
+  Purpose: Extract GL transaction data from NetSuite via SuiteAnalytics Connect
+  Source Connection: CONN_NetSuite
+  Created: 2026-02-18
+-->
+<OneStreamXF>
+  <DataManagement>
+    <StageDefinition>
+
+      <!-- ============================================================
+           STAGE IDENTITY
+           ============================================================ -->
+      <StageName>NetSuite_GL</StageName>
+      <StageDescription>Extracts General Ledger transaction data from NetSuite ERP via SuiteAnalytics Connect ODBC. Joins TRANSACTION_LINES with TRANSACTIONS, ACCOUNTS, SUBSIDIARIES, DEPARTMENTS, CLASSES, and LOCATIONS to provide full dimensional breakdown for subsidiaries operating on NetSuite. Supports multi-subsidiary and multi-currency environments.</StageDescription>
+      <IsActive>true</IsActive>
+      <StageType>DatabaseQuery</StageType>
+      <SourceConnection>CONN_NetSuite</SourceConnection>
+      <TargetStagingTable>STG_NetSuite_GL</TargetStagingTable>
+
+      <!-- ============================================================
+           SOURCE QUERY
+           NetSuite SuiteAnalytics Connect uses an ODBC-accessible
+           analytical schema with denormalized transaction views.
+           ============================================================ -->
+      <SourceQuery>
+        <SQL><![CDATA[
+          /*
+            NetSuite GL Transaction Extraction
+            Source: Transaction_Lines joined with Transactions, Accounts, Subsidiaries
+            Purpose: GL data for OneStream financial consolidation
+            Note: SuiteAnalytics Connect tables follow NetSuite's analytical data model
+          */
+          SELECT
+            sub.SubsidiaryID                  AS SubsidiaryID,
+            sub.Name                          AS SubsidiaryName,
+            sub.Currency                      AS SubsidiaryCurrency,
+            acct.AccountNumber                AS AccountNumber,
+            acct.Name                         AS AccountName,
+            acct.Type                         AS AccountType,
+            acct.GeneralRate                  AS GeneralRateType,
+            dept.DepartmentID                 AS DepartmentID,
+            dept.Name                         AS DepartmentName,
+            cls.ClassID                       AS ClassID,
+            cls.Name                          AS ClassName,
+            loc.LocationID                    AS LocationID,
+            loc.Name                          AS LocationName,
+            txn.TranDate                      AS TranDate,
+            txn.Type                          AS TransactionType,
+            txn.TranID                        AS TransactionNumber,
+            txn.Status                        AS TransactionStatus,
+            txn.Posting                       AS IsPosting,
+            tl.Amount                         AS Amount,
+            tl.Amount_Foreign                 AS AmountForeign,
+            tl.Debit_Amount                   AS DebitAmount,
+            tl.Credit_Amount                  AS CreditAmount,
+            tl.Debit_Foreign                  AS DebitForeign,
+            tl.Credit_Foreign                 AS CreditForeign,
+            tl.Net_Amount                     AS NetAmount,
+            txn.Currency                      AS Currency,
+            txn.Exchange_Rate                 AS ExchangeRate,
+            tl.Memo                           AS LineMemo,
+            txn.Memo                          AS TransactionMemo,
+            /* Period derivation from transaction date */
+            EXTRACT(YEAR FROM txn.TranDate)   AS FiscalYear,
+            EXTRACT(MONTH FROM txn.TranDate)  AS FiscalMonth,
+            /* Intercompany reference */
+            tl.Eliminate                       AS EliminationFlag,
+            /* Audit trail */
+            txn.Transaction_ID                AS TransactionID,
+            tl.Transaction_Line_ID            AS LineID,
+            txn.Date_Created                  AS CreatedDate,
+            txn.Date_Last_Modified            AS ModifiedDate
+          FROM Transaction_Lines tl
+          INNER JOIN Transactions txn
+            ON tl.Transaction_ID = txn.Transaction_ID
+          INNER JOIN Accounts acct
+            ON tl.Account_ID = acct.Account_ID
+          INNER JOIN Subsidiaries sub
+            ON tl.Subsidiary_ID = sub.Subsidiary_ID
+          LEFT JOIN Departments dept
+            ON tl.Department_ID = dept.Department_ID
+          LEFT JOIN Classes cls
+            ON tl.Class_ID = cls.Class_ID
+          LEFT JOIN Locations loc
+            ON tl.Location_ID = loc.Location_ID
+          WHERE txn.Posting = 'T'                         /* Posting transactions only */
+            AND txn.TranDate >= :StartDate                /* Period start date */
+            AND txn.TranDate <= :EndDate                  /* Period end date */
+            AND sub.SubsidiaryID IN (
+              10, 11, 12, 13, 14, 15, 20, 21, 22         /* Active subsidiaries */
+            )
+            AND acct.IsInactive = 'No'                    /* Active accounts only */
+          ORDER BY
+            sub.SubsidiaryID, acct.AccountNumber, txn.TranDate
+        ]]></SQL>
+
+        <Parameters>
+          <Parameter name="StartDate" dataType="Date" defaultValue="2026-01-01" description="Period start date (YYYY-MM-DD)" />
+          <Parameter name="EndDate" dataType="Date" defaultValue="2026-01-31" description="Period end date (YYYY-MM-DD)" />
+        </Parameters>
+      </SourceQuery>
+
+      <!-- ============================================================
+           COLUMN MAPPINGS
+           ============================================================ -->
+      <ColumnMappings>
+        <Column ordinal="1"  sourceName="SubsidiaryID"        stagingColumn="SRC_SubsidiaryID"      dataType="Integer"  nullable="false" description="NetSuite Subsidiary Internal ID" />
+        <Column ordinal="2"  sourceName="SubsidiaryName"      stagingColumn="SRC_SubsidiaryName"    dataType="String"   maxLength="100" nullable="true"  description="Subsidiary Name" />
+        <Column ordinal="3"  sourceName="SubsidiaryCurrency"  stagingColumn="SRC_SubCurrency"       dataType="String"   maxLength="10"  nullable="true"  description="Subsidiary Base Currency" />
+        <Column ordinal="4"  sourceName="AccountNumber"       stagingColumn="SRC_AccountNumber"     dataType="String"   maxLength="20"  nullable="false" description="GL Account Number" />
+        <Column ordinal="5"  sourceName="AccountName"         stagingColumn="SRC_AccountName"       dataType="String"   maxLength="100" nullable="true"  description="GL Account Name" />
+        <Column ordinal="6"  sourceName="AccountType"         stagingColumn="SRC_AccountType"       dataType="String"   maxLength="30"  nullable="true"  description="Account Type (Income/Expense/Asset/etc.)" />
+        <Column ordinal="7"  sourceName="GeneralRateType"     stagingColumn="SRC_RateType"          dataType="String"   maxLength="20"  nullable="true"  description="Currency Translation Rate Type" />
+        <Column ordinal="8"  sourceName="DepartmentID"        stagingColumn="SRC_DepartmentID"      dataType="Integer"  nullable="true"  description="Department Internal ID" />
+        <Column ordinal="9"  sourceName="DepartmentName"      stagingColumn="SRC_DepartmentName"    dataType="String"   maxLength="100" nullable="true"  description="Department Name" />
+        <Column ordinal="10" sourceName="ClassID"             stagingColumn="SRC_ClassID"           dataType="Integer"  nullable="true"  description="Class Internal ID (Product Line)" />
+        <Column ordinal="11" sourceName="ClassName"           stagingColumn="SRC_ClassName"         dataType="String"   maxLength="100" nullable="true"  description="Class Name" />
+        <Column ordinal="12" sourceName="LocationID"          stagingColumn="SRC_LocationID"        dataType="Integer"  nullable="true"  description="Location Internal ID" />
+        <Column ordinal="13" sourceName="LocationName"        stagingColumn="SRC_LocationName"      dataType="String"   maxLength="100" nullable="true"  description="Location Name" />
+        <Column ordinal="14" sourceName="TranDate"            stagingColumn="SRC_TranDate"          dataType="Date"     nullable="false" description="Transaction Date" />
+        <Column ordinal="15" sourceName="TransactionType"     stagingColumn="SRC_TranType"          dataType="String"   maxLength="30"  nullable="true"  description="Transaction Type" />
+        <Column ordinal="16" sourceName="TransactionNumber"   stagingColumn="SRC_TranNumber"        dataType="String"   maxLength="30"  nullable="true"  description="Transaction Reference Number" />
+        <Column ordinal="17" sourceName="TransactionStatus"   stagingColumn="SRC_TranStatus"        dataType="String"   maxLength="20"  nullable="true"  description="Transaction Status" />
+        <Column ordinal="18" sourceName="IsPosting"           stagingColumn="SRC_IsPosting"         dataType="String"   maxLength="1"   nullable="true"  description="Posting Flag (T/F)" />
+        <Column ordinal="19" sourceName="Amount"              stagingColumn="SRC_Amount"            dataType="Decimal"  precision="23" scale="2" nullable="true" description="Amount in Base Currency" />
+        <Column ordinal="20" sourceName="AmountForeign"       stagingColumn="SRC_AmountForeign"     dataType="Decimal"  precision="23" scale="2" nullable="true" description="Amount in Foreign Currency" />
+        <Column ordinal="21" sourceName="DebitAmount"         stagingColumn="SRC_DebitAmount"       dataType="Decimal"  precision="23" scale="2" nullable="true" description="Debit Amount (Base Currency)" />
+        <Column ordinal="22" sourceName="CreditAmount"        stagingColumn="SRC_CreditAmount"      dataType="Decimal"  precision="23" scale="2" nullable="true" description="Credit Amount (Base Currency)" />
+        <Column ordinal="23" sourceName="DebitForeign"        stagingColumn="SRC_DebitForeign"      dataType="Decimal"  precision="23" scale="2" nullable="true" description="Debit Amount (Foreign Currency)" />
+        <Column ordinal="24" sourceName="CreditForeign"       stagingColumn="SRC_CreditForeign"     dataType="Decimal"  precision="23" scale="2" nullable="true" description="Credit Amount (Foreign Currency)" />
+        <Column ordinal="25" sourceName="NetAmount"           stagingColumn="SRC_NetAmount"         dataType="Decimal"  precision="23" scale="2" nullable="true" description="Net Amount" />
+        <Column ordinal="26" sourceName="Currency"            stagingColumn="SRC_Currency"          dataType="String"   maxLength="10"  nullable="false" description="Transaction Currency Code" />
+        <Column ordinal="27" sourceName="ExchangeRate"        stagingColumn="SRC_ExchangeRate"      dataType="Decimal"  precision="15" scale="8" nullable="true" description="Exchange Rate at Transaction" />
+        <Column ordinal="28" sourceName="FiscalYear"          stagingColumn="SRC_FiscalYear"        dataType="Integer"  nullable="true"  description="Derived Fiscal Year" />
+        <Column ordinal="29" sourceName="FiscalMonth"         stagingColumn="SRC_FiscalMonth"       dataType="Integer"  nullable="true"  description="Derived Fiscal Month" />
+        <Column ordinal="30" sourceName="EliminationFlag"     stagingColumn="SRC_EliminationFlag"   dataType="String"   maxLength="1"   nullable="true"  description="Intercompany Elimination Flag" />
+        <Column ordinal="31" sourceName="TransactionID"       stagingColumn="SRC_TransactionID"     dataType="Integer"  nullable="true"  description="Internal Transaction ID (audit)" />
+        <Column ordinal="32" sourceName="LineID"              stagingColumn="SRC_LineID"            dataType="Integer"  nullable="true"  description="Transaction Line ID (audit)" />
+      </ColumnMappings>
+
+      <!-- ============================================================
+           PRE-STAGE AND POST-STAGE ACTIONS
+           ============================================================ -->
+      <PreStageActions>
+        <Action name="ClearStagingTable" order="1">
+          <Type>SQL</Type>
+          <SQL>TRUNCATE TABLE STG_NetSuite_GL</SQL>
+        </Action>
+      </PreStageActions>
+
+      <PostStageActions>
+        <Action name="RecordRowCount" order="1">
+          <Type>SQL</Type>
+          <SQL>INSERT INTO DM_LoadLog (StageName, LoadDate, RowCount, Status) SELECT 'NetSuite_GL', GETDATE(), COUNT(*), 'Staged' FROM STG_NetSuite_GL</SQL>
+        </Action>
+      </PostStageActions>
+
+      <!-- ============================================================
+           EXECUTION SETTINGS
+           ============================================================ -->
+      <ExecutionSettings>
+        <BatchSize>5000</BatchSize>
+        <CommandTimeout>600</CommandTimeout>
+        <EnableParallelExecution>false</EnableParallelExecution>
+        <LogRowCount>true</LogRowCount>
+        <TrackDuration>true</TrackDuration>
+      </ExecutionSettings>
+
+    </StageDefinition>
+  </DataManagement>
+</OneStreamXF>

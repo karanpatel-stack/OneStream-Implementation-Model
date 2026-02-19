@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Dashboard
+  Name="DB_ConsolidationStatus"
+  Description="Close Tracking and Consolidation Status Dashboard"
+  Version="1.0"
+  DashboardType="Standard"
+  RefreshOnOpen="True"
+  AutoFitToScreen="True"
+  ThemeName="OneStreamDark"
+  LastModified="2026-02-18T00:00:00">
+
+  <!-- POV BINDINGS -->
+  <POVBindings>
+    <POVBinding Dimension="Scenario"  MemberFilter="S#Actual"           DefaultMember="S#Actual" />
+    <POVBinding Dimension="Time"      MemberFilter="T#*"                DefaultMember="T#CurrentMonth" />
+    <POVBinding Dimension="Workflow"  MemberFilter="W#*"                DefaultMember="W#Default" />
+    <POVBinding Dimension="Entity"    MemberFilter="E#TopEntity.Base"   DefaultMember="E#TopEntity" />
+  </POVBindings>
+
+  <!-- DATA ADAPTERS -->
+  <DataAdapters>
+    <DataAdapter
+      Name="DDA_ConsolidationStatus"
+      AdapterType="DashboardDataAdapter"
+      DataSourceType="WorkflowStatus"
+      CubeName="MainCube"
+      SuppressNoData="False"
+      SuppressZeros="False">
+      <Parameters>
+        <Parameter Name="IncludeWorkflowProfile" Value="True" />
+        <Parameter Name="IncludeCloseSchedule"   Value="True" />
+        <Parameter Name="IncludeExceptions"      Value="True" />
+        <Parameter Name="MaxRows"                Value="10000" />
+      </Parameters>
+    </DataAdapter>
+  </DataAdapters>
+
+  <!-- LAYOUT -->
+  <Layout Rows="3" Columns="12" RowGap="8" ColumnGap="8" Padding="12">
+
+    <!-- HEADER ROW -->
+    <Row Index="0" Height="55" HeightUnit="Pixel">
+      <Panel Row="0" Column="0" ColumnSpan="8" RowSpan="1"
+             PanelType="LabelPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <LabelComponent
+          Name="DashboardTitle"
+          Text="Consolidation Status"
+          FontFamily="Segoe UI" FontSize="22" FontWeight="Bold"
+          ForeColor="#FFFFFF"
+          HorizontalAlignment="Left" VerticalAlignment="Center" />
+        <LabelComponent
+          Name="PeriodLabel"
+          Text="Close Period: {POV.Time.MemberDescription}"
+          FontFamily="Segoe UI" FontSize="12"
+          ForeColor="#A0B4D0"
+          HorizontalAlignment="Left" VerticalAlignment="Bottom" />
+      </Panel>
+
+      <Panel Row="0" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="FilterPanel" BorderStyle="None" BackgroundColor="#1B2A4A">
+        <FilterComponent
+          Name="WorkflowFilter"
+          FilterType="DropDown"
+          Dimension="Workflow"
+          MemberFilter="W#Default,W#Supplemental"
+          DefaultMember="W#Default"
+          Label="Workflow"
+          LabelForeColor="#A0B4D0"
+          Width="180"
+          BackgroundColor="#243B67" ForeColor="#FFFFFF"
+          BorderColor="#3A5A8C" BorderRadius="4" />
+      </Panel>
+    </Row>
+
+    <!-- ROW 1: ENTITY TREE + PROGRESS BARS -->
+    <Row Index="1" Height="400" HeightUnit="Pixel">
+
+      <!-- Entity Tree with Status Icons -->
+      <Panel Row="1" Column="0" ColumnSpan="5" RowSpan="1"
+             PanelType="TreePanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Entity Status by Workflow Step" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <TreeComponent
+          Name="EntityStatusTree"
+          DataAdapter="DDA_ConsolidationStatus"
+          TreeType="EntityHierarchy"
+          RootMember="E#TopEntity"
+          ExpandLevel="2"
+          ShowStatusIcons="True"
+          NodeFontSize="11" NodeForeColor="#D0D8E8"
+          SelectedNodeBackgroundColor="#243B67"
+          HoverNodeBackgroundColor="#1B2E50"
+          IndentSize="24"
+          ShowCheckboxes="False"
+          EnableSearch="True"
+          SearchPlaceholder="Search entities...">
+
+          <StatusIconMapping>
+            <StatusIcon Status="NotStarted"    IconName="fa-circle"          IconColor="#95A5A6" Label="Not Started" />
+            <StatusIcon Status="InProgress"    IconName="fa-spinner"         IconColor="#3498DB" Label="In Progress" />
+            <StatusIcon Status="DataLoaded"    IconName="fa-database"        IconColor="#F39C12" Label="Data Loaded" />
+            <StatusIcon Status="Validated"     IconName="fa-check-circle"    IconColor="#2ECC71" Label="Validated" />
+            <StatusIcon Status="Locked"        IconName="fa-lock"            IconColor="#27AE60" Label="Locked" />
+            <StatusIcon Status="Certified"     IconName="fa-certificate"     IconColor="#1ABC9C" Label="Certified" />
+            <StatusIcon Status="Error"         IconName="fa-exclamation-triangle" IconColor="#E74C3C" Label="Error" />
+          </StatusIconMapping>
+
+          <WorkflowSteps>
+            <Step Name="Import"         Order="1" />
+            <Step Name="Validate"       Order="2" />
+            <Step Name="ICElimination"  Order="3" />
+            <Step Name="JournalEntry"   Order="4" />
+            <Step Name="Review"         Order="5" />
+            <Step Name="Lock"           Order="6" />
+            <Step Name="Certify"        Order="7" />
+          </WorkflowSteps>
+
+          <Columns>
+            <Column Header="Entity"      Binding="Entity.Description" Width="180" />
+            <Column Header="Import"      Binding="Step.Import"        Width="60"  Alignment="Center" />
+            <Column Header="Validate"    Binding="Step.Validate"      Width="60"  Alignment="Center" />
+            <Column Header="IC Elim"     Binding="Step.ICElimination" Width="60"  Alignment="Center" />
+            <Column Header="Journals"    Binding="Step.JournalEntry"  Width="60"  Alignment="Center" />
+            <Column Header="Review"      Binding="Step.Review"        Width="60"  Alignment="Center" />
+            <Column Header="Lock"        Binding="Step.Lock"          Width="60"  Alignment="Center" />
+            <Column Header="Certify"     Binding="Step.Certify"       Width="60"  Alignment="Center" />
+          </Columns>
+        </TreeComponent>
+      </Panel>
+
+      <!-- Progress Bars per Region -->
+      <Panel Row="1" Column="5" ColumnSpan="3" RowSpan="1"
+             PanelType="ProgressPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Regional Close Progress" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ProgressBarGroup
+          Name="RegionalProgress"
+          DataAdapter="DDA_ConsolidationStatus"
+          Orientation="Vertical"
+          BarHeight="28" BarSpacing="16"
+          TrackColor="#243B67" TrackBorderRadius="6"
+          LabelFontSize="12" LabelForeColor="#D0D8E8"
+          ValueFontSize="11" ValueForeColor="#FFFFFF"
+          ShowPercentLabel="True">
+
+          <ProgressBar
+            Name="AmericasProgress"
+            Label="Americas"
+            EntityFilter="E#Americas.Base"
+            CompletionMetric="PercentCertified"
+            GradientStart="#2980B9" GradientEnd="#3498DB"
+            CompletedColor="#27AE60" />
+          <ProgressBar
+            Name="EMEAProgress"
+            Label="EMEA"
+            EntityFilter="E#EMEA.Base"
+            CompletionMetric="PercentCertified"
+            GradientStart="#2980B9" GradientEnd="#3498DB"
+            CompletedColor="#27AE60" />
+          <ProgressBar
+            Name="APACProgress"
+            Label="APAC"
+            EntityFilter="E#APAC.Base"
+            CompletionMetric="PercentCertified"
+            GradientStart="#2980B9" GradientEnd="#3498DB"
+            CompletedColor="#27AE60" />
+          <ProgressBar
+            Name="CorporateProgress"
+            Label="Corporate"
+            EntityFilter="E#Corporate.Base"
+            CompletionMetric="PercentCertified"
+            GradientStart="#2980B9" GradientEnd="#3498DB"
+            CompletedColor="#27AE60" />
+          <ProgressBar
+            Name="OverallProgress"
+            Label="Overall"
+            EntityFilter="E#TopEntity.Base"
+            CompletionMetric="PercentCertified"
+            GradientStart="#E67E22" GradientEnd="#F39C12"
+            CompletedColor="#27AE60"
+            BarHeight="36"
+            LabelFontWeight="Bold" />
+        </ProgressBarGroup>
+      </Panel>
+
+      <!-- Gantt-Style Timeline -->
+      <Panel Row="1" Column="8" ColumnSpan="4" RowSpan="1"
+             PanelType="ChartPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Close Timeline: Planned vs Actual" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <ChartComponent
+          Name="CloseGanttChart"
+          ChartType="GanttBar"
+          DataAdapter="DDA_ConsolidationStatus"
+          AnimationEnabled="True" AnimationDuration="600"
+          ShowLegend="True" LegendPosition="Bottom"
+          LegendFontSize="10" LegendForeColor="#8CA8CC"
+          TooltipEnabled="True">
+
+          <XAxis
+            AxisType="DateTime"
+            Title="Close Calendar"
+            TitleFontSize="10" TitleForeColor="#8CA8CC"
+            LabelFontSize="9" LabelForeColor="#8CA8CC"
+            LabelFormat="MMM dd"
+            GridLineColor="#2D4470" GridLineStyle="Dotted" />
+
+          <YAxis
+            DimensionBinding="WorkflowStep"
+            LabelFontSize="10" LabelForeColor="#D0D8E8" />
+
+          <GanttSeries Name="Planned"
+                       StartDateExpression="Step.PlannedStart"
+                       EndDateExpression="Step.PlannedEnd"
+                       Color="#3498DB50" BorderColor="#3498DB"
+                       BarHeight="12" />
+          <GanttSeries Name="Actual"
+                       StartDateExpression="Step.ActualStart"
+                       EndDateExpression="Step.ActualEnd"
+                       Color="#27AE60" BorderColor="#1ABC9C"
+                       BarHeight="8" />
+          <GanttMilestone Name="Deadline"
+                          DateExpression="Step.Deadline"
+                          MarkerType="Diamond" MarkerColor="#E74C3C" MarkerSize="10" />
+        </ChartComponent>
+      </Panel>
+    </Row>
+
+    <!-- ROW 2: EXCEPTION LIST -->
+    <Row Index="2" Height="250" HeightUnit="Pixel">
+      <Panel Row="2" Column="0" ColumnSpan="12" RowSpan="1"
+             PanelType="GridPanel" BorderStyle="Solid" BorderColor="#2D4470" BorderRadius="8"
+             BackgroundColor="#1E3355" Shadow="True"
+             Title="Exceptions: Entities Behind Schedule" TitleFontSize="13" TitleForeColor="#FFFFFF">
+        <GridComponent
+          Name="ExceptionGrid"
+          DataAdapter="DDA_ConsolidationStatus"
+          DataFilter="Status.BehindSchedule = True"
+          ShowGridLines="True" GridLineColor="#2D4470"
+          AlternateRowColor="#1B2E50"
+          HeaderBackgroundColor="#4A1525" HeaderForeColor="#FFFFFF" HeaderFontSize="11" HeaderFontWeight="Bold"
+          CellFontSize="11" CellForeColor="#D0D8E8"
+          CellPadding="6"
+          RowHeight="30"
+          EnableSorting="True"
+          EnableFiltering="True"
+          EmptyMessage="No entities behind schedule - all on track!">
+
+          <Columns>
+            <Column Header="Entity"           Binding="Entity.Description"         Width="180" Alignment="Left" FontWeight="Bold" />
+            <Column Header="Region"           Binding="Entity.Parent.Description"  Width="120" Alignment="Left" />
+            <Column Header="Current Step"     Binding="CurrentStep.Name"           Width="130" Alignment="Center" />
+            <Column Header="Expected Step"    Binding="ExpectedStep.Name"          Width="130" Alignment="Center" />
+            <Column Header="Steps Behind"     Binding="StepsBehind"               Width="100" Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 3" BackgroundColor="#E74C3C30" ForeColor="#E74C3C" FontWeight="Bold" />
+                <Rule Condition="Value >= 1" BackgroundColor="#F39C1230" ForeColor="#F39C12" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Planned Date"     Binding="CurrentStep.PlannedEnd"     Width="120" Alignment="Center" Format="MM/dd/yyyy" />
+            <Column Header="Days Overdue"     Binding="DaysOverdue"               Width="100" Alignment="Center">
+              <ConditionalFormat>
+                <Rule Condition="Value >= 5" BackgroundColor="#E74C3C30" ForeColor="#E74C3C" FontWeight="Bold" />
+                <Rule Condition="Value >= 2" BackgroundColor="#F39C1230" ForeColor="#F39C12" />
+                <Rule Condition="Value >= 0" BackgroundColor="#3498DB20" ForeColor="#3498DB" />
+              </ConditionalFormat>
+            </Column>
+            <Column Header="Assigned To"      Binding="CurrentStep.AssignedUser"   Width="140" Alignment="Left" />
+            <Column Header="Last Activity"    Binding="LastActivityDate"           Width="130" Alignment="Center" Format="MM/dd/yyyy HH:mm" />
+          </Columns>
+        </GridComponent>
+      </Panel>
+    </Row>
+  </Layout>
+
+  <!-- STYLING -->
+  <Styling>
+    <GlobalStyle
+      BackgroundColor="#0F1F3D"
+      FontFamily="Segoe UI"
+      DefaultForeColor="#D0D8E8" />
+    <ColorPalette>
+      <Color Name="OnTrack"        Value="#27AE60" />
+      <Color Name="AtRisk"         Value="#F39C12" />
+      <Color Name="BehindSchedule" Value="#E74C3C" />
+      <Color Name="NotStarted"     Value="#95A5A6" />
+      <Color Name="Completed"      Value="#1ABC9C" />
+    </ColorPalette>
+  </Styling>
+
+</Dashboard>

@@ -1,0 +1,9 @@
+MemberName,Description,ProcessOrder
+C_Total,Total Consolidated View,5
+C_Local,Local Currency Input,1
+C_Translated,Translated to Parent Currency,2
+C_Proportional,Proportional Consolidation Adjustment,3
+C_Elimination,Intercompany Elimination Entries,4
+C_Consolidated,Fully Consolidated Result,5
+C_MinorityInterest,Minority Interest / Non-Controlling Interest,6
+C_EquityMethod,Equity Method Adjustment,7
