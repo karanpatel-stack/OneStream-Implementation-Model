@@ -1,550 +1,363 @@
-# OneStream XF Enterprise Manufacturing Implementation
+# OneStream XF Enterprise Manufacturing Accelerator
 
-## Project Overview
-
-This repository contains the full implementation artifacts for a OneStream XF deployment serving a global multi-plant manufacturing company. The solution consolidates financial reporting, planning, budgeting, forecasting, account reconciliation, people planning, and operational analytics into a single unified platform, replacing a fragmented landscape of spreadsheets, legacy EPM tools, and disconnected data sources.
-
-The implementation supports 40+ legal entities across 12 countries, 6 manufacturing plants, and 3 distribution centers, with multi-currency consolidation, intercompany elimination, and regulatory reporting (US GAAP, IFRS, and local statutory).
+<p align="center">
+  <strong>Pre-Built CPM Solution for Global Multi-Plant Manufacturing</strong><br>
+  194 Artifacts &nbsp;|&nbsp; 74 Business Rules &nbsp;|&nbsp; 53,000+ Lines of Code &nbsp;|&nbsp; 6 Modules &nbsp;|&nbsp; 14 Dimensions
+</p>
 
 ---
 
-## Modules
+## Overview
 
-### Financial Consolidation
-- Multi-GAAP consolidation (US GAAP primary, IFRS and local statutory parallel)
-- Automated intercompany eliminations with matching and reconciliation
-- Currency translation (month-end rate for balance sheet, average rate for income statement, historical rate for equity)
-- Ownership management supporting direct and indirect holdings
-- Journal entry processing and top-side adjustments
-- Consolidation audit trail and certification workflows
+This repository contains a **complete, production-ready OneStream XF implementation** for a global multi-plant manufacturing company. It serves as an accelerator that reduces implementation timelines by 50-60% and covers the full CPM lifecycle:
 
-### Planning, Budgeting, and Forecasting
-- Annual operating plan with driver-based revenue and expense models
-- Rolling 18-month forecast updated monthly
-- Capital expenditure planning with asset-level detail
-- Workforce cost planning integrated with headcount models
-- Manufacturing cost planning (raw materials, labor, overhead allocation)
-- What-if scenario modeling and version comparison
+- **Financial Consolidation** — Multi-currency, multi-GAAP with IC elimination, equity pickup, and minority interest
+- **Planning & Budgeting** — Driver-based planning with BOM rollups, headcount planning, CAPEX, rolling forecasts
+- **Reporting & Dashboards** — 16 executive dashboards with KPI cockpits, variance waterfalls, and plant analytics
+- **Data Management** — 10 pre-built connectors for SAP, Oracle, NetSuite, Workday, and MES systems
+- **Account Reconciliation** — Automated matching engine with risk-based workflows
+- **People Planning** — FTE-to-cost modeling with compensation, benefits, and burden rates
 
-### Reporting and Dashboards
-- Executive KPI dashboards (revenue, margin, EBITDA, working capital)
-- Plant-level operational dashboards (OEE, yield, throughput, scrap rates)
-- Self-service ad hoc reporting via Cube Views
-- Financial statement packages (income statement, balance sheet, cash flow)
-- Variance analysis (actual vs. budget, actual vs. forecast, actual vs. prior year)
-- Board reporting packages with drill-through to transactional detail
+---
 
-### Account Reconciliation
-- Balance sheet reconciliation with risk-based scheduling
-- Automated matching for high-volume, low-risk accounts
-- Preparer/reviewer workflow with electronic sign-off
-- Aging analysis and open item management
-- Integration with subledger systems for supporting detail
+## Dashboards
+
+### Executive Summary
+C-suite KPI overview with revenue trends, margin analysis, and entity performance scorecards.
+
+![Executive Summary Dashboard](Dashboards/Mockups/DB_ExecutiveSummary.png)
+
+### Consolidation Status
+Real-time close tracking showing workflow step completion by entity across the monthly close cycle.
+
+![Consolidation Status Dashboard](Dashboards/Mockups/DB_ConsolidationStatus.png)
+
+### Plant Performance
+Operational dashboard with OEE, capacity utilization, first pass yield, and scrap rates by plant.
+
+![Plant Performance Dashboard](Dashboards/Mockups/DB_PlantPerformance.png)
+
+### Production Variance
+Variance waterfall decomposing budget-to-actual differences across volume, price, mix, and cost drivers.
+
+![Production Variance Dashboard](Dashboards/Mockups/DB_ProductionVariance.png)
+
+### P&L Waterfall
+Income statement bridge showing the walk from prior year to current year net income.
+
+![P&L Waterfall Dashboard](Dashboards/Mockups/DB_PLWaterfall.png)
+
+### Balance Sheet
+Asset and liability composition with key financial ratios and period-over-period comparison.
+
+![Balance Sheet Dashboard](Dashboards/Mockups/DB_BalanceSheet.png)
+
+### Cash Flow
+Cash flow waterfall from operating, investing, and financing activities with trend analysis.
+
+![Cash Flow Dashboard](Dashboards/Mockups/DB_CashFlow.png)
+
+### Budget vs Actual
+Grouped comparison of actual vs budget across all P&L categories with entity-level heatmap.
+
+![Budget vs Actual Dashboard](Dashboards/Mockups/DB_BudgetVsActual.png)
+
+### Rolling Forecast Trend
+18-month rolling forecast with actual overlay, budget baseline, and confidence bands.
+
+![Rolling Forecast Trend Dashboard](Dashboards/Mockups/DB_RollingForecastTrend.png)
 
 ### People Planning
-- Headcount planning by position, department, and location
-- Compensation modeling (salary, bonus, benefits, payroll taxes)
-- New hire and termination modeling with effective dating
-- FTE and contractor blended rate planning
-- Allocation of people costs to cost centers and projects
+Headcount and compensation analysis with FTE distribution by function and cost breakdowns.
 
-### Data Management (ETL Integration)
-- SAP ECC/S4HANA integration via RFC and BAPI connectors
-- Oracle EBS integration via database views and REST APIs
-- NetSuite integration via SuiteTalk SOAP and RESTlet services
-- Flat file staging for ancillary sources (production systems, HR databases)
-- Data quality rules with validation, transformation, and exception handling
-- Full audit trail of all data loads with row-level lineage
+![People Planning Dashboard](Dashboards/Mockups/DB_PeoplePlanning.png)
 
----
+### CAPEX Tracker
+Capital project status with budget vs spend tracking, completion percentages, and forecasted EAC.
 
-## Architecture Overview
+![CAPEX Tracker Dashboard](Dashboards/Mockups/DB_CAPEXTracker.png)
 
-The application is built on four cubes with 14 shared and cube-specific dimensions, over 75 business rules, and 5 major workflow profiles.
+### Intercompany Reconciliation
+IC balance matching with exception reporting, tolerance analysis, and unmatched item detail.
 
-### High-Level Architecture
+![Intercompany Reconciliation Dashboard](Dashboards/Mockups/DB_IntercompanyRecon.png)
 
-```
-Source Systems                OneStream XF Platform                 Consumers
------------------    ---------------------------------    ----------------------
-SAP ECC / S4HANA --> |                                 | --> Executive Dashboards
-Oracle EBS --------> |  Finance Cube    Planning Cube  | --> Financial Packages
-NetSuite ----------> |  HR Cube         Recon Cube     | --> Operational Reports
-Flat Files --------> |                                 | --> Board Books
-                     |  75+ Business Rules             | --> Ad Hoc Analysis
-                     |  5 Workflow Profiles             | --> Regulatory Filings
-                     ---------------------------------
-```
+### Data Quality Scorecard
+Validation rule results with overall DQ score, completeness, accuracy, timeliness, and consistency metrics.
 
----
+![Data Quality Scorecard Dashboard](Dashboards/Mockups/DB_DataQualityScorecard.png)
 
-## Folder Structure
+### KPI Cockpit
+4x3 grid of operational KPIs with sparklines and trend indicators — margins, turnover, DSO/DPO/DIO, OEE.
 
-```
-OneStream/
-|
-|-- README.md                          # This file
-|-- DEPLOYMENT.md                      # Deployment runbook and procedures
-|
-|-- Application/
-|   |-- Dimensions/
-|   |   |-- Account.xml                # ~800 members, chart of accounts
-|   |   |-- Entity.xml                 # ~120 members, legal and management entities
-|   |   |-- Scenario.xml               # Actual, Budget, Forecast, What-If
-|   |   |-- Time.xml                   # Monthly periods, FY2020-FY2030
-|   |   |-- Flow.xml                   # Flow types (periodic, YTD, QTD)
-|   |   |-- Consolidation.xml          # Local, Translated, Eliminations, Consolidated
-|   |   |-- UD1_Product.xml            # Product hierarchy (~200 members)
-|   |   |-- UD2_Customer.xml           # Customer segments and channels
-|   |   |-- UD3_Project.xml            # Capital projects and cost centers
-|   |   |-- UD4_Intercompany.xml       # Intercompany partner dimension
-|   |   |-- UD5_Movement.xml           # Movement types for roll-forward
-|   |   |-- UD6_Currency.xml           # Reporting currency overrides
-|   |   |-- UD7_Department.xml         # Departmental hierarchy
-|   |   |-- UD8_Driver.xml             # Planning drivers and assumptions
-|   |
-|   |-- Configuration/
-|   |   |-- ApplicationSettings.xml    # Global application parameters
-|   |   |-- CurrencyRates.xml          # Exchange rate type definitions
-|   |   |-- ConsolidationRules.xml     # Ownership and elimination rules
-|   |   |-- SecurityModel.xml          # Role and group definitions
-|   |
-|   |-- CubeViews/
-|       |-- FinancialStatements/       # Income statement, balance sheet, cash flow
-|       |-- VarianceAnalysis/          # Budget vs. actual, forecast vs. actual
-|       |-- PlantOperations/           # OEE, yield, production metrics
-|       |-- PeoplePlanning/            # Headcount and compensation views
-|
-|-- BusinessRules/
-|   |-- Finance/                       # 8 finance business rules
-|   |-- Calculate/                     # 20 calculation rules
-|   |-- Connector/                     # 10 connector business rules
-|   |-- DashboardDataAdapter/          # 15 dashboard data adapters
-|   |-- DashboardStringFunction/       # 4 string function rules
-|   |-- MemberFilter/                  # 5 member filter rules
-|   |-- EventHandler/                  # 6 event handler rules
-|   |-- Extender/                      # 6 extender rules
-|
-|-- Dashboards/
-|   |-- Executive/                     # C-suite KPI dashboards
-|   |-- Finance/                       # Controller and FP&A dashboards
-|   |-- Operations/                    # Plant manager dashboards
-|   |-- HR/                            # People planning dashboards
-|   |-- Reconciliation/               # Account reconciliation dashboards
-|   |-- Components/                    # Shared dashboard components
-|
-|-- DataManagement/
-|   |-- Connectors/
-|   |   |-- SAP_GL_Connector.xml       # SAP general ledger extract
-|   |   |-- SAP_AP_AR_Connector.xml    # SAP accounts payable/receivable
-|   |   |-- Oracle_GL_Connector.xml    # Oracle general ledger extract
-|   |   |-- NetSuite_GL_Connector.xml  # NetSuite trial balance extract
-|   |   |-- HR_Headcount_Connector.xml # HR system headcount data
-|   |   |-- Production_Connector.xml   # Manufacturing execution system data
-|   |
-|   |-- Transformations/
-|   |   |-- MappingRules/              # Source-to-target dimension mappings
-|   |   |-- ValidationRules/           # Data quality and validation checks
-|   |   |-- LookupTables/             # Reference data for transformations
-|   |
-|   |-- Schedules/
-|       |-- DailyLoads.xml             # Daily data load schedule
-|       |-- MonthlyClose.xml           # Month-end close data load sequence
-|       |-- AnnualBudget.xml           # Annual budget data load schedule
-|
-|-- Workflows/
-|   |-- MonthlyClose.xml               # 7-step monthly close workflow
-|   |-- AnnualBudget.xml               # 8-step annual budget workflow
-|   |-- RollingForecast.xml            # Rolling forecast workflow
-|   |-- AccountReconciliation.xml      # Account reconciliation workflow
-|   |-- PeoplePlanning.xml             # People planning workflow
-|
-|-- Security/
-|   |-- Roles.xml                      # Application roles
-|   |-- Groups.xml                     # Security groups
-|   |-- AccessControl.xml             # Dimension-level security assignments
-|
-|-- Testing/
-|   |-- TestPlan.xlsx                  # Master test plan
-|   |-- TestCases/                     # Individual test case documentation
-|   |-- TestData/                      # Sample data for testing
-|   |-- ValidationScripts/            # Automated validation scripts
-|
-|-- Documentation/
-    |-- FunctionalDesign/              # Functional design documents
-    |-- TechnicalDesign/               # Technical design documents
-    |-- UserGuides/                    # End-user training materials
-    |-- AdminGuides/                   # System administration guides
-```
+![KPI Cockpit Dashboard](Dashboards/Mockups/DB_KPICockpit.png)
+
+### Account Reconciliation Status
+Reconciliation progress tracker with risk-based categorization and unreconciled account detail.
+
+![Account Reconciliation Status Dashboard](Dashboards/Mockups/DB_AccountReconStatus.png)
+
+### Supply Chain Analytics
+Inventory analysis with turns, days of supply, fill rates, and supplier performance rankings.
+
+![Supply Chain Analytics Dashboard](Dashboards/Mockups/DB_SupplyChainAnalytics.png)
 
 ---
 
-## Dimensional Model
+## CubeViews
 
-### Dimension Summary
+### Data Entry Forms
 
-| Dimension       | Type           | Approx. Members | Description                                          |
-|-----------------|----------------|-----------------|------------------------------------------------------|
-| Account         | Standard       | ~800            | Full chart of accounts (assets, liabilities, equity, revenue, expense, statistical) |
-| Entity          | Standard       | ~120            | Legal entities, management entities, and elimination entities across 12 countries |
-| Scenario        | Standard       | 8               | Actual, Budget, Forecast, Rolling Forecast, What-If, Prior Year, Restatement, Baseline |
-| Time            | Standard       | ~130            | Monthly periods from FY2020 through FY2030, with quarterly and annual roll-ups |
-| Flow            | Standard       | 6               | Periodic, YTD, QTD, HTD, Rolling 12, LTM            |
-| Consolidation   | Standard       | 5               | Local, Translated, Proportional, Eliminations, Consolidated |
-| UD1 (Product)   | User Defined   | ~200            | Product families, product lines, SKU groupings       |
-| UD2 (Customer)  | User Defined   | ~80             | Customer segments, channels, geographic markets      |
-| UD3 (Project)   | User Defined   | ~60             | Capital projects, cost centers, initiative tracking  |
-| UD4 (IC Partner)| User Defined   | ~120            | Intercompany partner entities (mirrors Entity dim)   |
-| UD5 (Movement)  | User Defined   | ~30             | Movement types: opening, additions, disposals, revaluation, closing |
-| UD6 (Currency)  | User Defined   | ~15             | Reporting currency overrides and constant currency flags |
-| UD7 (Department)| User Defined   | ~45             | Departmental hierarchy for cost allocation and reporting |
-| UD8 (Driver)    | User Defined   | ~35             | Planning assumptions, growth rates, allocation drivers |
+#### Revenue Data Entry
+Monthly revenue input form with gross revenue by channel, deductions, and calculated net revenue. Yellow cells indicate editable input fields.
 
-### Account Dimension Hierarchy (Top Level)
+![Revenue Data Entry](CubeViews/Mockups/CV_DataEntry_Revenue.png)
 
-```
-Total Accounts
-|-- Balance Sheet
-|   |-- Assets
-|   |   |-- Current Assets (Cash, AR, Inventory, Prepaid)
-|   |   |-- Non-Current Assets (PP&E, Intangibles, Investments)
-|   |-- Liabilities
-|   |   |-- Current Liabilities (AP, Accruals, Current Debt)
-|   |   |-- Non-Current Liabilities (Long-term Debt, Deferred Tax)
-|   |-- Equity
-|       |-- Retained Earnings, AOCI, Common Stock
-|
-|-- Income Statement
-|   |-- Revenue
-|   |   |-- Product Revenue (by line)
-|   |   |-- Service Revenue
-|   |   |-- Intercompany Revenue
-|   |-- Cost of Goods Sold
-|   |   |-- Raw Materials
-|   |   |-- Direct Labor
-|   |   |-- Manufacturing Overhead
-|   |-- Gross Profit
-|   |-- Operating Expenses
-|   |   |-- Selling & Marketing
-|   |   |-- General & Administrative
-|   |   |-- Research & Development
-|   |-- Operating Income
-|   |-- Other Income / Expense
-|   |-- Tax Provision
-|   |-- Net Income
-|
-|-- Cash Flow (Indirect Method)
-|   |-- Operating Activities
-|   |-- Investing Activities
-|   |-- Financing Activities
-|
-|-- Statistical Accounts
-    |-- Headcount, FTE, Units Produced, Machine Hours
-```
+#### Operating Expense Data Entry
+Departmental OPEX entry organized by SG&A, R&D, and Marketing with quarterly rollups.
 
-### Entity Dimension Hierarchy (Top Level)
+![OPEX Data Entry](CubeViews/Mockups/CV_DataEntry_OPEX.png)
+
+#### Headcount Planning
+Position-level headcount planning with FTE count, average salary, benefits rate, and total annual cost.
+
+![Headcount Data Entry](CubeViews/Mockups/CV_DataEntry_Headcount.png)
+
+#### Capital Expenditure Planning
+Project-level CAPEX input with quarterly spend, estimate at completion, and percentage complete.
+
+![CAPEX Data Entry](CubeViews/Mockups/CV_DataEntry_CAPEX.png)
+
+#### Production Volume & Capacity
+Production volume entry with machine hours, quality metrics (OEE, scrap rate, first pass yield), and labor hours.
+
+![Production Data Entry](CubeViews/Mockups/CV_DataEntry_Production.png)
+
+### Financial Reports
+
+#### Income Statement (P&L)
+Full P&L from Net Revenue through Net Income with Actual, Budget, Variance $, Variance %, Prior Year, and YoY columns.
+
+![P&L Report](CubeViews/Mockups/CV_Report_PL.png)
+
+#### Balance Sheet
+Complete balance sheet with Assets, Liabilities, and Equity showing current period, prior period, and year-over-year changes.
+
+![Balance Sheet Report](CubeViews/Mockups/CV_Report_BS.png)
+
+#### Cash Flow Statement
+Indirect method cash flow with Operating, Investing, and Financing activities plus budget comparison.
+
+![Cash Flow Report](CubeViews/Mockups/CV_Report_CF.png)
+
+#### Budget vs Actual Variance
+Detailed BvA analysis including flex budget, 4-way cost variance decomposition (price, usage, efficiency, volume).
+
+![BvA Report](CubeViews/Mockups/CV_Report_BvA.png)
+
+#### Consolidation Report
+Full elimination detail: Local → FX Translation → IC Elimination → Minority Interest → Consolidated.
+
+![Consolidation Report](CubeViews/Mockups/CV_Report_Consolidation.png)
+
+---
+
+## Architecture
+
+### Cube Architecture
+
+| Cube | Dimensions | Purpose |
+|------|-----------|---------|
+| **Finance** | Account, Entity, Scenario, Time, Flow, Consolidation, UD1-UD6 | Main consolidation & reporting |
+| **Planning** | Account, Entity, Scenario, Time, UD1-UD4, UD6, UD8 | Operational planning & forecasting |
+| **HR** | Account (HR subset), Entity, Scenario, Time, UD2, UD8 | People planning & comp modeling |
+| **Reconciliation** | Account, Entity, Time, UD8 | Account reconciliation |
+
+### Dimensional Model (14 Dimensions)
+
+| Dimension | Members | Description |
+|-----------|---------|-------------|
+| Account | ~800 | P&L, Balance Sheet, Cash Flow, Statistical accounts |
+| Entity | ~120 | Corporate → Region → Country → Plant → Production Line |
+| Scenario | 27 | Actual, Budget, Forecast Q1-Q4, RF Jan-Dec, WhatIf |
+| Time | 73 | CY2024-2027, Monthly + Quarterly + Annual |
+| Flow | 14 | Opening, Movement, Closing, FX Translation, Elimination |
+| Consolidation | 8 | Local, Translated, Proportional, Eliminated, Consolidated |
+| UD1 Product | 66 | Industrial / Consumer / Specialty → Family → SKU |
+| UD2 CostCenter | 80+ | Production, Warehouse, QC, Maintenance, Admin, R&D, Sales |
+| UD3 Intercompany | 19 | Mirrors Entity for IC partner matching |
+| UD4 Project | 30 | CAPEX Expansion, Maintenance, Automation, R&D |
+| UD5 CustomerSegment | 21 | OEM, Aftermarket, Government, Commercial |
+| UD6 Channel | 19 | Direct, Distributor, OEM, E-Commerce |
+| UD7 Plant | 16 | Cross-reference for multi-entity plant analysis |
+| UD8 Version | 5 | Working, Submitted, Approved, Published, Archived |
+
+### Entity Hierarchy
 
 ```
 Global Consolidated
-|-- North America
-|   |-- US Operations
-|   |   |-- US Plant 1 (Detroit)
-|   |   |-- US Plant 2 (Houston)
-|   |   |-- US Distribution (Chicago)
-|   |   |-- US Corporate HQ
-|   |-- Canada Operations
-|       |-- Canada Plant (Toronto)
-|
-|-- Europe
-|   |-- Germany Operations
-|   |   |-- Germany Plant (Munich)
-|   |   |-- Germany Sales Office
-|   |-- UK Operations
-|   |-- France Operations
-|   |-- Netherlands Holding
-|
-|-- Asia Pacific
-|   |-- China Operations
-|   |   |-- China Plant (Shanghai)
-|   |   |-- China Distribution
-|   |-- Japan Sales Office
-|   |-- Singapore Regional HQ
-|
-|-- Eliminations
-    |-- NA Eliminations
-    |-- Europe Eliminations
-    |-- APAC Eliminations
-    |-- Global Eliminations
+├── Corporate_HQ
+├── Americas
+│   ├── Plant_US01_Detroit      [USD]
+│   ├── Plant_US02_Houston      [USD]
+│   ├── Plant_US03_Charlotte    [USD]
+│   ├── Plant_CA01_Toronto      [CAD]
+│   └── Plant_MX01_Monterrey    [MXN]
+├── EMEA
+│   ├── Plant_DE01_Munich       [EUR]
+│   ├── Plant_DE02_Stuttgart    [EUR]
+│   ├── Plant_UK01_Birmingham   [GBP]
+│   └── Plant_FR01_Lyon         [EUR]
+├── APAC
+│   ├── Plant_CN01_Shanghai     [CNY]
+│   ├── Plant_CN02_Shenzhen     [CNY]
+│   ├── Plant_JP01_Osaka        [JPY]
+│   └── Plant_IN01_Pune         [INR]
+└── Eliminations
 ```
 
 ---
 
-## Cube Architecture
+## Business Rules (74 Total)
 
-| Cube            | Primary Use                  | Key Dimensions                                                                 | Data Granularity      |
-|-----------------|------------------------------|--------------------------------------------------------------------------------|-----------------------|
-| **Finance**     | Actuals, consolidation, statutory reporting | Account, Entity, Scenario, Time, Flow, Consolidation, UD1-UD6               | Monthly by entity     |
-| **Planning**    | Budget, forecast, what-if modeling          | Account, Entity, Scenario, Time, Flow, UD1-UD4, UD7, UD8                    | Monthly by entity     |
-| **HR**          | People planning, headcount, compensation    | Account, Entity, Scenario, Time, UD7 (Department), UD8 (Driver)             | Monthly by department |
-| **Reconciliation** | Balance sheet account reconciliation     | Account, Entity, Scenario, Time, UD5 (Movement)                              | Monthly by account    |
-
-### Cube Details
-
-**Finance Cube** -- The primary cube for financial consolidation and reporting. Receives actual data from SAP, Oracle, and NetSuite via connectors. Supports multi-currency translation, intercompany eliminations, and equity method investments. Contains 5 years of historical actuals and current year data.
-
-**Planning Cube** -- Supports the annual budget cycle and rolling forecast process. Contains driver-based models for revenue (price x volume), cost of goods sold (material costs, labor rates, overhead allocation), and operating expenses (headcount-driven, trend-based, and zero-based). Includes what-if scenario capabilities.
-
-**HR Cube** -- Dedicated cube for people planning at the position level. Models compensation components (base salary, bonus targets, benefits, payroll taxes by jurisdiction), tracks headcount movements (new hires, terminations, transfers), and supports merit increase and promotion modeling.
-
-**Reconciliation Cube** -- Supports the balance sheet reconciliation process. Tracks opening balances, movements, adjustments, and closing balances at the account level. Integrates with subledger detail for drill-through and supports the preparer/reviewer certification workflow.
+| Category | Count | Key Capabilities |
+|----------|-------|-----------------|
+| **Finance Rules** | 8 | Consolidation, FX translation, IC elimination, equity pickup, minority interest, goodwill, journal entries, flow analysis |
+| **Calculate Rules** | 20 | COGS allocation, overhead absorption, standard cost variance (4-way), OEE, revenue recognition (ASC 606), BOM rollup, driver-based planning, headcount, CAPEX depreciation, cash flow, KPIs |
+| **Connector Rules** | 10 | SAP HANA GL + production + materials, Oracle EBS GL + sub-ledger, NetSuite, Workday HCM, MES, Excel templates, flat files |
+| **Dashboard Adapters** | 15 | Executive summary, plant performance, variance waterfall, P&L bridge, BvA, rolling forecast, IC recon, CAPEX tracker, KPI cockpit |
+| **Member Filters** | 5 | Entity security, scenario locking, time period control, product access, cost center access |
+| **Event Handlers** | 6 | Data quality validation, submission control, IC matching, budget threshold alerts, audit logging, notifications |
+| **Extenders** | 6 | Batch consolidation, data archival, ETL orchestrator, recon engine, RF seeder, report distribution |
+| **String Functions** | 4 | Status icons, variance formatting, KPI thresholds, dynamic multi-language labels |
 
 ---
 
-## Business Rules Inventory
+## Data Integration Pipeline
 
-### Summary
+```
+Source Systems              ETL Pipeline                    Target Cubes
+─────────────         ─────────────────────          ──────────────────
+SAP S/4HANA    ──►    EXTRACT  (10 Connectors)
+Oracle EBS     ──►    STAGE    (8 Staging Defs)     ──►  Finance Cube
+NetSuite       ──►    TRANSFORM (8 Mappings)        ──►  Planning Cube
+Workday HCM    ──►    VALIDATE  (Quality Rules)     ──►  HR Cube
+MES Systems    ──►    LOAD     (6 Load Sequences)   ──►  Recon Cube
+```
 
-| Rule Type                  | Count | Description                                              |
-|----------------------------|-------|----------------------------------------------------------|
-| Finance                    | 8     | Core financial calculations and consolidation logic      |
-| Calculate                  | 20    | Calculation, allocation, and driver-based model rules    |
-| Connector                  | 10    | Data integration connectors for source system loads      |
-| Dashboard DataAdapter      | 15    | Data retrieval rules powering dashboard components       |
-| Dashboard String Functions | 4     | String manipulation and formatting for dashboard display |
-| Member Filters             | 5     | Dynamic member selection for reports and forms           |
-| Event Handlers             | 6     | Workflow event-triggered automation rules                |
-| Extenders                  | 6     | Custom extensions for specialized processing             |
-| **Total**                  | **74**|                                                          |
-
-### Finance Rules (8)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `FIN_Consolidation`                  | Main consolidation logic including ownership calculations   |
-| `FIN_CurrencyTranslation`            | Multi-rate currency translation processing                 |
-| `FIN_IntercompanyElimination`        | Automated intercompany elimination entries                  |
-| `FIN_EquityPickup`                   | Equity method investment calculations                      |
-| `FIN_CashFlowIndirect`              | Indirect cash flow statement derivation                     |
-| `FIN_RetainedEarnings`              | Retained earnings roll-forward calculation                  |
-| `FIN_MinorityInterest`              | Non-controlling interest calculations                       |
-| `FIN_StatutoryAdjustments`          | GAAP-to-local statutory bridge adjustments                  |
-
-### Calculate Rules (20)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `CALC_RevenueModel`                  | Price x volume revenue driver model                        |
-| `CALC_COGSAllocation`               | Cost of goods sold allocation by product                    |
-| `CALC_LaborCostModel`              | Direct and indirect labor cost calculations                 |
-| `CALC_OverheadAllocation`           | Manufacturing overhead allocation across plants             |
-| `CALC_DepreciationSchedule`         | Asset depreciation schedule calculations                    |
-| `CALC_AmortizationSchedule`         | Intangible asset amortization calculations                  |
-| `CALC_InterestExpense`              | Debt schedule and interest expense modeling                 |
-| `CALC_TaxProvision`                 | Estimated tax provision by jurisdiction                     |
-| `CALC_WorkingCapitalModel`          | Days sales outstanding, inventory turns, DPO calculations   |
-| `CALC_VarianceAnalysis`             | Multi-dimensional variance decomposition                    |
-| `CALC_HeadcountCost`               | Fully-loaded headcount cost build-up                        |
-| `CALC_MeritIncrease`               | Annual merit increase modeling                              |
-| `CALC_BonusAccrual`                | Bonus accrual calculation and true-up                       |
-| `CALC_BenefitsAllocation`          | Benefits cost allocation by entity and department           |
-| `CALC_CapexModel`                  | Capital expenditure and project cost modeling                |
-| `CALC_AllocationsEngine`           | Multi-step corporate cost allocation engine                  |
-| `CALC_TransferPricing`             | Intercompany transfer pricing calculations                   |
-| `CALC_SeasonalityFactors`          | Seasonal spread patterns for forecast distribution           |
-| `CALC_RollingForecastBlend`        | Actual/forecast blending for rolling forecast                |
-| `CALC_KPICalculations`             | Derived KPI and ratio calculations                           |
-
-### Connector Rules (10)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `CONN_SAP_GL_Actuals`               | SAP general ledger trial balance extract                   |
-| `CONN_SAP_AP_Subledger`             | SAP accounts payable subledger detail                      |
-| `CONN_SAP_AR_Subledger`             | SAP accounts receivable subledger detail                   |
-| `CONN_Oracle_GL_Actuals`            | Oracle EBS general ledger extract                          |
-| `CONN_NetSuite_GL_Actuals`          | NetSuite trial balance via SuiteTalk                       |
-| `CONN_HR_Headcount`                 | HR system headcount and position data                      |
-| `CONN_HR_Compensation`              | HR system compensation and benefits data                   |
-| `CONN_Production_Volumes`           | MES production volume and yield data                       |
-| `CONN_ExchangeRates`                | Exchange rate feed from treasury system                    |
-| `CONN_FixedAssets`                  | Fixed asset register detail from asset system              |
-
-### Dashboard DataAdapter Rules (15)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `DA_ExecutiveKPIs`                   | Executive summary KPI data retrieval                       |
-| `DA_IncomeStatement`                 | Income statement data with variance columns                |
-| `DA_BalanceSheet`                    | Balance sheet data with period comparison                  |
-| `DA_CashFlow`                        | Cash flow statement data adapter                           |
-| `DA_RevenueAnalysis`                | Revenue drill-down by product, customer, region             |
-| `DA_MarginAnalysis`                 | Gross and operating margin analysis                         |
-| `DA_PlantPerformance`              | Plant-level operational KPIs                                |
-| `DA_WorkingCapital`                 | Working capital dashboard data                              |
-| `DA_HeadcountSummary`              | Headcount and FTE summary data                              |
-| `DA_CompensationDetail`            | Compensation detail by position and department              |
-| `DA_BudgetVsActual`                | Budget variance analysis data                               |
-| `DA_ForecastAccuracy`              | Forecast accuracy tracking over time                        |
-| `DA_ReconStatus`                    | Reconciliation status and aging dashboard                   |
-| `DA_IntercompanyBalance`           | Intercompany balance matching dashboard                     |
-| `DA_CapexTracking`                 | Capital expenditure tracking vs. approved budget            |
-
-### Dashboard String Functions (4)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `SF_PeriodLabel`                     | Dynamic period label formatting                            |
-| `SF_CurrencyFormat`                 | Currency-aware number formatting                            |
-| `SF_VarianceIndicator`             | Conditional variance display (favorable/unfavorable)        |
-| `SF_EntityDescription`             | Dynamic entity description and metadata display             |
-
-### Member Filter Rules (5)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `MF_ActiveEntities`                  | Filters to entities active in selected scenario/period     |
-| `MF_PLAccounts`                     | Income statement account filter with dynamic hierarchy      |
-| `MF_BSAccounts`                     | Balance sheet account filter with classification            |
-| `MF_PlanningAccounts`              | Planning-specific account filter for input forms            |
-| `MF_ReconAccounts`                 | Reconciliation-eligible balance sheet accounts              |
-
-### Event Handler Rules (6)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `EH_DataLoadValidation`             | Pre-load data validation and quality checks                |
-| `EH_ConsolidationTrigger`          | Post-load automatic consolidation trigger                   |
-| `EH_WorkflowNotification`          | Workflow step completion email notifications                |
-| `EH_AuditTrailCapture`             | Detailed audit trail logging for data changes               |
-| `EH_CertificationEnforcement`      | Certification prerequisite enforcement                      |
-| `EH_LockPeriod`                    | Period lock enforcement after close completion               |
-
-### Extender Rules (6)
-
-| Rule Name                            | Purpose                                                    |
-|--------------------------------------|------------------------------------------------------------|
-| `EXT_DataExportPackage`             | Automated financial package export to PDF/Excel            |
-| `EXT_ReconMatchingEngine`          | Automated transaction matching for reconciliation           |
-| `EXT_BulkJournalImport`           | Mass journal entry import and validation                    |
-| `EXT_AllocationBatchProcess`       | Batch allocation processing with audit output               |
-| `EXT_RateLoadAutomation`          | Automated exchange rate loading and validation               |
-| `EXT_ArchiveUtility`              | Historical data archival and purge utility                   |
+**27 Data Management artifacts** covering connections, staging, transformation (account/entity/product/cost center mapping, currency conversion, sign convention), and loading.
 
 ---
 
 ## Workflow Design
 
-### Monthly Close Workflow (7 Steps)
+### Monthly Financial Close (7 Steps, 8-Day Cycle)
 
-| Step | Name                    | Type        | Owner                | Duration | Dependencies      |
-|------|-------------------------|-------------|----------------------|----------|-------------------|
-| 1    | Data Load & Validation  | Automated   | Data Management Team | Day 1-2  | Source system close |
-| 2    | Journal Entries         | Manual      | Corporate Accounting | Day 2-3  | Step 1            |
-| 3    | Intercompany Matching   | Semi-Auto   | IC Coordinator       | Day 3-4  | Step 1            |
-| 4    | Local Close & Certify   | Manual      | Entity Controllers   | Day 4-5  | Steps 2, 3        |
-| 5    | Consolidation           | Automated   | Consolidation Team   | Day 5-6  | Step 4            |
-| 6    | Review & Adjustments    | Manual      | Corporate Controller | Day 6-7  | Step 5            |
-| 7    | Final Certification     | Manual      | VP Finance / CFO     | Day 7-8  | Step 6            |
+| Step | Activity | Duration |
+|------|----------|----------|
+| 1 | Data Load & Validation | Day 1-2 |
+| 2 | Local GAAP Adjustments | Day 2-3 |
+| 3 | Intercompany Reconciliation | Day 3-4 |
+| 4 | Currency Translation | Day 4-5 |
+| 5 | Consolidation | Day 5-6 |
+| 6 | Management Review | Day 6-7 |
+| 7 | Certification & Lock | Day 7-8 |
 
-### Annual Budget Workflow (8 Steps)
+### Annual Budget (8 Steps, Sep-Nov)
 
-| Step | Name                       | Type        | Owner               | Duration    | Dependencies |
-|------|----------------------------|-------------|----------------------|-------------|--------------|
-| 1    | Target Setting             | Manual      | CFO / FP&A Director  | Week 1-2    | None         |
-| 2    | Assumption Distribution    | Automated   | FP&A Team            | Week 2      | Step 1       |
-| 3    | Revenue Planning           | Manual      | Sales / BU Leaders   | Week 3-5    | Step 2       |
-| 4    | COGS & Opex Planning       | Manual      | Plant / Dept Managers| Week 3-5    | Step 2       |
-| 5    | People Planning            | Manual      | HR / Dept Managers   | Week 3-5    | Step 2       |
-| 6    | Capital Planning           | Manual      | Engineering / Ops    | Week 4-6    | Step 2       |
-| 7    | Consolidation & Review     | Semi-Auto   | FP&A Team            | Week 6-7    | Steps 3-6   |
-| 8    | Executive Approval         | Manual      | CFO / CEO            | Week 7-8    | Step 7       |
+| Step | Activity | Duration |
+|------|----------|----------|
+| 1 | Budget Kickoff & Targets | Week 1-2 |
+| 2 | Revenue Planning | Week 3-5 |
+| 3 | COGS Planning | Week 3-5 |
+| 4 | OPEX Planning | Week 3-5 |
+| 5 | Headcount Planning | Week 3-5 |
+| 6 | CAPEX Planning | Week 4-6 |
+| 7 | Review & Iteration | Week 6-7 |
+| 8 | Approval & Publish | Week 7-8 |
 
-### Rolling Forecast Workflow
+Additional workflows: **Rolling Forecast** (monthly, 18-month window), **Account Reconciliation** (risk-based), **People Planning** (annual + quarterly refresh).
 
-- Triggered monthly after close completion
-- Blends actual months with remaining forecast periods
-- 18-month forward horizon, refreshed each cycle
-- Uses trend extrapolation with manual override capability
-- Incorporates latest run-rate and known commitments
+---
 
-### Account Reconciliation Workflow
+## Deployment
 
-- Risk-based scheduling (high-risk accounts reconciled monthly, low-risk quarterly)
-- Automated balance pull from Finance cube at period close
-- Preparer completes reconciliation with supporting documentation
-- Reviewer approves or returns with comments
-- Aging tracked for open reconciling items
-- Dashboard provides real-time status visibility to management
+### Environment Strategy
 
-### People Planning Workflow
+| Environment | Purpose | Config |
+|-------------|---------|--------|
+| **DEV** | Development & unit testing | Debug logging, no rate limits, 20 users |
+| **QA** | Integration & UAT testing | Production-mirror data (masked), strict validation, 50 users |
+| **PROD** | Production | HA with F5 load balancer, 99.9% SLA, MFA required, 250 users |
 
-- Position-level detail planning by department manager
-- Compensation modeling with effective date logic
-- Automated calculation of payroll taxes by jurisdiction
-- Benefits cost allocation using blended rates
-- Approval routing: Manager, HR Business Partner, VP, CFO
-- Monthly actuals comparison and variance analysis
+### Automation Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `Deploy_BusinessRules.ps1` | Upload, compile, and activate 74 business rules with rollback |
+| `Deploy_Dimensions.ps1` | Load dimension hierarchies with backup and delta comparison |
+| `Deploy_DataManagement.ps1` | Deploy ETL sequences in dependency order |
+| `Validate_Deployment.ps1` | Post-deployment health checks: compilation, connectivity, data integrity |
+
+---
+
+## Project Structure
+
+```
+OneStream/
+├── Application/           AppConfig.xml, CubeDefinitions.xml
+├── Dimensions/            21 CSV files across 14 dimensions
+├── BusinessRules/
+│   ├── Finance/           8 consolidation & FX rules
+│   ├── Calculate/         20 calculation & planning rules
+│   ├── Connector/         10 source system connectors
+│   ├── DashboardDataAdapter/  15 dashboard data adapters
+│   ├── DashboardStringFunction/  4 formatting rules
+│   ├── MemberFilter/      5 security & access rules
+│   ├── EventHandler/      6 workflow automation rules
+│   └── Extender/          6 batch processing rules
+├── DataManagement/        27 XMLs (connections, stage, transform, load)
+├── Workflows/             5 workflow definitions
+├── Dashboards/            16 dashboard XMLs + mockup illustrations
+├── CubeViews/             10 cube views + mockup illustrations
+├── Security/              Roles, assignments, data access profiles
+├── Testing/               Validation scripts, test cases, sample data
+├── Documentation/         Architecture, user guides, deployment docs
+├── Deployment/            PowerShell scripts + environment configs
+└── PitchDeck/             Sales presentation (PowerPoint)
+```
 
 ---
 
 ## Technology Stack
 
-| Component             | Technology                                                   |
-|-----------------------|--------------------------------------------------------------|
-| Platform              | OneStream XF (cloud-hosted or on-premise)                    |
-| Business Rules        | VB.NET (compiled within OneStream runtime)                   |
-| Configurations        | XML-based application metadata                               |
-| Source System ETL     | OneStream native connectors, Stage tables, REST/SOAP APIs    |
-| Dashboards            | OneStream Dashboard framework (HTML5, responsive)            |
-| Authentication        | Active Directory / SAML 2.0 / Azure AD integration          |
-| Version Control       | Git (this repository)                                        |
-| CI/CD                 | Migration packages exported from DEV, promoted through environments |
+| Component | Technology |
+|-----------|-----------|
+| Platform | OneStream XF (cloud or on-premise) |
+| Business Rules | VB.NET (compiled within OneStream runtime) |
+| Configurations | XML-based application metadata |
+| ETL | OneStream native connectors, REST/SOAP APIs, ODBC |
+| Dashboards | OneStream Dashboard framework (HTML5) |
+| Authentication | Azure AD / SAML 2.0 SSO with MFA |
+| Version Control | Git |
+| Deployment | PowerShell automation (DEV → QA → PROD) |
 
 ---
 
 ## Getting Started
 
-### Prerequisites
-
-- OneStream XF platform instance (v8.0 or later recommended)
-- Administrative access to the target OneStream environment
-- Network connectivity to source systems (SAP, Oracle, NetSuite)
-- Active Directory or identity provider configured for SSO
-
-### Initial Setup
-
-1. **Review the Deployment Runbook** -- See [DEPLOYMENT.md](DEPLOYMENT.md) for the full deployment sequence, environment strategy, and validation procedures.
-
-2. **Dimension Load** -- Begin by loading the dimension XML files from `Application/Dimensions/`. These define the structural foundation and must be loaded before any other artifacts.
-
-3. **Application Configuration** -- Apply the settings from `Application/Configuration/` including currency rate types, consolidation rules, and security model.
-
-4. **Business Rule Deployment** -- Import business rules from the `BusinessRules/` directory in the sequence outlined in the deployment runbook.
-
-5. **Data Management Setup** -- Configure connectors from `DataManagement/Connectors/` and apply transformation mappings. Test connectivity to all source systems.
-
-6. **Workflow Configuration** -- Deploy workflow profiles from the `Workflows/` directory and assign workflow roles to security groups.
-
-7. **Dashboard Deployment** -- Import dashboards from the `Dashboards/` directory and validate data adapter connectivity.
-
-8. **Security Assignment** -- Apply role-based security from `Security/` and validate access permissions against the security matrix.
-
-9. **Data Load and Validation** -- Execute an initial data load using test data from `Testing/TestData/` and run the validation scripts in `Testing/ValidationScripts/`.
-
-### Key Contacts
-
-| Role                     | Responsibility                              |
-|--------------------------|---------------------------------------------|
-| Solution Architect       | Overall design and technical decisions       |
-| Consolidation Lead       | Finance cube and consolidation logic         |
-| Planning Lead            | Planning cube and budgeting/forecasting      |
-| Integration Lead         | Data management and connector configuration  |
-| Dashboard Developer      | Dashboard design and data adapter rules      |
-| Security Administrator   | Access control and role management           |
-| Project Manager          | Timeline, resources, and stakeholder management |
+1. **Review** [DEPLOYMENT.md](DEPLOYMENT.md) for the full deployment runbook
+2. **Load Dimensions** from `Dimensions/` (foundation — must be loaded first)
+3. **Configure Application** settings from `Application/`
+4. **Import Business Rules** from `BusinessRules/` (74 VB.NET files)
+5. **Set Up Data Management** pipelines from `DataManagement/` (update connection strings)
+6. **Deploy Workflows** from `Workflows/`
+7. **Import Dashboards** and CubeViews
+8. **Apply Security** roles and data access profiles
+9. **Run Validation** with sample data from `Testing/SampleData/`
 
 ---
 
 ## License
 
-This implementation is proprietary and confidential. All artifacts are the property of the implementing organization and are subject to the terms of the OneStream XF software license agreement.
+This implementation is proprietary and confidential. All artifacts are subject to the terms of the OneStream XF software license agreement.
